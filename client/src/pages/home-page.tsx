@@ -4,6 +4,7 @@ import Footer from "@/components/ui/footer";
 import ServiceCard from "@/components/services/service-card";
 import AppointmentForm from "@/components/appointments/appointment-form";
 import ReviewCard from "@/components/reviews/review-card";
+import ReviewForm from "@/components/reviews/review-form";
 import { Service, Review, Category, PriceItem } from "@shared/schema";
 
 function Hero() {
@@ -171,6 +172,11 @@ function Reviews() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">O que Nossos Clientes Dizem</h2>
           <p className="text-gray-700 max-w-2xl mx-auto">Confira as experiências e opiniões de quem já utilizou nossos serviços.</p>
+        </div>
+        
+        {/* Formulário de Avaliação */}
+        <div className="max-w-lg mx-auto mb-12">
+          <ReviewForm />
         </div>
         
         {isLoading ? (
