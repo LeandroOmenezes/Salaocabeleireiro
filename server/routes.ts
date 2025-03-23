@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema } from "@shared/schema";
 import { ZodError } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -138,6 +138,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(reviews);
     } catch (error) {
       res.status(500).json({ message: "Error fetching reviews" });
+    }
+  });
+  
+  app.post("/api/reviews", async (req: Request, res: Response) => {
+    try {
+      // Verificar se o usuário está autenticado
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "É necessário estar logado para enviar avaliações" });
+      }
+      
+      // Se o nome do cliente não for fornecido, usar o nome do usuário logado
+      if (!req.body.clientName && req.user) {
+        req.body.clientName = req.user.name || req.user.username;
+      }
+      
+      // Validar os dados da avaliação
+      const reviewData = insertReviewSchema.parse(req.body);
+      
+      // Criar a avaliação
+      const review = await storage.createReview(reviewData);
+      res.status(201).json(review);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados de avaliação inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao criar avaliação" });
+      }
     }
   });
   
