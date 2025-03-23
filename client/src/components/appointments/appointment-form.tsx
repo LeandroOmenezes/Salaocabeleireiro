@@ -52,6 +52,11 @@ export default function AppointmentForm() {
 
   const { data: services } = useQuery<ServiceOption[]>({
     queryKey: ['/api/services', selectedCategoryId],
+    queryFn: async () => {
+      if (!selectedCategoryId) return [];
+      const response = await fetch(`/api/services/${selectedCategoryId}`);
+      return response.json();
+    },
     enabled: !!selectedCategoryId,
   });
   
@@ -233,7 +238,9 @@ export default function AppointmentForm() {
                 >
                   <FormControl>
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <SelectValue placeholder="Selecione uma categoria" />
+                      <SelectValue placeholder="Selecione uma categoria">
+                        {categories?.find(cat => String(cat.id) === field.value)?.name}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -271,7 +278,9 @@ export default function AppointmentForm() {
                 >
                   <FormControl>
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <SelectValue placeholder="Selecione o serviço" />
+                      <SelectValue placeholder="Selecione o serviço">
+                        {services?.find(serv => String(serv.id) === field.value)?.name}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -315,7 +324,9 @@ export default function AppointmentForm() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <SelectValue placeholder="Selecione um horário" />
+                      <SelectValue placeholder="Selecione um horário">
+                        {field.value}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
