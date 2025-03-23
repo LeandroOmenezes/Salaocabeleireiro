@@ -1,0 +1,108 @@
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useAuth } from "@/lib/auth";
+
+export default function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const [location] = useLocation();
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  return (
+    <header className="bg-white shadow-md sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center space-x-2">
+          <i className="fas fa-cut text-blue-500 text-xl"></i>
+          <span className="text-2xl font-bold text-gray-800">Salão de Beleza</span>
+        </Link>
+        
+        {/* Mobile menu button */}
+        <div className="md:hidden">
+          <button 
+            className="text-gray-800 focus:outline-none" 
+            aria-label="Menu"
+            onClick={toggleMobileMenu}
+          >
+            <i className="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+        
+        {/* Desktop navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          <a href="#services" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Serviços</a>
+          <a href="#prices" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Preços</a>
+          <a href="#appointments" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Agendamentos</a>
+          <a href="#reviews" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Avaliações</a>
+          <a href="#sales-management" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Gestão de Vendas</a>
+          
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/dashboard" 
+                className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
+              >
+                Dashboard
+              </Link>
+              <button 
+                onClick={() => logout()}
+                className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
+              >
+                Sair
+              </button>
+            </div>
+          ) : (
+            <Link 
+              href="/auth" 
+              className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
+            >
+              Login
+            </Link>
+          )}
+        </nav>
+      </div>
+      
+      {/* Mobile menu */}
+      <div className={`bg-white md:hidden ${mobileMenuOpen ? "" : "hidden"}`}>
+        <div className="container mx-auto px-4 py-3 space-y-3">
+          <a href="#services" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Serviços</a>
+          <a href="#prices" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Preços</a>
+          <a href="#appointments" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Agendamentos</a>
+          <a href="#reviews" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Avaliações</a>
+          <a href="#sales-management" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Gestão de Vendas</a>
+          
+          {user ? (
+            <>
+              <Link 
+                href="/dashboard" 
+                className="block text-gray-700 py-2 hover:text-blue-500" 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <button 
+                onClick={() => {
+                  logout();
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left text-gray-700 py-2 hover:text-blue-500"
+              >
+                Sair
+              </button>
+            </>
+          ) : (
+            <Link 
+              href="/auth" 
+              className="block text-gray-700 py-2 hover:text-blue-500"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Login
+            </Link>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

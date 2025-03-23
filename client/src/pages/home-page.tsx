@@ -1,0 +1,191 @@
+import { useQuery } from "@tanstack/react-query";
+import Header from "@/components/ui/header";
+import Footer from "@/components/ui/footer";
+import ServiceCard from "@/components/services/service-card";
+import AppointmentForm from "@/components/appointments/appointment-form";
+import ReviewCard from "@/components/reviews/review-card";
+import { Service, Review, Category, PriceItem } from "@shared/schema";
+
+function Hero() {
+  return (
+    <section id="hero" className="bg-white py-16 md:py-24">
+      <div className="container mx-auto px-4 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+          Beleza e bem-estar em um só lugar
+        </h1>
+        <p className="text-gray-700 text-lg mb-8 max-w-2xl mx-auto">
+          Transforme sua aparência e eleve sua autoestima com nossos serviços profissionais de beleza.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="#appointments" className="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium">
+            Agendar Agora
+          </a>
+          <a href="#services" className="bg-white text-blue-500 border border-blue-500 px-6 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200 font-medium">
+            Nossos Serviços
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Services() {
+  const { data: services, isLoading } = useQuery<Service[]>({
+    queryKey: ['/api/services/featured'],
+  });
+
+  return (
+    <section id="services" className="py-16 bg-gray-100">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Nossos Serviços</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto">Oferecemos uma variedade de serviços para realçar sua beleza natural e proporcionar uma experiência relaxante.</p>
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center">Carregando...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {services?.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))}
+          </div>
+        )}
+        
+        <div className="mt-12 text-center">
+          <a href="#prices" className="inline-flex items-center text-blue-500 hover:text-blue-700 font-medium">
+            Ver todos os serviços e preços <i className="fas fa-chevron-down ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PriceList() {
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['/api/categories'],
+  });
+
+  const { data: priceItems } = useQuery<PriceItem[]>({
+    queryKey: ['/api/prices'],
+  });
+
+  const getCategoryIcon = (categoryId: string) => {
+    const category = categories?.find(cat => cat.id === categoryId);
+    return category?.icon || "fas fa-scissors";
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories?.find(cat => cat.id === categoryId);
+    return category?.name || "";
+  };
+
+  const getPriceItemsByCategory = (categoryId: string) => {
+    return priceItems?.filter(item => item.categoryId === categoryId) || [];
+  };
+
+  return (
+    <section id="prices" className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Tabela de Preços</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto">Confira nossa lista completa de serviços e preços transparentes.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {categories?.map((category) => (
+            <div key={category.id} className="bg-gray-100 rounded-lg p-6 shadow-md">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i className={`${getCategoryIcon(category.id)} mr-3 text-blue-500`}></i> {getCategoryName(category.id)}
+              </h3>
+              <ul className="space-y-4">
+                {getPriceItemsByCategory(category.id).map((item) => (
+                  <li key={item.id} className="flex justify-between items-center border-b pb-2">
+                    <span className="text-gray-700">{item.name}</span>
+                    <span className="font-medium">
+                      {item.maxPrice > item.minPrice 
+                        ? `R$${item.minPrice.toFixed(2)}-${item.maxPrice.toFixed(2)}`
+                        : `R$${item.minPrice.toFixed(2)}`
+                      }
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-10 text-center">
+          <a href="#appointments" className="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 inline-block font-medium">
+            Agendar um Serviço
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Appointments() {
+  return (
+    <section id="appointments" className="py-16 bg-gray-100">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Agende seu Horário</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto">Escolha o serviço e horário de sua preferência e venha cuidar da sua beleza conosco.</p>
+        </div>
+        
+        <AppointmentForm />
+      </div>
+    </section>
+  );
+}
+
+function Reviews() {
+  const { data: reviews, isLoading } = useQuery<Review[]>({
+    queryKey: ['/api/reviews'],
+  });
+
+  return (
+    <section id="reviews" className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">O que Nossos Clientes Dizem</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto">Confira as experiências e opiniões de quem já utilizou nossos serviços.</p>
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center">Carregando...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {reviews?.slice(0, 3).map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+        )}
+        
+        <div className="mt-10 text-center">
+          <a href="#" className="inline-flex items-center text-blue-500 hover:text-blue-700 font-medium">
+            Ver mais avaliações <i className="fas fa-chevron-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <div className="font-sans bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+      <Header />
+      <main>
+        <Hero />
+        <Services />
+        <PriceList />
+        <Appointments />
+        <Reviews />
+      </main>
+      <Footer />
+    </div>
+  );
+}
