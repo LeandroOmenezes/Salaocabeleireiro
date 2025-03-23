@@ -168,6 +168,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Rota para dar like (coração) em uma avaliação
+  app.post("/api/reviews/:id/like", async (req: Request, res: Response) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      
+      // Buscar a avaliação atual
+      const review = await storage.likeReview(reviewId);
+      
+      if (!review) {
+        return res.status(404).json({ message: "Avaliação não encontrada" });
+      }
+      
+      res.status(200).json(review);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao adicionar like na avaliação" });
+    }
+  });
+  
   // === Sales ===
   app.post("/api/sales", async (req: Request, res: Response) => {
     try {

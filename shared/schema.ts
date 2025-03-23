@@ -102,6 +102,7 @@ export const reviews = pgTable("reviews", {
   clientName: text("client_name").notNull(),
   rating: real("rating").notNull(),
   comment: text("comment").notNull(),
+  likes: integer("likes").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -109,6 +110,7 @@ export const insertReviewSchema = createInsertSchema(reviews, {
   clientName: z.string().min(3),
   rating: z.number().min(1).max(5),
   comment: z.string().min(10),
+  likes: z.number().default(0),
 }).omit({ id: true, createdAt: true });
 
 // === Sales ===
