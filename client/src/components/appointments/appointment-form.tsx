@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Category, ServiceOption } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { MessageSquare } from "lucide-react";
 
 const appointmentFormSchema = z.object({
   name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
@@ -28,6 +29,8 @@ type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 export default function AppointmentForm() {
   const { toast } = useToast();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>("");
   
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -51,6 +54,25 @@ export default function AppointmentForm() {
     queryKey: ['/api/services', selectedCategoryId],
     enabled: !!selectedCategoryId,
   });
+  
+  useEffect(() => {
+    if (categories && selectedCategoryId) {
+      const category = categories.find(cat => String(cat.id) === selectedCategoryId);
+      if (category) {
+        setSelectedCategoryName(category.name);
+      }
+    }
+  }, [selectedCategoryId, categories]);
+  
+  useEffect(() => {
+    const serviceId = form.getValues("serviceId");
+    if (services && serviceId) {
+      const service = services.find(serv => String(serv.id) === serviceId);
+      if (service) {
+        setSelectedService(service.name);
+      }
+    }
+  }, [services, form]);
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormValues) => {
@@ -76,6 +98,58 @@ export default function AppointmentForm() {
   function onSubmit(data: AppointmentFormValues) {
     createAppointmentMutation.mutate(data);
   }
+
+  const formatPhoneForWhatsApp = (phone: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbersOnly = phone.replace(/\D/g, '');
+    
+    // Verifica se já tem o código do país (Brasil - 55)
+    if (numbersOnly.startsWith('55')) {
+      return numbersOnly;
+    }
+    
+    // Adiciona o código do país (Brasil - 55)
+    return `55${numbersOnly}`;
+  };
+
+  const handleWhatsAppScheduling = () => {
+    // Valida o formulário antes de abrir o WhatsApp
+    const formResult = form.trigger();
+    
+    formResult.then((isValid) => {
+      if (!isValid) {
+        toast({
+          title: "Formulário incompleto",
+          description: "Por favor, preencha todos os campos obrigatórios antes de agendar pelo WhatsApp.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Pega os valores atuais do formulário
+      const values = form.getValues();
+      
+      // Cria a mensagem para o WhatsApp
+      let message = `Olá! Gostaria de agendar um horário para ${selectedService || "um serviço"} na categoria ${selectedCategoryName || "de beleza"}.\n\n`;
+      message += `Nome: ${values.name}\n`;
+      message += `Email: ${values.email}\n`;
+      message += `Data: ${values.date}\n`;
+      message += `Horário: ${values.time}\n`;
+      
+      if (values.notes) {
+        message += `\nObservações: ${values.notes}`;
+      }
+      
+      // Formata o número do WhatsApp (número do salão) - este seria o número comercial do salão
+      const salonWhatsApp = "5500000000000"; // Substitua pelo número real do salão
+      
+      // Cria a URL do WhatsApp com a mensagem codificada
+      const whatsappUrl = `https://wa.me/${salonWhatsApp}?text=${encodeURIComponent(message)}`;
+      
+      // Abre o WhatsApp em uma nova janela
+      window.open(whatsappUrl, '_blank');
+    });
+  };
 
   const availableTimes = [
     "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"
@@ -182,7 +256,16 @@ export default function AppointmentForm() {
               <FormItem>
                 <FormLabel className="text-gray-700 font-medium">Serviço Específico</FormLabel>
                 <Select 
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    // Atualiza o nome do serviço selecionado para uso no WhatsApp
+                    if (services) {
+                      const service = services.find(s => String(s.id) === value);
+                      if (service) {
+                        setSelectedService(service.name);
+                      }
+                    }
+                  }}
                   value={field.value}
                   disabled={!selectedCategoryId}
                 >
@@ -270,13 +353,33 @@ export default function AppointmentForm() {
           </div>
         </div>
         
-        <div className="mt-8">
+        <div className="mt-8 space-y-4">
           <Button
             type="submit"
             className="w-full bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium"
             disabled={createAppointmentMutation.isPending}
           >
             {createAppointmentMutation.isPending ? "Agendando..." : "Confirmar Agendamento"}
+          </Button>
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">
+                ou agende diretamente pelo
+              </span>
+            </div>
+          </div>
+          
+          <Button
+            type="button"
+            onClick={handleWhatsAppScheduling}
+            className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full transition-colors duration-200 font-medium flex items-center justify-center gap-2"
+          >
+            <MessageSquare className="h-5 w-5" />
+            Agendar pelo WhatsApp
           </Button>
         </div>
       </form>
