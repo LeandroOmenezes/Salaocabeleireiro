@@ -148,8 +148,18 @@ function PriceList() {
 
 function Appointments() {
   return (
-    <section id="appointments" className="py-16 bg-gray-100">
-      <div className="container mx-auto px-4">
+    <section id="appointments" className="py-16 relative overflow-hidden">
+      {/* Imagem de fundo para a área do cliente */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/images/client-area-bg.svg')",
+          backgroundSize: 'cover',
+          opacity: 0.95
+        }}
+      />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Agende seu Horário</h2>
           <p className="text-gray-700 max-w-2xl mx-auto">Escolha o serviço e horário de sua preferência e venha cuidar da sua beleza conosco.</p>

@@ -162,7 +162,7 @@ export default function AppointmentForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white p-8 rounded-lg shadow-md max-w-xl mx-auto">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-blue-100">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             <FormField
@@ -364,13 +364,20 @@ export default function AppointmentForm() {
           </div>
         </div>
         
-        <div className="mt-8 space-y-4">
+        <div className="mt-8 space-y-6">
           <Button
             type="submit"
-            className="w-full bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium"
+            className="w-full bg-blue-600 text-white px-6 py-4 rounded-xl hover:bg-blue-700 transition-colors duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             disabled={createAppointmentMutation.isPending}
           >
-            {createAppointmentMutation.isPending ? "Agendando..." : "Confirmar Agendamento"}
+            {createAppointmentMutation.isPending ? (
+              <div className="flex items-center justify-center gap-2">
+                <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>Agendando...</span>
+              </div>
+            ) : (
+              "Confirmar Agendamento"
+            )}
           </Button>
           
           <div className="relative">
@@ -378,7 +385,7 @@ export default function AppointmentForm() {
               <span className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+              <span className="px-4 bg-white text-gray-500 font-medium">
                 ou agende diretamente pelo
               </span>
             </div>
@@ -387,7 +394,7 @@ export default function AppointmentForm() {
           <Button
             type="button"
             onClick={handleWhatsAppScheduling}
-            className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full transition-colors duration-200 font-medium flex items-center justify-center gap-2"
+            className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl transition-colors duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-3"
           >
             <MessageSquare className="h-5 w-5" />
             Agendar pelo WhatsApp
