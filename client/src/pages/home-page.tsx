@@ -8,19 +8,38 @@ import { Service, Review, Category, PriceItem } from "@shared/schema";
 
 function Hero() {
   return (
-    <section id="hero" className="bg-white py-16 md:py-24">
-      <div className="container mx-auto px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+    <section id="hero" className="relative h-[500px] md:h-[600px] overflow-hidden">
+      {/* Background Image Banner */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center z-0"
+        style={{
+          backgroundImage: "url('/images/salon-banner.svg')",
+          backgroundSize: 'cover'
+        }}
+      />
+      
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+      
+      {/* Content */}
+      <div className="container relative z-20 h-full mx-auto px-4 flex flex-col justify-center items-center text-center">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg">
           Beleza e bem-estar em um só lugar
         </h1>
-        <p className="text-gray-700 text-lg mb-8 max-w-2xl mx-auto">
+        <p className="text-white text-lg md:text-xl mb-8 max-w-2xl mx-auto drop-shadow-md">
           Transforme sua aparência e eleve sua autoestima com nossos serviços profissionais de beleza.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <a href="#appointments" className="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium">
+          <a 
+            href="#appointments" 
+            className="bg-blue-500 text-white px-8 py-4 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
+          >
             Agendar Agora
           </a>
-          <a href="#services" className="bg-white text-blue-500 border border-blue-500 px-6 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200 font-medium">
+          <a 
+            href="#services" 
+            className="bg-white text-blue-500 border border-blue-500 px-8 py-4 rounded-full hover:bg-gray-100 transition-colors duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
+          >
             Nossos Serviços
           </a>
         </div>
