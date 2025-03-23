@@ -38,6 +38,7 @@ export interface IStorage {
   // Reviews
   getReviews(): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+  likeReview(id: number): Promise<Review | undefined>;
   
   // Sales
   getSales(): Promise<Sale[]>;
@@ -161,17 +162,20 @@ export class MemStorage implements IStorage {
       {
         clientName: "Maria Silva",
         rating: 4.5,
-        comment: "O ambiente é super acolhedor e os profissionais são muito atenciosos. Meu corte ficou exatamente como eu queria! Voltarei com certeza."
+        comment: "O ambiente é super acolhedor e os profissionais são muito atenciosos. Meu corte ficou exatamente como eu queria! Voltarei com certeza.",
+        likes: 12
       },
       {
         clientName: "João Pereira",
         rating: 5,
-        comment: "Sempre fui muito exigente com meu cabelo, mas aqui encontrei profissionais que realmente entendem o que eu quero. Recomendo a todos!"
+        comment: "Sempre fui muito exigente com meu cabelo, mas aqui encontrei profissionais que realmente entendem o que eu quero. Recomendo a todos!",
+        likes: 8
       },
       {
         clientName: "Ana Costa",
         rating: 4.5,
-        comment: "A manicure é excelente! Minhas unhas nunca ficaram tão bonitas e a esmaltação em gel durou muito mais do que em outros lugares. Super recomendo!"
+        comment: "A manicure é excelente! Minhas unhas nunca ficaram tão bonitas e a esmaltação em gel durou muito mais do que em outros lugares. Super recomendo!",
+        likes: 15
       }
     ];
     
@@ -302,9 +306,25 @@ export class MemStorage implements IStorage {
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = this.currentReviewId++;
     const now = new Date();
-    const review: Review = { ...insertReview, id, createdAt: now };
+    const review: Review = { 
+      ...insertReview, 
+      id, 
+      createdAt: now,
+      likes: insertReview.likes || 0
+    };
     this.reviews.set(id, review);
     return review;
+  }
+  
+  async likeReview(id: number): Promise<Review | undefined> {
+    const review = this.reviews.get(id);
+    if (review) {
+      // Incrementa o contador de likes
+      const updatedReview = { ...review, likes: review.likes + 1 };
+      this.reviews.set(id, updatedReview);
+      return updatedReview;
+    }
+    return undefined;
   }
   
   // === Sales ===

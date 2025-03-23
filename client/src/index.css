@@ -11,3 +11,27 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@layer utilities {
+  .animate-heartbeat {
+    animation: heartbeat 1s ease-in-out;
+  }
+}
