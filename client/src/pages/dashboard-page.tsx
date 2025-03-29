@@ -4,6 +4,7 @@ import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import SalesForm from "@/components/sales/sales-form";
 import SalesHistory from "@/components/sales/sales-history";
+import AppointmentsManagement from "@/components/appointments/appointments-management";
 import { useAuth } from "@/lib/auth";
 
 export default function DashboardPage() {
@@ -30,6 +31,10 @@ export default function DashboardPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Gestão de Vendas</h2>
               <p className="text-gray-700 max-w-2xl mx-auto">Registre vendas, acompanhe o desempenho e gerencie seu negócio com eficiência.</p>
+            </div>
+            
+            <div className="mb-12">
+              <AppointmentsManagement />
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
