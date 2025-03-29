@@ -9,6 +9,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
   
+  // === Clients ===
+  app.get("/api/clients", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated users
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const clients = await storage.getClients();
+      res.json(clients);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching clients" });
+    }
+  });
+  
+  app.get("/api/clients/:id", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated users
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid client ID" });
+      }
+      
+      const client = await storage.getClientById(id);
+      
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      res.json(client);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching client" });
+    }
+  });
+  
+  app.post("/api/clients", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated users
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { name, phone, email } = req.body;
+      
+      if (!name || !phone) {
+        return res.status(400).json({ message: "Name and phone are required" });
+      }
+      
+      const client = await storage.createClient({ name, phone, email });
+      res.status(201).json(client);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating client" });
+    }
+  });
+  
+  app.patch("/api/clients/:id", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated users
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid client ID" });
+      }
+      
+      const { name, phone, email } = req.body;
+      const client = await storage.updateClient(id, { name, phone, email });
+      
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      res.json(client);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating client" });
+    }
+  });
+  
+  app.delete("/api/clients/:id", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated users
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid client ID" });
+      }
+      
+      const success = await storage.deleteClient(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting client" });
+    }
+  });
+  
   // === Categories ===
   app.get("/api/categories", async (req: Request, res: Response) => {
     try {

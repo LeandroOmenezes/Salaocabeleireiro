@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   name: text("name"),
   phone: text("phone"),
+  email: text("email"),
   isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -18,6 +19,7 @@ export const insertUserSchema = createInsertSchema(users, {
   password: z.string().min(6),
   name: z.string().min(3).optional(),
   phone: z.string().min(10).optional(),
+  email: z.string().email().optional(),
 }).omit({ id: true, isAdmin: true, createdAt: true });
 
 // === Categories ===

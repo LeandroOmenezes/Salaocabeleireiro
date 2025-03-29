@@ -36,7 +36,14 @@ export default function Header() {
           <a href="#prices" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Preços</a>
           <a href="#appointments" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Agendamentos</a>
           <a href="#reviews" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Avaliações</a>
-          <a href="#sales-management" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Gestão de Vendas</a>
+          {user && (
+            <Link 
+              href="/clients-sales" 
+              className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/clients-sales" ? "text-blue-500 font-medium" : ""}`}
+            >
+              Gestão de Clientes/Vendas
+            </Link>
+          )}
           
           {user ? (
             <div className="flex items-center space-x-4">
@@ -71,7 +78,15 @@ export default function Header() {
           <a href="#prices" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Preços</a>
           <a href="#appointments" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Agendamentos</a>
           <a href="#reviews" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Avaliações</a>
-          <a href="#sales-management" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Gestão de Vendas</a>
+          {user && (
+            <Link 
+              href="/clients-sales" 
+              className="block text-gray-700 py-2 hover:text-blue-500"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Gestão de Clientes/Vendas
+            </Link>
+          )}
           
           {user ? (
             <>

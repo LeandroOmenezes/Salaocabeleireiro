@@ -12,6 +12,13 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
+  // Clients
+  getClients(): Promise<User[]>;
+  getClientById(id: number): Promise<User | undefined>;
+  createClient(client: { name: string; phone: string; email: string }): Promise<User>;
+  updateClient(id: number, client: { name?: string; phone?: string; email?: string }): Promise<User | undefined>;
+  deleteClient(id: number): Promise<boolean>;
+  
   // Categories
   getCategories(): Promise<Category[]>;
   getCategoryById(id: number): Promise<Category | undefined>;
@@ -204,6 +211,65 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, user);
     return user;
+  }
+  
+  // === Clients ===
+  async getClients(): Promise<User[]> {
+    return Array.from(this.users.values()).filter(user => !user.isAdmin);
+  }
+  
+  async getClientById(id: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    return user && !user.isAdmin ? user : undefined;
+  }
+  
+  async createClient(client: { name: string; phone: string; email: string }): Promise<User> {
+    const id = this.currentUserId++;
+    const now = new Date();
+    // Gera um username aleatório baseado no nome (para clientes que não fazem login)
+    const username = `${client.name.toLowerCase().replace(/\s+/g, '.')}.${Date.now()}@client.local`;
+    // Senha aleatória (já que esses clientes não fazem login)
+    const password = Math.random().toString(36).substring(2, 15);
+    
+    const user: User = { 
+      id,
+      username,
+      password,
+      name: client.name,
+      phone: client.phone,
+      email: client.email,
+      isAdmin: false,
+      createdAt: now
+    };
+    
+    this.users.set(id, user);
+    return user;
+  }
+  
+  async updateClient(id: number, client: { name?: string; phone?: string; email?: string }): Promise<User | undefined> {
+    const existingUser = this.users.get(id);
+    
+    if (existingUser && !existingUser.isAdmin) {
+      const updatedUser = { 
+        ...existingUser,
+        ...client
+      };
+      
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    
+    return undefined;
+  }
+  
+  async deleteClient(id: number): Promise<boolean> {
+    const user = this.users.get(id);
+    
+    if (user && !user.isAdmin) {
+      return this.users.delete(id);
+    }
+    
+    return false;
   }
   
   // === Categories ===
