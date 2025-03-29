@@ -13,10 +13,12 @@ export default function ClientSalesPage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
 
-  // Redirect if user is not logged in
+  // Redirect if user is not logged in or not admin
   useEffect(() => {
     if (!user) {
       navigate("/auth");
+    } else if (!user.isAdmin) {
+      navigate("/");
     }
   }, [user, navigate]);
 
