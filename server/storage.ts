@@ -91,7 +91,30 @@ export class MemStorage implements IStorage {
     this.seedInitialData();
   }
 
-  private seedInitialData() {
+  private async seedInitialData() {
+    // Seed admin user (if not exists)
+    try {
+      // Import the hashPassword function
+      const { hashPassword } = await import("./auth");
+      
+      // Check if admin user already exists
+      const existingAdmin = await this.getUserByUsername("admin");
+      
+      if (!existingAdmin) {
+        // Create admin user
+        await this.createUser({
+          username: "admin",
+          password: await hashPassword("admin"),
+          name: "Administrador",
+          phone: "11964027914",
+          isAdmin: true
+        });
+        console.log("Admin user created successfully");
+      }
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+    }
+    
     // Seed categories
     const categories: InsertCategory[] = [
       { name: "Serviços de Cabelo", icon: "fas fa-cut" },
@@ -206,7 +229,8 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id, 
-      isAdmin: false,
+      // Usar o valor fornecido ou false como padrão
+      isAdmin: insertUser.isAdmin ?? false,
       createdAt: now
     };
     this.users.set(id, user);

@@ -15,12 +15,13 @@ export const users = pgTable("users", {
 });
 
 export const insertUserSchema = createInsertSchema(users, {
-  username: z.string().email(),
-  password: z.string().min(6),
+  username: z.string().min(3),
+  password: z.string().min(4),
   name: z.string().min(3).optional(),
-  phone: z.string().min(10).optional(),
+  phone: z.string().min(8).optional(),
   email: z.string().email().optional(),
-}).omit({ id: true, isAdmin: true, createdAt: true });
+  isAdmin: z.boolean().optional(),
+}).omit({ id: true, createdAt: true });
 
 // === Categories ===
 export const categories = pgTable("categories", {
