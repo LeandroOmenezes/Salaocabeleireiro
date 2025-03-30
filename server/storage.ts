@@ -98,12 +98,12 @@ export class MemStorage implements IStorage {
       const { hashPassword } = await import("./auth");
       
       // Check if admin user already exists
-      const existingAdmin = await this.getUserByUsername("admin");
+      const existingAdmin = await this.getUserByUsername("lleandro.m32@gmail.com");
       
       if (!existingAdmin) {
         // Create admin user
         await this.createUser({
-          username: "admin",
+          username: "lleandro.m32@gmail.com",
           password: await hashPassword("admin"),
           name: "Administrador",
           phone: "11964027914",
