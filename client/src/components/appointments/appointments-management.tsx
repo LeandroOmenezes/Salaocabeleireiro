@@ -1,14 +1,10 @@
 
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Appointment, Service } from "@shared/schema";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function AppointmentsManagement() {
-  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: appointments, isLoading } = useQuery<Appointment[]>({

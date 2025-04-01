@@ -29,12 +29,21 @@ export default function DashboardPage() {
         <section id="sales-management" className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Gestão de Vendas</h2>
-              <p className="text-gray-700 max-w-2xl mx-auto">Registre vendas, acompanhe o desempenho e gerencie seu negócio com eficiência.</p>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Painel Administrativo</h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">Gerencie agendamentos, registre vendas e acompanhe o desempenho do seu negócio.</p>
             </div>
             
-            <div className="mb-12">
+            <div className="mb-16">
+              <div className="text-left mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Agendamentos</h2>
+                <p className="text-gray-700">Visualize todos os agendamentos realizados pelos clientes.</p>
+              </div>
               <AppointmentsManagement />
+            </div>
+            
+            <div className="text-left mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Gestão de Vendas</h2>
+              <p className="text-gray-700">Registre vendas e acompanhe o desempenho financeiro.</p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
