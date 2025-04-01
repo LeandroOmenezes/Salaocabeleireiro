@@ -28,9 +28,9 @@ export default function AppointmentsManagement() {
     return date.toLocaleDateString('pt-BR');
   };
 
-  const getServiceName = (serviceId: string) => {
+  const getServiceName = (serviceId: number | string) => {
     if (!services) return "Carregando...";
-    const service = services.find(s => String(s.id) === serviceId);
+    const service = services.find(s => s.id === Number(serviceId));
     return service ? service.name : "Serviço não encontrado";
   };
 
