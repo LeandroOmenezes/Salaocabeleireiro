@@ -211,6 +211,33 @@ export class MemStorage implements IStorage {
     ];
     
     reviews.forEach(review => this.createReview(review));
+    
+    // Seed appointments
+    const appointments: InsertAppointment[] = [
+      { 
+        name: "Leandro Oliveira", 
+        email: "lleandro.m32@gmail.com",
+        phone: "11964027914",
+        serviceId: 1,
+        categoryId: 1,
+        date: "2025-04-10",
+        time: "14:00",
+        notes: "Corte masculino"
+      },
+      { 
+        name: "Maria Silva", 
+        email: "maria@example.com",
+        phone: "11987654321",
+        serviceId: 3,
+        categoryId: 3,
+        date: "2025-04-15",
+        time: "10:30",
+        notes: "Tratamento de pele para evento"
+      }
+    ];
+    
+    appointments.forEach(appointment => this.createAppointment(appointment));
+    console.log("Agendamentos iniciais criados com sucesso");
   }
 
   // === Users ===

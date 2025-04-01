@@ -5,7 +5,7 @@ import Footer from "@/components/ui/footer";
 import SalesForm from "@/components/sales/sales-form";
 import SalesHistory from "@/components/sales/sales-history";
 import AppointmentsManagement from "@/components/appointments/appointments-management";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function DashboardPage() {
   const { user } = useAuth();
