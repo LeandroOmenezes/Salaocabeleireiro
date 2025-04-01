@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import ServiceCard from "@/components/services/service-card";
 import AppointmentForm from "@/components/appointments/appointment-form";
 import ReviewCard from "@/components/reviews/review-card";
 import ReviewForm from "@/components/reviews/review-form";
+import { Button } from "@/components/ui/button";
 import { Service, Review, Category, PriceItem } from "@shared/schema";
 
 function Hero() {
@@ -175,6 +177,10 @@ function Reviews() {
   const { data: reviews, isLoading } = useQuery<Review[]>({
     queryKey: ['/api/reviews'],
   });
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+  // Determine quais avaliações mostrar
+  const displayedReviews = showAllReviews ? reviews : reviews?.slice(0, 3);
 
   return (
     <section id="reviews" className="py-16 bg-white">
@@ -191,19 +197,32 @@ function Reviews() {
         
         {isLoading ? (
           <div className="text-center">Carregando...</div>
+        ) : reviews && reviews.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {displayedReviews?.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+            
+            {reviews.length > 3 && (
+              <div className="mt-10 text-center">
+                <Button 
+                  variant="link" 
+                  onClick={() => setShowAllReviews(!showAllReviews)}
+                  className="text-blue-500 hover:text-blue-700 font-medium"
+                >
+                  {showAllReviews ? "Mostrar menos" : "Ver mais avaliações"} 
+                  <i className={`fas fa-chevron-${showAllReviews ? 'up' : 'right'} ml-2`}></i>
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {reviews?.slice(0, 3).map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
+          <div className="text-center py-8 text-gray-500">
+            Ainda não temos avaliações. Seja o primeiro a avaliar!
           </div>
         )}
-        
-        <div className="mt-10 text-center">
-          <a href="#" className="inline-flex items-center text-blue-500 hover:text-blue-700 font-medium">
-            Ver mais avaliações <i className="fas fa-chevron-right ml-2"></i>
-          </a>
-        </div>
       </div>
     </section>
   );
