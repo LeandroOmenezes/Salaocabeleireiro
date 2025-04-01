@@ -54,7 +54,14 @@ export default function AppointmentsManagement() {
 
       <div className="overflow-x-auto">
         {isLoading ? (
-          <p>Carregando...</p>
+          <div className="p-6 text-center">
+            <p className="text-gray-500">Carregando agendamentos...</p>
+          </div>
+        ) : !appointments || appointments.length === 0 ? (
+          <div className="p-10 text-center border rounded-lg">
+            <p className="text-xl text-gray-500 mb-2">Nenhum agendamento encontrado</p>
+            <p className="text-gray-400">Quando os clientes fizerem agendamentos, eles aparecerão aqui.</p>
+          </div>
         ) : (
           <table className="min-w-full">
             <thead>

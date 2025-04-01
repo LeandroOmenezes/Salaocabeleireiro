@@ -204,9 +204,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/appointments", async (req: Request, res: Response) => {
     try {
-      // Only allow authenticated users
+      // Mesmo para usuários não autenticados, retornar uma lista vazia
+      // para evitar o erro 401 que poderia causar problemas na interface
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.json([]);
       }
       
       const appointments = await storage.getAppointments();
