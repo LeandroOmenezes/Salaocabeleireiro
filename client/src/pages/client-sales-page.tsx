@@ -6,7 +6,7 @@ import Footer from "@/components/ui/footer";
 import SalesForm from "@/components/sales/sales-form";
 import SalesHistory from "@/components/sales/sales-history";
 import ClientList from "@/components/clients/client-list";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Users, ShoppingBag, BarChart2 } from "lucide-react";
 
 export default function ClientSalesPage() {
