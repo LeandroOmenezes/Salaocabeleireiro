@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/use-auth";
 import { useState, FormEvent } from "react";
 import { FaGoogle } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 
 const loginFormSchema = z.object({
   username: z.string().min(1, { message: "Email é obrigatório" }).email({ message: "Email inválido" }),
@@ -26,6 +27,7 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -130,9 +132,21 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
         
         <a
           href="/api/auth/google"
+          onClick={() => setIsGoogleLoading(true)}
           className="w-full bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-50 transition-colors duration-200 font-medium flex justify-center items-center"
+          disabled={isGoogleLoading}
         >
-          <FaGoogle className="mr-2 text-red-500" /> Entrar com Google
+          {isGoogleLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+              Redirecionando...
+            </>
+          ) : (
+            <>
+              <FaGoogle className="mr-2 text-red-500" /> 
+              Entrar com Google
+            </>
+          )}
         </a>
         
         {/* Modal de recuperação de senha */}
