@@ -125,6 +125,23 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
           >
             {loginMutation.isPending ? "Entrando..." : "Entrar"}
           </Button>
+          
+          {/* Botão de login rápido para testes */}
+          <Button
+            type="button"
+            className="w-full bg-green-500 text-white px-6 py-3 mt-3 rounded-full hover:bg-green-600 transition-colors duration-200 font-medium"
+            onClick={() => {
+              form.setValue("username", "lleandro.m32@gmail.com");
+              form.setValue("password", "admin");
+              loginMutation.mutate({
+                username: "lleandro.m32@gmail.com",
+                password: "admin"
+              });
+            }}
+            disabled={loginMutation.isPending}
+          >
+            Entrar como administrador (teste)
+          </Button>
         </form>
       </Form>
       
