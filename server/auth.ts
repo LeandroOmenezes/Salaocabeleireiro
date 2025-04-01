@@ -6,7 +6,7 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User } from "@shared/schema";
+import { User as UserType } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import nodemailer from "nodemailer";
 
@@ -18,7 +18,16 @@ const passwordResetTokens = new Map<string, { userId: number; expires: Date }>()
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    // Estendendo a interface User do Express para incluir nossos campos personalizados
+    interface User {
+      id: number;
+      username: string;
+      password: string;
+      name: string;
+      phone?: string;
+      email?: string;
+      isAdmin?: boolean;
+    }
   }
 }
 
@@ -132,12 +141,22 @@ export function setupAuth(app: Express) {
   
   // Estratégia de autenticação do Google (configurada se as credenciais estiverem disponíveis)
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    console.log("Google auth configured with CLIENT_ID:", process.env.GOOGLE_CLIENT_ID.substring(0, 5) + "...");
+    
+    // Obter o domínio do Replit em execução
+    const appUrl = process.env.REPL_SLUG ? 
+      `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : 
+      (process.env.APP_URL || 'http://localhost:5000');
+    
+    const callbackUrl = `${appUrl}/api/auth/google/callback`;
+    console.log("Google callback URL:", callbackUrl);
+    
     passport.use(
       new GoogleStrategy(
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: `${process.env.APP_URL || 'http://localhost:5000'}/api/auth/google/callback`,
+          callbackURL: callbackUrl,
           scope: ['profile', 'email']
         },
         async (accessToken, refreshToken, profile, done) => {
@@ -234,7 +253,7 @@ export function setupAuth(app: Express) {
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     // Don't send the password hash to the client
-    const { password, ...userWithoutPassword } = req.user as User;
+    const { password, ...userWithoutPassword } = req.user;
     res.json(userWithoutPassword);
   });
   
@@ -246,10 +265,28 @@ export function setupAuth(app: Express) {
     // Rota para callback do Google após autenticação
     app.get(
       "/api/auth/google/callback",
-      passport.authenticate("google", { failureRedirect: "/auth" }),
-      (req, res) => {
-        // Redirecionar para a página inicial após login bem-sucedido
-        res.redirect("/");
+      (req, res, next) => {
+        passport.authenticate("google", (err, user, info) => {
+          if (err) {
+            console.error("Google auth error:", err);
+            return res.redirect("/auth?error=" + encodeURIComponent("Erro na autenticação: " + err.message));
+          }
+          
+          if (!user) {
+            console.error("Google auth failed - no user");
+            return res.redirect("/auth?error=Falha na autenticação com o Google");
+          }
+          
+          req.login(user, (err) => {
+            if (err) {
+              console.error("Login error:", err);
+              return res.redirect("/auth?error=" + encodeURIComponent("Erro ao fazer login: " + err.message));
+            }
+            
+            // Sucesso - redirecionar para a página inicial
+            return res.redirect("/");
+          });
+        })(req, res, next);
       }
     );
   }

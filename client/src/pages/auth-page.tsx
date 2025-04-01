@@ -1,15 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import LoginForm from "@/components/auth/login-form";
 import RegisterForm from "@/components/auth/register-form";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuthPage() {
   const [showRegister, setShowRegister] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { user } = useAuth();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  
+  // Verificar parâmetros de URL para mensagens de erro
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    
+    if (error) {
+      setErrorMessage(decodeURIComponent(error));
+      // Limpar URL para não mostrar erro após refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Redirect if user is already logged in
   if (user) {
@@ -29,6 +45,14 @@ export default function AuthPage() {
             </div>
             
             <div className="max-w-md mx-auto">
+              {errorMessage && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertDescription>
+                    {errorMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className={`${showRegister ? 'hidden' : 'block'}`}>
                 <div className="bg-white p-8 rounded-lg shadow-md">
                   <LoginForm onToggleForm={() => setShowRegister(true)} />
