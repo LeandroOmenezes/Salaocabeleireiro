@@ -157,6 +157,9 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
         className="w-full bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-50 transition-colors duration-200 font-medium flex justify-center items-center"
         onClick={() => {
           setIsGoogleLoading(true);
+          console.log("Redirecionando para autenticação do Google...");
+          
+          // Redirecionar para a rota de autenticação do Google
           window.location.href = "/api/auth/google";
         }}
         disabled={isGoogleLoading}
@@ -173,6 +176,11 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
           </>
         )}
       </Button>
+      
+      <p className="text-gray-500 text-xs text-center mt-4">
+        Para o login com Google funcionar, é necessário configurar as credenciais no Console do Google Cloud 
+        e adicionar o URL de callback como domínio autorizado.
+      </p>
       
       {/* Modal de recuperação de senha */}
       {showForgotPassword && (

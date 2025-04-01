@@ -19,15 +19,7 @@ const passwordResetTokens = new Map<string, { userId: number; expires: Date }>()
 declare global {
   namespace Express {
     // Estendendo a interface User do Express para incluir nossos campos personalizados
-    interface User {
-      id: number;
-      username: string;
-      password: string;
-      name: string;
-      phone?: string;
-      email?: string;
-      isAdmin?: boolean;
-    }
+    interface User extends UserType {}
   }
 }
 
@@ -144,11 +136,15 @@ export function setupAuth(app: Express) {
     console.log("Google auth configured with CLIENT_ID:", process.env.GOOGLE_CLIENT_ID.substring(0, 5) + "...");
     
     // Obter o domínio do Replit em execução
-    const appUrl = process.env.REPL_SLUG ? 
-      `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` : 
-      (process.env.APP_URL || 'http://localhost:5000');
+    const replSlug = process.env.REPL_SLUG || "workspace";
+    const replOwner = process.env.REPL_OWNER || "LeandroOlivei50";
+    const appUrl = process.env.APP_URL || `https://${replSlug}.${replOwner}.repl.co`;
     
     const callbackUrl = `${appUrl}/api/auth/google/callback`;
+    
+    // Registrar o domínio completo para debug
+    console.log(`Replit domain: ${replSlug}.${replOwner}.repl.co`);
+    console.log(`Full app URL: ${appUrl}`);
     console.log("Google callback URL:", callbackUrl);
     
     passport.use(
@@ -174,7 +170,7 @@ export function setupAuth(app: Express) {
               user = await storage.createUser({
                 username: email,
                 password: await hashPassword(randomBytes(16).toString('hex')), // Senha aleatória
-                name: profile.displayName,
+                name: profile.displayName || email.split('@')[0],
                 email: email
               });
             }
@@ -214,7 +210,7 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         username,
         password: await hashPassword(password),
-        name,
+        name: name || username.split('@')[0],
         phone
       });
 
@@ -230,7 +226,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user: Express.User | false | null, info: any) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: "Invalid username or password" });
       
@@ -266,7 +262,9 @@ export function setupAuth(app: Express) {
     app.get(
       "/api/auth/google/callback",
       (req, res, next) => {
-        passport.authenticate("google", (err, user, info) => {
+        console.log("Google callback recebido");
+        
+        passport.authenticate("google", { failureRedirect: '/auth?error=Falha+na+autenticação+com+o+Google' }, (err: Error | null, user: Express.User | false | null, info: any) => {
           if (err) {
             console.error("Google auth error:", err);
             return res.redirect("/auth?error=" + encodeURIComponent("Erro na autenticação: " + err.message));
@@ -274,7 +272,7 @@ export function setupAuth(app: Express) {
           
           if (!user) {
             console.error("Google auth failed - no user");
-            return res.redirect("/auth?error=Falha na autenticação com o Google");
+            return res.redirect("/auth?error=Falha+na+autenticação+com+o+Google");
           }
           
           req.login(user, (err) => {
@@ -283,6 +281,7 @@ export function setupAuth(app: Express) {
               return res.redirect("/auth?error=" + encodeURIComponent("Erro ao fazer login: " + err.message));
             }
             
+            console.log("Login com Google bem-sucedido para:", user.username);
             // Sucesso - redirecionar para a página inicial
             return res.redirect("/");
           });

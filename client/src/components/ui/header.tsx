@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
 
   const toggleMobileMenu = () => {
@@ -54,10 +54,11 @@ export default function Header() {
                 Dashboard
               </Link>
               <button 
-                onClick={() => logout()}
+                onClick={() => logoutMutation.mutate()}
                 className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
+                disabled={logoutMutation.isPending}
               >
-                Sair
+                {logoutMutation.isPending ? "Saindo..." : "Sair"}
               </button>
             </div>
           ) : (
@@ -99,12 +100,13 @@ export default function Header() {
               </Link>
               <button 
                 onClick={() => {
-                  logout();
+                  logoutMutation.mutate();
                   setMobileMenuOpen(false);
                 }}
                 className="block w-full text-left text-gray-700 py-2 hover:text-blue-500"
+                disabled={logoutMutation.isPending}
               >
-                Sair
+                {logoutMutation.isPending ? "Saindo..." : "Sair"}
               </button>
             </>
           ) : (
