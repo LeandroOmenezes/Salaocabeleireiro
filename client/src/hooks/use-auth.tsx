@@ -15,6 +15,9 @@ type AuthContextType = {
   loginMutation: UseMutationResult<User, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<User, Error, InsertUser>;
+  forgotPasswordMutation: UseMutationResult<{ message: string }, Error, { email: string }>;
+  resetPasswordMutation: UseMutationResult<{ message: string }, Error, { token: string; password: string }>;
+  verifyResetTokenMutation: UseMutationResult<{ valid: boolean }, Error, { token: string }>;
 };
 
 type LoginData = Pick<InsertUser, "username" | "password">;
@@ -94,6 +97,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Mutação para solicitar a recuperação de senha
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async ({ email }: { email: string }) => {
+      const res = await apiRequest("POST", "/api/forgot-password", { email });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email enviado",
+        description: "Se existir uma conta com esse email, você receberá um link para redefinir sua senha.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao solicitar recuperação de senha",
+        description: error.message || "Não foi possível enviar o email de recuperação",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutação para verificar se um token de recuperação é válido
+  const verifyResetTokenMutation = useMutation({
+    mutationFn: async ({ token }: { token: string }) => {
+      const res = await apiRequest("GET", `/api/reset-password/${token}`);
+      return await res.json();
+    },
+    onError: () => {
+      toast({
+        title: "Token inválido",
+        description: "O link de recuperação é inválido ou expirou",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutação para redefinir a senha com um token válido
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ token, password }: { token: string; password: string }) => {
+      const res = await apiRequest("POST", `/api/reset-password/${token}`, { password });
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Senha redefinida com sucesso",
+        description: "Sua senha foi alterada. Você já pode fazer login com a nova senha.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao redefinir senha",
+        description: error.message || "Não foi possível redefinir sua senha",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <AuthContext.Provider
       value={{
@@ -103,6 +163,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginMutation,
         logoutMutation,
         registerMutation,
+        forgotPasswordMutation,
+        resetPasswordMutation,
+        verifyResetTokenMutation,
       }}
     >
       {children}

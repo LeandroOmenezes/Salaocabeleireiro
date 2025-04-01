@@ -7,6 +7,7 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import DashboardPage from "@/pages/dashboard-page";
 import ClientSalesPage from "@/pages/client-sales-page";
+import ResetPasswordPage from "@/pages/reset-password-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute, AdminProtectedRoute } from "@/lib/protected-route";
 
@@ -15,6 +16,7 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/reset-password/:token" component={ResetPasswordPage} />
       <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <AdminProtectedRoute path="/clients-sales" component={ClientSalesPage} />
       <Route component={NotFound} />

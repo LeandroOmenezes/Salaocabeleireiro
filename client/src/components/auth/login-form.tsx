@@ -5,8 +5,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useAuth } from "@/lib/auth";
-import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useState, FormEvent } from "react";
+import { FaGoogle } from "react-icons/fa";
 
 const loginFormSchema = z.object({
   username: z.string().min(1, { message: "Email é obrigatório" }).email({ message: "Email inválido" }),
@@ -21,7 +22,9 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onToggleForm }: LoginFormProps) {
-  const { login } = useAuth();
+  const { loginMutation, forgotPasswordMutation } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
   const form = useForm<LoginFormValues>({
@@ -33,15 +36,17 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
     },
   });
 
-  async function onSubmit(data: LoginFormValues) {
-    setIsLoading(true);
-    try {
-      await login(data.username, data.password);
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  function onSubmit(data: LoginFormValues) {
+    loginMutation.mutate({
+      username: data.username,
+      password: data.password
+    });
+  }
+  
+  function handleForgotPassword(e: FormEvent) {
+    e.preventDefault();
+    forgotPasswordMutation.mutate({ email: forgotPasswordEmail });
+    setShowForgotPassword(false);
   }
 
   return (
@@ -101,15 +106,21 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
               </FormItem>
             )}
           />
-          <a href="#" className="text-sm text-blue-500 hover:text-blue-700">Esqueci minha senha</a>
+          <button 
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="text-sm text-blue-500 hover:text-blue-700"
+          >
+            Esqueci minha senha
+          </button>
         </div>
         
         <Button
           type="submit"
           className="w-full bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium"
-          disabled={isLoading}
+          disabled={loginMutation.isPending}
         >
-          {isLoading ? "Entrando..." : "Entrar"}
+          {loginMutation.isPending ? "Entrando..." : "Entrar"}
         </Button>
         
         <div className="relative flex items-center justify-center">
@@ -117,13 +128,52 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
           <span className="absolute bg-white px-3 text-gray-600 text-sm">ou</span>
         </div>
         
-        <Button
-          type="button"
-          variant="outline"
+        <a
+          href="/api/auth/google"
           className="w-full bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-50 transition-colors duration-200 font-medium flex justify-center items-center"
         >
-          <i className="fab fa-google mr-2 text-red-500"></i> Entrar com Google
-        </Button>
+          <FaGoogle className="mr-2 text-red-500" /> Entrar com Google
+        </a>
+        
+        {/* Modal de recuperação de senha */}
+        {showForgotPassword && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Recuperar Senha</h3>
+              <p className="text-gray-600 mb-4">Digite seu email para receber um link de recuperação de senha.</p>
+              
+              <form onSubmit={handleForgotPassword}>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Email</label>
+                  <Input 
+                    type="email" 
+                    placeholder="seu.email@exemplo.com" 
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg"
+                    required
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={forgotPasswordMutation.isPending}
+                  >
+                    {forgotPasswordMutation.isPending ? "Enviando..." : "Enviar Link"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
         
         <div className="text-center mt-4">
           <p className="text-gray-700">
