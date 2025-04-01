@@ -44,10 +44,18 @@ export default function ReviewForm() {
 
   const createReviewMutation = useMutation({
     mutationFn: async (data: ReviewFormValues) => {
-      const res = await apiRequest("POST", "/api/reviews", data);
+      // Garantir que temos o nome do cliente (do usuário autenticado)
+      const reviewData = {
+        ...data,
+        clientName: user?.name || "Cliente",
+      };
+      
+      console.log("Enviando avaliação:", reviewData);
+      const res = await apiRequest("POST", "/api/reviews", reviewData);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log("Avaliação enviada com sucesso:", response);
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       form.reset({
         clientName: user?.name || "",
@@ -59,7 +67,8 @@ export default function ReviewForm() {
         description: "Obrigado pelo seu feedback!",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Erro ao enviar avaliação:", error);
       toast({
         title: "Erro",
         description: "Não foi possível enviar sua avaliação. Tente novamente.",
@@ -69,6 +78,37 @@ export default function ReviewForm() {
   });
 
   function onSubmit(data: ReviewFormValues) {
+    // Verificar se usuário está logado
+    if (!user) {
+      toast({
+        title: "Usuário não autenticado",
+        description: "Você precisa estar logado para enviar uma avaliação.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Verificar se tem avaliação (rating)
+    if (!data.rating || data.rating <= 0) {
+      toast({
+        title: "Avaliação necessária",
+        description: "Por favor, selecione pelo menos 1 estrela.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Verificar se tem comentário
+    if (!data.comment || data.comment.trim().length < 5) {
+      toast({
+        title: "Comentário necessário",
+        description: "Por favor, escreva um comentário com pelo menos 5 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Se todas as validações passarem, enviar
     createReviewMutation.mutate(data);
   }
 
@@ -78,12 +118,11 @@ export default function ReviewForm() {
     const rating = form.watch("rating");
 
     for (let i = 1; i <= 5; i++) {
-      const halfIndex = i - 0.5;
       stars.push(
         <button
           key={`star-${i}`}
           type="button"
-          className="text-2xl focus:outline-none transition-colors duration-200"
+          className="text-3xl focus:outline-none transition-colors duration-200 mx-1 hover:scale-110"
           onClick={() => form.setValue("rating", i, { shouldValidate: true })}
           onMouseEnter={() => setHoveredStar(i)}
           onMouseLeave={() => setHoveredStar(0)}
@@ -91,22 +130,6 @@ export default function ReviewForm() {
           {i <= (hoveredStar || rating) ? "★" : "☆"}
         </button>
       );
-      
-      // Adiciona opção de meia estrela
-      if (i < 5) {
-        stars.push(
-          <button
-            key={`half-star-${i}`}
-            type="button"
-            className="text-2xl focus:outline-none transition-colors duration-200 -ml-2"
-            onClick={() => form.setValue("rating", halfIndex, { shouldValidate: true })}
-            onMouseEnter={() => setHoveredStar(halfIndex)}
-            onMouseLeave={() => setHoveredStar(0)}
-          >
-            {halfIndex <= (hoveredStar || rating) ? "★" : "☆"}
-          </button>
-        );
-      }
     }
     return stars;
   };
