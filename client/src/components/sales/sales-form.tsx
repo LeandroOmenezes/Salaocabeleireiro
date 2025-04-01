@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ServiceOption } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const salesFormSchema = z.object({
   clientName: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
@@ -23,8 +23,17 @@ const salesFormSchema = z.object({
 
 type SalesFormValues = z.infer<typeof salesFormSchema>;
 
+const PAYMENT_METHODS = [
+  { id: "cash", name: "Dinheiro" },
+  { id: "credit", name: "Cartão de Crédito" },
+  { id: "debit", name: "Cartão de Débito" },
+  { id: "pix", name: "PIX" },
+];
+
 export default function SalesForm() {
   const { toast } = useToast();
+  const [selectedServiceName, setSelectedServiceName] = useState<string | null>(null);
+  const [selectedPaymentName, setSelectedPaymentName] = useState<string | null>(null);
   
   const form = useForm<SalesFormValues>({
     resolver: zodResolver(salesFormSchema),
@@ -61,6 +70,8 @@ export default function SalesForm() {
         date: new Date().toISOString().split('T')[0],
         paymentMethod: "",
       });
+      setSelectedServiceName(null);
+      setSelectedPaymentName(null);
       queryClient.invalidateQueries({ queryKey: ['/api/sales'] });
     },
     onError: (error) => {
@@ -80,6 +91,7 @@ export default function SalesForm() {
       const selectedService = services.find(service => service.id === watchedServiceId);
       if (selectedService) {
         form.setValue("amount", selectedService.minPrice.toString());
+        setSelectedServiceName(selectedService.name);
       }
     }
   }, [watchedServiceId, services, form]);
@@ -88,12 +100,23 @@ export default function SalesForm() {
     createSaleMutation.mutate(data);
   }
 
-  const paymentMethods = [
-    { id: "cash", name: "Dinheiro" },
-    { id: "credit", name: "Cartão de Crédito" },
-    { id: "debit", name: "Cartão de Débito" },
-    { id: "pix", name: "PIX" },
-  ];
+  const handleServiceChange = (value: string) => {
+    form.setValue("serviceId", value);
+    if (services) {
+      const service = services.find(s => s.id === value);
+      if (service) {
+        setSelectedServiceName(service.name);
+      }
+    }
+  };
+
+  const handlePaymentMethodChange = (value: string) => {
+    form.setValue("paymentMethod", value);
+    const method = PAYMENT_METHODS.find(m => m.id === value);
+    if (method) {
+      setSelectedPaymentName(method.name);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -122,10 +145,15 @@ export default function SalesForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="block text-gray-700 font-medium mb-2">Serviço</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select 
+                onValueChange={handleServiceChange} 
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <SelectValue placeholder="Selecionar serviço" />
+                    <SelectValue placeholder="Selecionar serviço">
+                      {selectedServiceName}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -186,14 +214,19 @@ export default function SalesForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="block text-gray-700 font-medium mb-2">Forma de Pagamento</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select 
+                onValueChange={handlePaymentMethodChange} 
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <SelectValue placeholder="Selecionar método" />
+                    <SelectValue placeholder="Selecionar método">
+                      {selectedPaymentName}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {paymentMethods.map((method) => (
+                  {PAYMENT_METHODS.map((method) => (
                     <SelectItem key={method.id} value={method.id}>
                       {method.name}
                     </SelectItem>
