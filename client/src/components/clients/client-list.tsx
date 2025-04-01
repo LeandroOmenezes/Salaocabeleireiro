@@ -20,7 +20,9 @@ import { useMutation } from "@tanstack/react-query";
 export default function ClientList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", phone: "", email: "" });
+  const [editingClient, setEditingClient] = useState<{id: number, name: string, phone: string, email: string}>({ id: 0, name: "", phone: "", email: "" });
   const { toast } = useToast();
 
   // Fetch clients data
@@ -57,6 +59,29 @@ export default function ClientList() {
     },
   });
 
+  // Edit client mutation
+  const editClientMutation = useMutation({
+    mutationFn: async (data: {id: number, client: { name: string; phone: string; email: string }}) => {
+      const res = await apiRequest("PATCH", `/api/clients/${data.id}`, data.client);
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cliente atualizado com sucesso",
+        description: "As informações do cliente foram atualizadas",
+      });
+      setIsEditClientOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao atualizar cliente",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete client mutation
   const deleteClientMutation = useMutation({
     mutationFn: async (clientId: number) => {
@@ -65,6 +90,8 @@ export default function ClientList() {
     onSuccess: () => {
       toast({
         title: "Cliente removido com sucesso",
+        description: "O cliente foi removido permanentemente do sistema",
+        variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
     },
@@ -90,8 +117,32 @@ export default function ClientList() {
     addClientMutation.mutate(newClient);
   };
 
-  const handleDeleteClient = (clientId: number) => {
-    if (confirm("Tem certeza que deseja remover este cliente?")) {
+  const handleEditClient = () => {
+    if (!editingClient.name || !editingClient.phone) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome e telefone são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const { id, ...clientData } = editingClient;
+    editClientMutation.mutate({ id, client: clientData });
+  };
+
+  const openEditDialog = (client: User) => {
+    setEditingClient({
+      id: client.id,
+      name: client.name || "",
+      phone: client.phone || "",
+      email: client.email || "",
+    });
+    setIsEditClientOpen(true);
+  };
+
+  const handleDeleteClient = (clientId: number, clientName: string) => {
+    if (confirm(`Tem certeza que deseja remover o cliente "${clientName}"?\n\nEsta ação não pode ser desfeita e todos os dados do cliente serão excluídos permanentemente.`)) {
       deleteClientMutation.mutate(clientId);
     }
   };
@@ -176,6 +227,7 @@ export default function ClientList() {
                     variant="ghost" 
                     size="sm"
                     className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                    onClick={() => openEditDialog(client)}
                   >
                     <Edit size={16} />
                   </Button>
@@ -183,7 +235,7 @@ export default function ClientList() {
                     variant="ghost" 
                     size="sm"
                     className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                    onClick={() => handleDeleteClient(client.id)}
+                    onClick={() => handleDeleteClient(client.id, client.name || 'este cliente')}
                     disabled={deleteClientMutation.isPending}
                   >
                     <Trash size={16} />
@@ -247,6 +299,63 @@ export default function ClientList() {
               disabled={addClientMutation.isPending}
             >
               {addClientMutation.isPending ? "Adicionando..." : "Adicionar Cliente"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Client Dialog */}
+      <Dialog open={isEditClientOpen} onOpenChange={setIsEditClientOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+            <DialogDescription>
+              Atualize os dados do cliente.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <div className="grid w-full items-center gap-1.5">
+              <label className="text-sm font-medium">Nome *</label>
+              <Input
+                value={editingClient.name}
+                onChange={(e) => setEditingClient({...editingClient, name: e.target.value})}
+                placeholder="Nome completo"
+              />
+            </div>
+            
+            <div className="grid w-full items-center gap-1.5">
+              <label className="text-sm font-medium">Telefone *</label>
+              <Input
+                value={editingClient.phone}
+                onChange={(e) => setEditingClient({...editingClient, phone: e.target.value})}
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+            
+            <div className="grid w-full items-center gap-1.5">
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                value={editingClient.email}
+                onChange={(e) => setEditingClient({...editingClient, email: e.target.value})}
+                placeholder="email@exemplo.com"
+                type="email"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditClientOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleEditClient}
+              disabled={editClientMutation.isPending}
+            >
+              {editClientMutation.isPending ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </DialogFooter>
         </DialogContent>
