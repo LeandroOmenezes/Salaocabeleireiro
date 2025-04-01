@@ -191,9 +191,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/appointments", async (req: Request, res: Response) => {
     try {
       const appointmentData = insertAppointmentSchema.parse(req.body);
+      console.log("[appointments] Creating appointment with data:", appointmentData);
       const appointment = await storage.createAppointment(appointmentData);
+      console.log("[appointments] Created appointment:", appointment);
+      
+      // Verificar quantos agendamentos existem após criar este
+      const appointments = await storage.getAppointments();
+      console.log(`[appointments] Total appointments after creation: ${appointments.length}`);
+      
       res.status(201).json(appointment);
     } catch (error) {
+      console.error("[appointments] Error creating appointment:", error);
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Invalid appointment data", errors: error.errors });
       } else {
@@ -207,12 +215,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mesmo para usuários não autenticados, retornar uma lista vazia
       // para evitar o erro 401 que poderia causar problemas na interface
       if (!req.isAuthenticated()) {
+        console.log("[appointments] User not authenticated, returning empty array");
         return res.json([]);
       }
       
       const appointments = await storage.getAppointments();
+      console.log(`[appointments] Returning ${appointments.length} appointments:`, appointments);
       res.json(appointments);
     } catch (error) {
+      console.error("[appointments] Error fetching appointments:", error);
       res.status(500).json({ message: "Error fetching appointments" });
     }
   });
