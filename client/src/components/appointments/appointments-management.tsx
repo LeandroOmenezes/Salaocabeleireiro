@@ -1,15 +1,22 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Appointment } from "@shared/schema";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Appointment, Service } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function AppointmentsManagement() {
+  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: appointments, isLoading } = useQuery<Appointment[]>({
     queryKey: ['/api/appointments'],
+  });
+
+  const { data: services } = useQuery<Service[]>({
+    queryKey: ['/api/services/all'],
   });
 
   const getFilteredAppointments = () => {
@@ -23,6 +30,12 @@ export default function AppointmentsManagement() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const getServiceName = (serviceId: string) => {
+    if (!services) return "Carregando...";
+    const service = services.find(s => String(s.id) === serviceId);
+    return service ? service.name : "Serviço não encontrado";
   };
 
   return (
@@ -55,28 +68,33 @@ export default function AppointmentsManagement() {
                 <th className="py-3 px-4 text-left">Data</th>
                 <th className="py-3 px-4 text-left">Horário</th>
                 <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-left">Ações</th>
               </tr>
             </thead>
             <tbody>
               {filteredAppointments.map((appointment) => (
                 <tr key={appointment.id} className="border-t">
-                  <td className="py-3 px-4">{appointment.name}</td>
-                  <td className="py-3 px-4">{appointment.serviceId}</td>
+                  <td className="py-3 px-4">
+                    <div>
+                      <div className="font-medium">{appointment.name}</div>
+                      <div className="text-sm text-gray-500">{appointment.phone}</div>
+                      <div className="text-sm text-gray-500">{appointment.email}</div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">{getServiceName(appointment.serviceId)}</td>
                   <td className="py-3 px-4">{formatDate(appointment.date)}</td>
                   <td className="py-3 px-4">{appointment.time}</td>
-                  <td className="py-3 px-4">{appointment.status}</td>
                   <td className="py-3 px-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mr-2"
-                      onClick={() => {
-                        // Implement status update logic
-                      }}
-                    >
-                      Atualizar Status
-                    </Button>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      appointment.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {appointment.status === 'pending' ? 'Pendente' :
+                       appointment.status === 'confirmed' ? 'Confirmado' :
+                       appointment.status === 'completed' ? 'Concluído' :
+                       'Cancelado'}
+                    </span>
                   </td>
                 </tr>
               ))}

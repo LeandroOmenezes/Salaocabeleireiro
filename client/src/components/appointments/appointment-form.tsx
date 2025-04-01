@@ -145,11 +145,17 @@ export default function AppointmentForm() {
         message += `\nObservações: ${values.notes}`;
       }
       
-      // Formata o número do WhatsApp (número do salão) - este seria o número comercial do salão
-      const salonWhatsApp = "5500000000000"; // Substitua pelo número real do salão
+      // Formata o número do telefone do cliente para WhatsApp
+      const clientPhone = formatPhoneForWhatsApp(values.phone);
       
-      // Cria a URL do WhatsApp com a mensagem codificada
-      const whatsappUrl = `https://wa.me/${salonWhatsApp}?text=${encodeURIComponent(message)}`;
+      // Formata o número do WhatsApp (número do salão) - este seria o número comercial do salão
+      const salonWhatsApp = "5511999999999"; // Número de exemplo do salão
+      
+      // Registramos os dados do cliente no sistema antes de redirecionar para o WhatsApp
+      createAppointmentMutation.mutate(values);
+      
+      // Cria a URL do WhatsApp com a mensagem codificada e o telefone do cliente
+      const whatsappUrl = `https://wa.me/${salonWhatsApp}?text=${encodeURIComponent(message + "\n\nMeu telefone: " + values.phone)}`;
       
       // Abre o WhatsApp em uma nova janela
       window.open(whatsappUrl, '_blank');
