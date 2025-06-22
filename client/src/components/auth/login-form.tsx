@@ -175,12 +175,6 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
         )}
       </Button>
       
-      <div className="text-center mt-2">
-        <p className="text-gray-500 text-xs">
-          O login com Google requer credenciais OAuth válidas configuradas no Google Cloud Console
-        </p>
-      </div>
-      
       <div className="text-center mt-4 p-3 bg-gray-50 rounded-lg">
         <p className="text-sm text-gray-600">
           <strong>Novo cliente?</strong> Use o botão "Entrar com WhatsApp" para criar sua conta rapidamente. 
