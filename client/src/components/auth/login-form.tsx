@@ -150,29 +150,32 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
         <span className="absolute bg-white px-3 text-gray-600 text-sm">ou</span>
       </div>
       
-      {/* Botão de login demo */}
+      {/* Botão de login com Google */}
       <Button
         type="button"
         variant="outline"
-        className="w-full bg-blue-50 border border-blue-300 text-blue-700 px-6 py-3 rounded-full hover:bg-blue-100 transition-colors duration-200 font-medium flex justify-center items-center"
+        className="w-full bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-50 transition-colors duration-200 font-medium flex justify-center items-center"
         onClick={() => {
-          form.setValue("username", "demo@example.com");
-          form.setValue("password", "demo123");
-          loginMutation.mutate({
-            username: "demo@example.com",
-            password: "demo123"
-          });
+          setIsGoogleLoading(true);
+          console.log("Redirecionando para autenticação do Google...");
+          
+          // Redirecionar para a rota de autenticação do Google
+          window.location.href = "/api/auth/google";
         }}
-        disabled={loginMutation.isPending}
+        disabled={isGoogleLoading}
       >
-        Entrar como usuário demo
+        {isGoogleLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+            Redirecionando...
+          </>
+        ) : (
+          <>
+            <FaGoogle className="mr-2 text-red-500" /> 
+            Entrar com Google
+          </>
+        )}
       </Button>
-      
-      <div className="text-center">
-        <p className="text-gray-500 text-xs">
-          Use o botão "usuário demo" para testar a aplicação como cliente regular
-        </p>
-      </div>
       
       {/* Modal de recuperação de senha */}
       {showForgotPassword && (
