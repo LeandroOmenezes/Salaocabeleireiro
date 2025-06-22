@@ -152,6 +152,11 @@ export function setupAuth(app: Express) {
     console.log("Base URL:", baseUrl);
     console.log("Google callback URL:", callbackUrl);
     
+    // Verificar se as credenciais do Google são válidas
+    if (!process.env.GOOGLE_CLIENT_ID.includes('.googleusercontent.com')) {
+      console.warn("ATENÇÃO: As credenciais do Google podem estar incorretas ou expiradas");
+    }
+    
     passport.use(
       new GoogleStrategy(
         {
@@ -270,7 +275,13 @@ export function setupAuth(app: Express) {
   // Rotas de autenticação do Google
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     // Rota para iniciar o processo de autenticação do Google
-    app.get("/api/auth/google", passport.authenticate("google"));
+    app.get("/api/auth/google", (req, res, next) => {
+      console.log("Iniciando autenticação Google...");
+      console.log("URL atual:", req.get('host'));
+      passport.authenticate("google", {
+        scope: ['profile', 'email']
+      })(req, res, next);
+    });
     
     // Rota para callback do Google após autenticação
     app.get(
