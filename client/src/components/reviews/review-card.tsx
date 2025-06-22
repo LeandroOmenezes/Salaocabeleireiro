@@ -1,9 +1,10 @@
 import { Review } from "@shared/schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 interface ReviewCardProps {
   review: Review;
@@ -11,26 +12,43 @@ interface ReviewCardProps {
 
 export default function ReviewCard({ review }: ReviewCardProps) {
   const [likes, setLikes] = useState(review.likes);
+  const [userLiked, setUserLiked] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Buscar likes do usuário
+  const { data: userLikes } = useQuery<number[]>({
+    queryKey: ['/api/user/likes'],
+    enabled: !!user,
+  });
+
+  // Verificar se o usuário curtiu esta avaliação
+  useEffect(() => {
+    if (userLikes) {
+      setUserLiked(userLikes.includes(review.id));
+    }
+  }, [userLikes, review.id]);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", `/api/reviews/${review.id}/like`);
       return await res.json();
     },
-    onSuccess: (updatedReview) => {
-      setLikes(updatedReview.likes);
+    onSuccess: (response) => {
+      setLikes(response.review.likes);
+      setUserLiked(response.userLiked);
       setIsLikeAnimating(true);
       setTimeout(() => setIsLikeAnimating(false), 1000);
       
-      // Atualiza a cache da query
+      // Atualiza a cache das queries
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/likes"] });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Não foi possível curtir essa avaliação",
+        description: error.message || "Não foi possível processar o like",
         variant: "destructive",
       });
     }
@@ -61,6 +79,14 @@ export default function ReviewCard({ review }: ReviewCardProps) {
   };
 
   const handleLikeClick = () => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para curtir avaliações",
+        variant: "destructive",
+      });
+      return;
+    }
     likeMutation.mutate();
   };
 
@@ -84,10 +110,21 @@ export default function ReviewCard({ review }: ReviewCardProps) {
         <button 
           onClick={handleLikeClick}
           disabled={likeMutation.isPending}
-          className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors duration-200 focus:outline-none"
+          className={`flex items-center gap-1 transition-colors duration-200 focus:outline-none ${
+            userLiked 
+              ? 'text-red-500 hover:text-red-600' 
+              : 'text-gray-500 hover:text-red-500'
+          }`}
+          title={userLiked ? "Remover curtida" : "Curtir avaliação"}
         >
           <Heart 
-            className={`${isLikeAnimating ? 'animate-heartbeat text-red-500 fill-red-500' : likes > 0 ? 'text-red-500 fill-red-500' : ''}`} 
+            className={`${
+              isLikeAnimating 
+                ? 'animate-pulse text-red-500 fill-red-500' 
+                : userLiked 
+                  ? 'text-red-500 fill-red-500' 
+                  : 'text-gray-500'
+            }`} 
             size={16} 
           />
           <span className="text-sm font-medium">{likes}</span>

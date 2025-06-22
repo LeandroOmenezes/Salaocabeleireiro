@@ -48,7 +48,8 @@ export interface IStorage {
   // Reviews
   getReviews(): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
-  likeReview(id: number): Promise<Review | undefined>;
+  toggleLikeReview(reviewId: number, userId: number): Promise<{ review: Review; userLiked: boolean } | undefined>;
+  getUserLikes(userId: number): Promise<number[]>;
   
   // Sales
   getSales(): Promise<Sale[]>;
@@ -64,6 +65,7 @@ export class MemStorage implements IStorage {
   private appointments: Map<number, Appointment>;
   private reviews: Map<number, Review>;
   private sales: Map<number, Sale>;
+  private userLikes: Map<number, Set<number>>; // userId -> Set of reviewIds they liked
   
   private currentUserId: number;
   private currentCategoryId: number;
@@ -81,6 +83,7 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.reviews = new Map();
     this.sales = new Map();
+    this.userLikes = new Map();
     
     this.currentUserId = 1;
     this.currentCategoryId = 1;
@@ -456,15 +459,37 @@ export class MemStorage implements IStorage {
     return review;
   }
   
-  async likeReview(id: number): Promise<Review | undefined> {
-    const review = this.reviews.get(id);
-    if (review) {
-      // Incrementa o contador de likes
-      const updatedReview = { ...review, likes: review.likes + 1 };
-      this.reviews.set(id, updatedReview);
-      return updatedReview;
+  async toggleLikeReview(reviewId: number, userId: number): Promise<{ review: Review; userLiked: boolean } | undefined> {
+    const review = this.reviews.get(reviewId);
+    if (!review) return undefined;
+
+    // Get user's current likes
+    if (!this.userLikes.has(userId)) {
+      this.userLikes.set(userId, new Set());
     }
-    return undefined;
+    
+    const userLikeSet = this.userLikes.get(userId)!;
+    const userAlreadyLiked = userLikeSet.has(reviewId);
+    
+    let updatedReview: Review;
+    
+    if (userAlreadyLiked) {
+      // Remove like
+      userLikeSet.delete(reviewId);
+      updatedReview = { ...review, likes: Math.max(0, review.likes - 1) };
+    } else {
+      // Add like
+      userLikeSet.add(reviewId);
+      updatedReview = { ...review, likes: review.likes + 1 };
+    }
+    
+    this.reviews.set(reviewId, updatedReview);
+    return { review: updatedReview, userLiked: !userAlreadyLiked };
+  }
+
+  async getUserLikes(userId: number): Promise<number[]> {
+    const userLikeSet = this.userLikes.get(userId);
+    return userLikeSet ? Array.from(userLikeSet) : [];
   }
   
   // === Sales ===

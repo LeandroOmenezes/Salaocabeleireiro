@@ -291,21 +291,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Rota para dar like (coração) em uma avaliação
+  // Rota para dar/remover like (coração) em uma avaliação
   app.post("/api/reviews/:id/like", async (req: Request, res: Response) => {
     try {
       const reviewId = parseInt(req.params.id);
       
-      // Buscar a avaliação atual
-      const review = await storage.likeReview(reviewId);
+      // Verificar se o usuário está autenticado
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "É necessário estar logado para curtir avaliações" });
+      }
       
-      if (!review) {
+      const result = await storage.toggleLikeReview(reviewId, req.user.id);
+      
+      if (!result) {
         return res.status(404).json({ message: "Avaliação não encontrada" });
       }
       
-      res.status(200).json(review);
+      res.status(200).json({
+        review: result.review,
+        userLiked: result.userLiked
+      });
     } catch (error) {
-      res.status(500).json({ message: "Erro ao adicionar like na avaliação" });
+      res.status(500).json({ message: "Erro ao processar like na avaliação" });
+    }
+  });
+
+  // Rota para obter os likes do usuário
+  app.get("/api/user/likes", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "É necessário estar logado" });
+      }
+      
+      const userLikes = await storage.getUserLikes(req.user.id);
+      res.status(200).json(userLikes);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar likes do usuário" });
     }
   });
   
