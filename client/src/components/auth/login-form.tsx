@@ -177,6 +177,12 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
         )}
       </Button>
       
+      <div className="text-center mt-2">
+        <p className="text-gray-500 text-xs">
+          O login com Google requer credenciais OAuth válidas configuradas no Google Cloud Console
+        </p>
+      </div>
+      
       {/* Modal de recuperação de senha */}
       {showForgotPassword && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

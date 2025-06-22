@@ -28,10 +28,11 @@ export default function AuthPage() {
   }, []);
 
   // Redirect if user is already logged in
-  if (user) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   return (
     <div className="font-sans bg-gray-100 text-gray-800 min-h-screen flex flex-col">
