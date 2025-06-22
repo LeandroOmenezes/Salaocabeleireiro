@@ -135,16 +135,21 @@ export function setupAuth(app: Express) {
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log("Google auth configured with CLIENT_ID:", process.env.GOOGLE_CLIENT_ID.substring(0, 5) + "...");
     
-    // Obter o domínio do Replit em execução
-    const replSlug = process.env.REPL_SLUG || "workspace";
-    const replOwner = process.env.REPL_OWNER || "LeandroOlivei50";
-    const appUrl = process.env.APP_URL || `https://${replSlug}.${replOwner}.repl.co`;
+    // Detectar automaticamente a URL do ambiente
+    const getBaseUrl = () => {
+      // Em produção no Replit, usar a URL do ambiente
+      if (process.env.REPLIT_DOMAINS) {
+        return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+      }
+      
+      // Fallback para desenvolvimento local
+      return process.env.APP_URL || "http://localhost:5000";
+    };
     
-    const callbackUrl = `${appUrl}/api/auth/google/callback`;
+    const baseUrl = getBaseUrl();
+    const callbackUrl = `${baseUrl}/api/auth/google/callback`;
     
-    // Registrar o domínio completo para debug
-    console.log(`Replit domain: ${replSlug}.${replOwner}.repl.co`);
-    console.log(`Full app URL: ${appUrl}`);
+    console.log("Base URL:", baseUrl);
     console.log("Google callback URL:", callbackUrl);
     
     passport.use(
@@ -157,26 +162,35 @@ export function setupAuth(app: Express) {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
+            console.log("Google profile received:", profile.displayName, profile.emails?.[0]?.value);
+            
             // Verificar se o usuário já existe no sistema
             const email = profile.emails?.[0]?.value;
             if (!email) {
+              console.error("No email found in Google profile");
               return done(new Error("No email found in Google profile"));
             }
             
             let user = await storage.getUserByUsername(email);
             
-            // Se o usuário não existir, criar um novo
+            // Se o usuário não existir, criar um novo automaticamente
             if (!user) {
+              console.log("Creating new user from Google profile:", email);
               user = await storage.createUser({
                 username: email,
                 password: await hashPassword(randomBytes(16).toString('hex')), // Senha aleatória
                 name: profile.displayName || email.split('@')[0],
-                email: email
+                phone: "", // Campo obrigatório, mas pode ser vazio para usuários do Google
+                isAdmin: false
               });
+              console.log("New user created successfully:", user.username);
+            } else {
+              console.log("Existing user found:", user.username);
             }
             
             return done(null, user);
           } catch (error) {
+            console.error("Error in Google OAuth callback:", error);
             return done(error);
           }
         }
@@ -264,24 +278,31 @@ export function setupAuth(app: Express) {
       (req, res, next) => {
         console.log("Google callback recebido");
         
-        passport.authenticate("google", { failureRedirect: '/auth?error=Falha+na+autenticação+com+o+Google' }, (err: Error | null, user: Express.User | false | null, info: any) => {
+        passport.authenticate("google", (err: Error | null, user: Express.User | false | null, info: any) => {
+          console.log("Google auth callback result:", { err: err?.message, user: user ? 'User found' : 'No user', info });
+          
           if (err) {
             console.error("Google auth error:", err);
             return res.redirect("/auth?error=" + encodeURIComponent("Erro na autenticação: " + err.message));
           }
           
           if (!user) {
-            console.error("Google auth failed - no user");
+            console.error("Google auth failed - no user returned from strategy");
             return res.redirect("/auth?error=Falha+na+autenticação+com+o+Google");
           }
           
-          req.login(user, (err) => {
-            if (err) {
-              console.error("Login error:", err);
-              return res.redirect("/auth?error=" + encodeURIComponent("Erro ao fazer login: " + err.message));
+          console.log("Attempting to login user:", user);
+          
+          req.login(user, (loginErr) => {
+            if (loginErr) {
+              console.error("Login error:", loginErr);
+              return res.redirect("/auth?error=" + encodeURIComponent("Erro ao fazer login: " + loginErr.message));
             }
             
             console.log("Login com Google bem-sucedido para:", user.username);
+            console.log("Session after login:", req.session);
+            console.log("User authenticated:", req.isAuthenticated());
+            
             // Sucesso - redirecionar para a página inicial
             return res.redirect("/");
           });
