@@ -1,11 +1,16 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Appointment, Service } from "@shared/schema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Check, Clock, X } from "lucide-react";
 
 export default function AppointmentsManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { toast } = useToast();
 
   const { data: appointments, isLoading } = useQuery<Appointment[]>({
     queryKey: ['/api/appointments'],
@@ -13,6 +18,27 @@ export default function AppointmentsManagement() {
 
   const { data: services } = useQuery<Service[]>({
     queryKey: ['/api/services/all'],
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/appointments/${id}/status`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
+      toast({
+        title: "Status atualizado",
+        description: "O status do agendamento foi atualizado com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar status",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const getFilteredAppointments = () => {
@@ -71,6 +97,7 @@ export default function AppointmentsManagement() {
                 <th className="py-3 px-4 text-left">Data</th>
                 <th className="py-3 px-4 text-left">Horário</th>
                 <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-left">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -98,6 +125,85 @@ export default function AppointmentsManagement() {
                        appointment.status === 'completed' ? 'Concluído' :
                        'Cancelado'}
                     </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex space-x-2">
+                      {appointment.status === 'pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                            onClick={() => updateStatusMutation.mutate({ 
+                              id: appointment.id, 
+                              status: 'confirmed' 
+                            })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Confirmar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                            onClick={() => updateStatusMutation.mutate({ 
+                              id: appointment.id, 
+                              status: 'cancelled' 
+                            })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Cancelar
+                          </Button>
+                        </>
+                      )}
+                      {appointment.status === 'confirmed' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                            onClick={() => updateStatusMutation.mutate({ 
+                              id: appointment.id, 
+                              status: 'completed' 
+                            })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Concluir
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
+                            onClick={() => updateStatusMutation.mutate({ 
+                              id: appointment.id, 
+                              status: 'pending' 
+                            })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <Clock className="h-4 w-4 mr-1" />
+                            Pendente
+                          </Button>
+                        </>
+                      )}
+                      {(appointment.status === 'completed' || appointment.status === 'cancelled') && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-yellow-600 border-yellow-600 hover:bg-yellow-50"
+                          onClick={() => updateStatusMutation.mutate({ 
+                            id: appointment.id, 
+                            status: 'pending' 
+                          })}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          <Clock className="h-4 w-4 mr-1" />
+                          Reativar
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
