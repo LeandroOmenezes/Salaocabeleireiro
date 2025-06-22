@@ -5,6 +5,7 @@ import Footer from "@/components/ui/footer";
 import SalesForm from "@/components/sales/sales-form";
 import SalesHistory from "@/components/sales/sales-history";
 import AppointmentsManagement from "@/components/appointments/appointments-management";
+import UsersManagement from "@/components/admin/users-management";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function DashboardPage() {
@@ -31,6 +32,14 @@ export default function DashboardPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Painel Administrativo</h2>
               <p className="text-gray-700 max-w-2xl mx-auto">Gerencie agendamentos, registre vendas e acompanhe o desempenho do seu negócio.</p>
+            </div>
+            
+            <div className="mb-16">
+              <div className="text-left mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Usuários do Sistema</h2>
+                <p className="text-gray-700">Gerencie usuários administradores e suas permissões.</p>
+              </div>
+              <UsersManagement />
             </div>
             
             <div className="mb-16">

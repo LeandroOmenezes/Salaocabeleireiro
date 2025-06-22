@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { setupAuth, hashPassword } from "./auth";
 import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema } from "@shared/schema";
 import { ZodError } from "zod";
 
@@ -309,6 +309,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // === Admin Users Management ===
+  app.get("/api/admin/users", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const users = await storage.getUsers();
+      // Remove passwords from response
+      const safeUsers = users.map(({ password, ...user }) => user);
+      res.json(safeUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching users" });
+    }
+  });
+
+  app.post("/api/admin/users", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const { username, password, name, phone, isAdmin } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+      
+      // Hash password and create user
+      const hashedPassword = await hashPassword(password);
+      const user = await storage.createUser({
+        username,
+        password: hashedPassword,
+        name,
+        phone,
+        isAdmin: isAdmin || false
+      });
+      
+      // Remove password from response
+      const { password: _, ...safeUser } = user;
+      res.status(201).json(safeUser);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating user" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Prevent deleting own account
+      if (req.user?.id === id) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+      
+      const deleted = await storage.deleteUser(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting user" });
+    }
+  });
+
   // === Sales ===
   app.post("/api/sales", async (req: Request, res: Response) => {
     try {

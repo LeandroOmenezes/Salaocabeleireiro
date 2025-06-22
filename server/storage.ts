@@ -9,9 +9,11 @@ import { type Sale, type InsertSale } from "@shared/schema";
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
+  getUsers(): Promise<User[]>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserPassword(id: number, password: string): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
   
   // Clients
   getClients(): Promise<User[]>;
@@ -247,6 +249,10 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
+  async getUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.username === username,
@@ -275,6 +281,10 @@ export class MemStorage implements IStorage {
       return updatedUser;
     }
     return undefined;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    return this.users.delete(id);
   }
   
   // === Clients ===
