@@ -47,6 +47,17 @@ export default function Header() {
           
           {user ? (
             <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 bg-gray-100 px-3 py-2 rounded-full">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <i className="fas fa-user text-white text-sm"></i>
+                </div>
+                <div className="text-sm">
+                  <div className="font-medium text-gray-800">{user.name || user.username}</div>
+                  {user.isAdmin && (
+                    <div className="text-xs text-blue-600 font-medium">Administrador</div>
+                  )}
+                </div>
+              </div>
               <Link 
                 href="/dashboard" 
                 className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
@@ -91,6 +102,17 @@ export default function Header() {
           
           {user ? (
             <>
+              <div className="flex items-center space-x-3 bg-gray-100 px-3 py-2 rounded-lg mb-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <i className="fas fa-user text-white text-sm"></i>
+                </div>
+                <div className="text-sm">
+                  <div className="font-medium text-gray-800">{user.name || user.username}</div>
+                  {user.isAdmin && (
+                    <div className="text-xs text-blue-600 font-medium">Administrador</div>
+                  )}
+                </div>
+              </div>
               <Link 
                 href="/dashboard" 
                 className="block text-gray-700 py-2 hover:text-blue-500" 
