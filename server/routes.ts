@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, hashPassword } from "./auth";
+import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
 import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema } from "@shared/schema";
 import { ZodError } from "zod";
 
@@ -466,6 +466,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sales);
     } catch (error) {
       res.status(500).json({ message: "Error fetching filtered sales" });
+    }
+  });
+
+  // === Password Reset Routes ===
+  app.post("/api/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+      
+      // Verificar se o usuário existe
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado com este email" });
+      }
+      
+      // Gerar token de reset
+      const resetToken = generatePasswordResetToken(user.id);
+      
+      try {
+        // Tentar enviar email
+        await sendPasswordResetEmail(email, resetToken);
+        res.status(200).json({ 
+          message: "Email de recuperação enviado com sucesso. Verifique sua caixa de entrada." 
+        });
+      } catch (emailError: any) {
+        console.error("Email error:", emailError.message);
+        
+        // Se o erro contém um link de reset, enviar para o cliente
+        if (emailError.message.includes('EMAIL_NOT_CONFIGURED:') || emailError.message.includes('EMAIL_CONFIG_ERROR:')) {
+          const resetLink = emailError.message.split(':')[1];
+          res.status(200).json({ 
+            message: "Sistema de email temporariamente indisponível. Use este link para redefinir sua senha:",
+            resetLink: resetLink
+          });
+        } else {
+          res.status(500).json({ message: "Erro ao enviar email de recuperação" });
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao processar recuperação de senha:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.post("/api/verify-reset-token", async (req: Request, res: Response) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token é obrigatório" });
+      }
+      
+      const valid = verifyPasswordResetToken(token);
+      res.status(200).json({ valid });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao verificar token" });
+    }
+  });
+
+  app.post("/api/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token e senha são obrigatórios" });
+      }
+      
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Senha deve ter no mínimo 6 caracteres" });
+      }
+      
+      const userId = verifyPasswordResetToken(token);
+      if (!userId) {
+        return res.status(400).json({ message: "Token inválido ou expirado" });
+      }
+      
+      // Hash da nova senha
+      const hashedPassword = await hashPassword(password);
+      
+      // Atualizar senha do usuário
+      const user = await storage.updateUserPassword(userId, hashedPassword);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Remover token usado
+      removePasswordResetToken(token);
+      
+      res.status(200).json({ message: "Senha redefinida com sucesso" });
+    } catch (error) {
+      console.error("Erro ao redefinir senha:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
 

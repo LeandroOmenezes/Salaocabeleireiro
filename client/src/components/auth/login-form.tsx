@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/use-auth";
 import { useState, FormEvent } from "react";
 import { FaGoogle } from "react-icons/fa";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const loginFormSchema = z.object({
   username: z.string().min(1, { message: "Email é obrigatório" }).email({ message: "Email inválido" }),
@@ -30,6 +30,7 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
   const [whatsAppPhone, setWhatsAppPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -50,7 +51,6 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
   function handleForgotPassword(e: FormEvent) {
     e.preventDefault();
     forgotPasswordMutation.mutate({ email: forgotPasswordEmail });
-    setShowForgotPassword(false);
   }
 
   return (
@@ -83,12 +83,21 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
               <FormItem>
                 <FormLabel className="block text-gray-700 font-medium mb-2">Senha</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="password" 
-                    placeholder="••••••••" 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    {...field} 
-                  />
+                  <div className="relative">
+                    <Input 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      {...field} 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -265,7 +274,10 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowForgotPassword(false)}
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail("");
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -276,6 +288,37 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
                   {forgotPasswordMutation.isPending ? "Enviando..." : "Enviar Link"}
                 </Button>
               </div>
+              
+              {forgotPasswordMutation.isSuccess && (
+                <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm text-green-700">
+                    {forgotPasswordMutation.data?.resetLink ? (
+                      <>
+                        <strong>Sistema de email temporariamente indisponível.</strong><br />
+                        <span>Use este link para redefinir sua senha:</span><br />
+                        <a 
+                          href={forgotPasswordMutation.data.resetLink} 
+                          className="text-blue-600 underline break-all"
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          {forgotPasswordMutation.data.resetLink}
+                        </a>
+                      </>
+                    ) : (
+                      forgotPasswordMutation.data?.message
+                    )}
+                  </p>
+                </div>
+              )}
+              
+              {forgotPasswordMutation.isError && (
+                <div className="mt-4 p-3 bg-red-50 rounded-lg">
+                  <p className="text-sm text-red-700">
+                    Erro ao enviar email de recuperação. Tente novamente.
+                  </p>
+                </div>
+              )}
             </form>
           </div>
         </div>

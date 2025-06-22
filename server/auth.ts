@@ -25,7 +25,7 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-export async function hashPassword(password: string) {
+async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
@@ -42,10 +42,9 @@ async function comparePasswords(supplied: string, stored: string) {
 async function sendPasswordResetEmail(email: string, resetToken: string) {
   // Verificar se as credenciais de e-mail estão configuradas
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("Email credentials not configured. Would send reset email to:", email);
-    console.log("With reset token:", resetToken);
-    console.log("Reset link:", `${process.env.APP_URL || 'http://localhost:5000'}/reset-password/${resetToken}`);
-    return;
+    const resetLink = `https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev/reset-password?token=${resetToken}`;
+    console.log("Email credentials not configured. Reset link:", resetLink);
+    throw new Error(`EMAIL_NOT_CONFIGURED:${resetLink}`);
   }
 
   // Configurar o transportador de e-mail
@@ -56,6 +55,15 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
       pass: process.env.EMAIL_PASS
     }
   });
+
+  // Verificar conexão antes de enviar
+  try {
+    await transporter.verify();
+  } catch (error) {
+    const resetLink = `https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev/reset-password?token=${resetToken}`;
+    console.error('Erro na configuração do email:', error);
+    throw new Error(`EMAIL_CONFIG_ERROR:${resetLink}`);
+  }
 
   // Configurar o e-mail
   const mailOptions = {
@@ -68,7 +76,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
         <p>Você solicitou a recuperação de senha para sua conta no Salão de Beleza.</p>
         <p>Clique no botão abaixo para redefinir sua senha:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.APP_URL || 'http://localhost:5000'}/reset-password/${resetToken}" 
+          <a href="https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev/reset-password?token=${resetToken}" 
              style="background-color: #d6436e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
             Redefinir Senha
           </a>
@@ -92,6 +100,29 @@ function generatePasswordResetToken(userId: number): string {
   passwordResetTokens.set(token, { userId, expires });
   return token;
 }
+
+// Função para verificar um token de recuperação de senha
+function verifyPasswordResetToken(token: string): number | null {
+  const tokenData = passwordResetTokens.get(token);
+  
+  if (!tokenData) {
+    return null;
+  }
+  
+  if (new Date() > tokenData.expires) {
+    passwordResetTokens.delete(token);
+    return null;
+  }
+  
+  return tokenData.userId;
+}
+
+// Função para remover um token usado
+function removePasswordResetToken(token: string): void {
+  passwordResetTokens.delete(token);
+}
+
+export { hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail };
 
 export function setupAuth(app: Express) {
   const sessionStore = new MemoryStore({
