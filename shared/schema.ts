@@ -44,6 +44,7 @@ export const services = pgTable("services", {
   maxPrice: real("max_price").notNull(),
   categoryId: integer("category_id").notNull(),
   icon: text("icon").notNull(),
+  imageUrl: text("image_url"),
   featured: boolean("featured").default(false),
 });
 
@@ -54,6 +55,7 @@ export const insertServiceSchema = createInsertSchema(services, {
   maxPrice: z.number().min(0),
   categoryId: z.number().int(),
   icon: z.string().min(1),
+  imageUrl: z.string().url().optional(),
   featured: z.boolean().optional(),
 }).omit({ id: true });
 
