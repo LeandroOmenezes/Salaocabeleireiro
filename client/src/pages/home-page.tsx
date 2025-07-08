@@ -16,7 +16,7 @@ function Hero() {
       <div 
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{
-          backgroundImage: "url('/images/salon-banner.svg')",
+          backgroundImage: "url('/images/salon-banner.jpg')",
           backgroundSize: 'cover'
         }}
       />
