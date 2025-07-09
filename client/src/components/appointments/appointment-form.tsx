@@ -251,7 +251,8 @@ export default function AppointmentForm() {
                   </FormControl>
                   <SelectContent>
                     {categories?.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
+                      <SelectItem key={category.id} value={String(category.id)}>
+                        <i className={`${category.icon} mr-2`}></i>
                         {category.name}
                       </SelectItem>
                     ))}

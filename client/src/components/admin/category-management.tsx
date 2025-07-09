@@ -69,6 +69,9 @@ export default function CategoryManagement() {
         description: "Categoria adicionada com sucesso",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/all'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/featured'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/prices'] });
       setShowAddForm(false);
       form.reset();
     },
@@ -92,6 +95,9 @@ export default function CategoryManagement() {
         description: "Categoria atualizada com sucesso",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/all'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/featured'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/prices'] });
       setEditingId(null);
       editForm.reset();
     },

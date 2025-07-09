@@ -106,17 +106,17 @@ function PriceList() {
     queryKey: ['/api/prices'],
   });
 
-  const getCategoryIcon = (categoryId: string) => {
+  const getCategoryIcon = (categoryId: number) => {
     const category = categories?.find(cat => cat.id === categoryId);
     return category?.icon || "fas fa-scissors";
   };
 
-  const getCategoryName = (categoryId: string) => {
+  const getCategoryName = (categoryId: number) => {
     const category = categories?.find(cat => cat.id === categoryId);
     return category?.name || "";
   };
 
-  const getPriceItemsByCategory = (categoryId: string) => {
+  const getPriceItemsByCategory = (categoryId: number) => {
     return priceItems?.filter(item => item.categoryId === categoryId) || [];
   };
 
@@ -129,26 +129,34 @@ function PriceList() {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {categories?.map((category) => (
-            <div key={category.id} className="bg-gray-100 rounded-lg p-6 shadow-md">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <i className={`${getCategoryIcon(category.id)} mr-3 text-blue-500`}></i> {getCategoryName(category.id)}
-              </h3>
-              <ul className="space-y-4">
-                {getPriceItemsByCategory(category.id).map((item) => (
-                  <li key={item.id} className="flex justify-between items-center border-b pb-2">
-                    <span className="text-gray-700">{item.name}</span>
-                    <span className="font-medium">
-                      {item.maxPrice > item.minPrice 
-                        ? `R$${item.minPrice.toFixed(2)}-${item.maxPrice.toFixed(2)}`
-                        : `R$${item.minPrice.toFixed(2)}`
-                      }
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {categories?.map((category) => {
+            const categoryPriceItems = getPriceItemsByCategory(category.id);
+            
+            return (
+              <div key={category.id} className="bg-gray-100 rounded-lg p-6 shadow-md">
+                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                  <i className={`${category.icon} mr-3 text-blue-500`}></i> {category.name}
+                </h3>
+                <ul className="space-y-4">
+                  {categoryPriceItems.length > 0 ? (
+                    categoryPriceItems.map((item) => (
+                      <li key={item.id} className="flex justify-between items-center border-b pb-2">
+                        <span className="text-gray-700">{item.name}</span>
+                        <span className="font-medium">
+                          {item.maxPrice > item.minPrice 
+                            ? `R$${item.minPrice.toFixed(2)}-${item.maxPrice.toFixed(2)}`
+                            : `R$${item.minPrice.toFixed(2)}`
+                          }
+                        </span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-500 italic">Nenhum preço cadastrado nesta categoria</li>
+                  )}
+                </ul>
+              </div>
+            );
+          })}
         </div>
         
         <div className="mt-10 text-center">
