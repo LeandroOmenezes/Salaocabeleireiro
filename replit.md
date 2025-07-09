@@ -220,3 +220,15 @@ Preferred communication style: Simple, everyday language.
 - **UX**: Botões "Ver na Home" para visualizar alterações instantaneamente
 - **Conversão de cores**: Sistema que converte hex para HSL e aplica variações para hover/estados
 - **Rodapé personalizado**: Informações do desenvolvedor "Leandro Menezes" integradas no rodapé
+
+### Sistema de Email para Recuperação de Senha (2025-07-09)
+- **Sistema multicanal**: Implementação inteligente com 3 níveis de fallback (SendGrid → Gmail → Desenvolvimento)
+- **SendGrid integrado**: Suporte completo para envio profissional de emails em produção
+- **Gmail fallback**: Opção alternativa usando nodemailer para contas Gmail configuradas
+- **Modo desenvolvimento**: Console detalhado com links funcionais para testes locais
+- **Email HTML responsivo**: Templates profissionais com design do Salão de Beleza Premium
+- **Segurança**: Tokens com expiração de 1 hora e validação robusta
+- **UX melhorada**: Mensagens de erro amigáveis e feedback visual claro
+- **Configuração flexível**: Suporte a variáveis de ambiente para diferentes ambientes
+- **Logging inteligente**: Logs diferenciados por método de envio para debug eficiente
+- **Pronto para produção**: Aguardando apenas configuração de SENDGRID_API_KEY para funcionamento completo

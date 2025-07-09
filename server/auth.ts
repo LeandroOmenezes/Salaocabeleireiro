@@ -9,6 +9,7 @@ import { storage } from "./storage";
 import { User as UserType } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import nodemailer from "nodemailer";
+import { MailService } from '@sendgrid/mail';
 
 const MemoryStore = createMemoryStore(session);
 
@@ -43,15 +44,110 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
   const baseUrl = process.env.REPLIT_DEV_DOMAIN || 'https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev';
   const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
   
-  // Para desenvolvimento, vamos simular o envio do email e mostrar o link no console
-  // Em produção, aqui seria configurado um serviço de email real
-  console.log('\n=== EMAIL DE RECUPERAÇÃO DE SENHA ===');
-  console.log(`Para: ${email}`);
-  console.log(`Link de recuperação: ${resetLink}`);
-  console.log('=====================================\n');
+  const emailHTML = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #333; margin-bottom: 10px;">Salão de Beleza Premium</h1>
+        <h2 style="color: #666; font-weight: normal;">Recuperação de Senha</h2>
+      </div>
+      
+      <div style="background-color: #f8f9fa; padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">
+          Olá,
+        </p>
+        <p style="color: #555; font-size: 16px; margin-bottom: 20px;">
+          Você solicitou a recuperação de senha para sua conta no <strong>Salão de Beleza Premium</strong>.
+        </p>
+        <p style="color: #555; font-size: 16px; margin-bottom: 30px;">
+          Clique no botão abaixo para criar uma nova senha:
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+          ">🔒 Redefinir Minha Senha</a>
+        </div>
+        
+        <p style="color: #666; font-size: 14px; margin-top: 30px;">
+          ⚠️ <strong>Importante:</strong> Este link expira em 1 hora por segurança.
+        </p>
+        <p style="color: #666; font-size: 14px;">
+          Se você não solicitou esta recuperação, pode ignorar este email com segurança.
+        </p>
+      </div>
+      
+      <div style="text-align: center; padding: 20px; border-top: 1px solid #eee;">
+        <p style="color: #999; font-size: 12px; margin-bottom: 5px;">
+          <strong>Salão de Beleza Premium</strong>
+        </p>
+        <p style="color: #999; font-size: 12px;">
+          Este é um email automático, não responda a esta mensagem.
+        </p>
+      </div>
+    </div>
+  `;
   
-  // Simular sucesso do email
-  return Promise.resolve();
+  // Tentar SendGrid primeiro (produção)
+  if (process.env.SENDGRID_API_KEY) {
+    try {
+      const mailService = new MailService();
+      mailService.setApiKey(process.env.SENDGRID_API_KEY);
+      
+      await mailService.send({
+        to: email,
+        from: 'noreply@salaodebeleza.com', // Você precisa verificar este domínio no SendGrid
+        subject: '🔒 Recuperação de Senha - Salão de Beleza Premium',
+        html: emailHTML
+      });
+      
+      console.log(`✅ Email enviado via SendGrid para: ${email}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao enviar email via SendGrid:', error);
+      // Continuar para tentar nodemailer
+    }
+  }
+  
+  // Fallback para Gmail/Nodemailer
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"Salão de Beleza Premium" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: '🔒 Recuperação de Senha - Salão de Beleza Premium',
+        html: emailHTML
+      });
+      
+      console.log(`✅ Email enviado via Gmail para: ${email}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao enviar email via Gmail:', error);
+    }
+  }
+  
+  // Modo desenvolvimento - mostrar no console
+  console.log('\n=== EMAIL DE RECUPERAÇÃO DE SENHA (MODO DESENVOLVIMENTO) ===');
+  console.log(`📧 Para: ${email}`);
+  console.log(`🔗 Link de recuperação: ${resetLink}`);
+  console.log('==============================================================\n');
+  
+  return true;
 }
 
 // Função para gerar um token de recuperação de senha
