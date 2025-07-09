@@ -21,7 +21,14 @@ export default function AuthPage() {
     const error = params.get('error');
     
     if (error) {
-      setErrorMessage(decodeURIComponent(error));
+      let errorMsg = decodeURIComponent(error);
+      
+      // Personalizar mensagem para erro específico do Google OAuth
+      if (error.includes('google') || error.includes('redirect_uri')) {
+        errorMsg = "Problema com autenticação Google. Clique aqui para ver como resolver.";
+      }
+      
+      setErrorMessage(errorMsg);
       // Limpar URL para não mostrar erro após refresh
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -50,6 +57,16 @@ export default function AuthPage() {
                 <Alert variant="destructive" className="mb-6">
                   <AlertDescription>
                     {errorMessage}
+                    {errorMessage.includes('Google') && (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => navigate('/oauth-diagnostics')}
+                          className="text-blue-600 hover:text-blue-800 underline text-sm"
+                        >
+                          Ver instruções para corrigir Google OAuth
+                        </button>
+                      </div>
+                    )}
                   </AlertDescription>
                 </Alert>
               )}

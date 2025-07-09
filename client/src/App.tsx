@@ -15,6 +15,7 @@ import FooterManagementPage from "@/pages/footer-management-page";
 import SiteConfigPage from "@/pages/site-config-page";
 import PriceManagementPage from "@/pages/price-management-page";
 import CategoryManagementPage from "@/pages/category-management-page";
+import OAuthDiagnostics from "@/pages/oauth-diagnostics";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute, AdminProtectedRoute } from "@/lib/protected-route";
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -34,6 +35,7 @@ function Router() {
       <AdminProtectedRoute path="/admin/prices" component={PriceManagementPage} />
       <AdminProtectedRoute path="/admin/categories" component={CategoryManagementPage} />
       <AdminProtectedRoute path="/admin/site-config" component={SiteConfigPage} />
+      <Route path="/oauth-diagnostics" component={OAuthDiagnostics} />
       <Route component={NotFound} />
     </Switch>
   );
