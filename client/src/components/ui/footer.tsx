@@ -137,9 +137,17 @@ export default function Footer() {
         
         {/* Footer Bottom */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p className="text-sm">
-            Desenvolvido por <span className="text-blue-400 font-medium">Leandro Menezes</span> | Todos os direitos reservados 2025
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm">
+              Desenvolvido com <span className="text-red-400">♥</span> por{' '}
+              <span className="text-blue-400 font-medium hover:text-blue-300 transition-colors">
+                Leandro Menezes
+              </span>
+            </p>
+            <p className="text-xs text-gray-500">
+              Desenvolvedor Full Stack | React • Node.js • TypeScript | © 2025 Todos os direitos reservados
+            </p>
+          </div>
         </div>
       </div>
     </footer>
