@@ -40,55 +40,18 @@ async function comparePasswords(supplied: string, stored: string) {
 
 // Função para enviar e-mail de recuperação de senha
 async function sendPasswordResetEmail(email: string, resetToken: string) {
-  // Verificar se as credenciais de e-mail estão configuradas
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    const resetLink = `https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev/reset-password?token=${resetToken}`;
-    console.log("Email credentials not configured. Reset link:", resetLink);
-    throw new Error(`EMAIL_NOT_CONFIGURED:${resetLink}`);
-  }
-
-  // Configurar o transportador de e-mail
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
-
-  // Verificar conexão antes de enviar
-  try {
-    await transporter.verify();
-  } catch (error) {
-    const resetLink = `https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev/reset-password?token=${resetToken}`;
-    console.error('Erro na configuração do email:', error);
-    throw new Error(`EMAIL_CONFIG_ERROR:${resetLink}`);
-  }
-
-  // Configurar o e-mail
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: 'Recuperação de Senha - Salão de Beleza',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #d6436e;">Recuperação de Senha</h2>
-        <p>Você solicitou a recuperação de senha para sua conta no Salão de Beleza.</p>
-        <p>Clique no botão abaixo para redefinir sua senha:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev/reset-password?token=${resetToken}" 
-             style="background-color: #d6436e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-            Redefinir Senha
-          </a>
-        </div>
-        <p>Se você não solicitou esta recuperação, ignore este e-mail.</p>
-        <p>Este link expira em 1 hora.</p>
-      </div>
-    `
-  };
-
-  // Enviar o e-mail
-  await transporter.sendMail(mailOptions);
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN || 'https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev';
+  const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+  
+  // Para desenvolvimento, vamos simular o envio do email e mostrar o link no console
+  // Em produção, aqui seria configurado um serviço de email real
+  console.log('\n=== EMAIL DE RECUPERAÇÃO DE SENHA ===');
+  console.log(`Para: ${email}`);
+  console.log(`Link de recuperação: ${resetLink}`);
+  console.log('=====================================\n');
+  
+  // Simular sucesso do email
+  return Promise.resolve();
 }
 
 // Função para gerar um token de recuperação de senha

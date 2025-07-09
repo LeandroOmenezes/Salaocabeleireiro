@@ -103,16 +103,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/forgot-password", { email });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
-        title: "Email enviado",
-        description: "Se existir uma conta com esse email, você receberá um link para redefinir sua senha.",
+        title: "Solicitação processada",
+        description: "Link de recuperação gerado com sucesso. Verifique o console do desenvolvedor para o link temporário.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro ao solicitar recuperação de senha",
-        description: error.message || "Não foi possível enviar o email de recuperação",
+        title: "Erro temporário",
+        description: "Sistema de email temporariamente indisponível. Tente novamente em alguns minutos.",
         variant: "destructive",
       });
     },

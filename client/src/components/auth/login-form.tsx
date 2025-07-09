@@ -290,32 +290,19 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
               </div>
               
               {forgotPasswordMutation.isSuccess && (
-                <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-700">
-                    {forgotPasswordMutation.data?.resetLink ? (
-                      <>
-                        <strong>Sistema de email temporariamente indisponível.</strong><br />
-                        <span>Use este link para redefinir sua senha:</span><br />
-                        <a 
-                          href={forgotPasswordMutation.data.resetLink} 
-                          className="text-blue-600 underline break-all"
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          {forgotPasswordMutation.data.resetLink}
-                        </a>
-                      </>
-                    ) : (
-                      forgotPasswordMutation.data?.message
-                    )}
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    <strong>✓ Solicitação processada com sucesso!</strong><br />
+                    <span className="text-xs">O link de recuperação foi gerado. Em modo de desenvolvimento, verifique o console do servidor para o link temporário.</span>
                   </p>
                 </div>
               )}
               
               {forgotPasswordMutation.isError && (
-                <div className="mt-4 p-3 bg-red-50 rounded-lg">
-                  <p className="text-sm text-red-700">
-                    Erro ao enviar email de recuperação. Tente novamente.
+                <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                  <p className="text-sm text-yellow-700">
+                    <strong>⚠️ Sistema de email temporariamente indisponível</strong><br />
+                    <span className="text-xs">Entre em contato com o administrador ou tente novamente mais tarde.</span>
                   </p>
                 </div>
               )}

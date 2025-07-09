@@ -800,24 +800,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/verify-reset-token", async (req: Request, res: Response) => {
+  app.get("/api/reset-password/:token", async (req: Request, res: Response) => {
     try {
-      const { token } = req.body;
+      const { token } = req.params;
       
       if (!token) {
         return res.status(400).json({ message: "Token é obrigatório" });
       }
       
-      const valid = verifyPasswordResetToken(token);
+      const userId = verifyPasswordResetToken(token);
+      const valid = userId !== null;
       res.status(200).json({ valid });
     } catch (error) {
       res.status(500).json({ message: "Erro ao verificar token" });
     }
   });
 
-  app.post("/api/reset-password", async (req: Request, res: Response) => {
+  app.post("/api/reset-password/:token", async (req: Request, res: Response) => {
     try {
-      const { token, password } = req.body;
+      const { token } = req.params;
+      const { password } = req.body;
       
       if (!token || !password) {
         return res.status(400).json({ message: "Token e senha são obrigatórios" });
