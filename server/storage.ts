@@ -6,6 +6,7 @@ import { type Appointment, type InsertAppointment } from "@shared/schema";
 import { type Review, type InsertReview } from "@shared/schema";
 import { type Sale, type InsertSale } from "@shared/schema";
 import { type Banner, type InsertBanner } from "@shared/schema";
+import { type Footer, type InsertFooter } from "@shared/schema";
 
 export interface IStorage {
   // Users
@@ -62,6 +63,10 @@ export interface IStorage {
   getBanner(): Promise<Banner | undefined>;
   updateBanner(banner: InsertBanner): Promise<Banner>;
   updateBannerImage(backgroundImage: string): Promise<Banner | undefined>;
+  
+  // Footer
+  getFooter(): Promise<Footer | undefined>;
+  updateFooter(footer: InsertFooter): Promise<Footer>;
 }
 
 export class MemStorage implements IStorage {
@@ -74,6 +79,7 @@ export class MemStorage implements IStorage {
   private sales: Map<number, Sale>;
   private userLikes: Map<number, Set<number>>; // userId -> Set of reviewIds they liked
   private bannerConfig: Banner | null = null;
+  private footerConfig: Footer | null = null;
   
   private currentUserId: number;
   private currentCategoryId: number;
@@ -211,6 +217,24 @@ export class MemStorage implements IStorage {
       ctaText: "Agendar Horário",
       ctaLink: "#appointments",
       backgroundImage: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    // Seed default footer
+    this.footerConfig = {
+      id: 1,
+      businessName: "Salão de Beleza Premium",
+      address: "Rua das Flores, 123 - Centro, São Paulo - SP, 01234-567",
+      phone: "(11) 3456-7890",
+      email: "contato@salaopremium.com.br",
+      whatsapp: "11964027914",
+      workingHours: "Segunda a Sexta: 9h às 18h | Sábado: 8h às 17h",
+      facebookUrl: "https://facebook.com/salaopremium",
+      instagramUrl: "https://instagram.com/salaopremium",
+      tiktokUrl: "",
+      youtubeUrl: "",
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -579,6 +603,23 @@ export class MemStorage implements IStorage {
       return this.bannerConfig;
     }
     return undefined;
+  }
+  
+  // === Footer ===
+  async getFooter(): Promise<Footer | undefined> {
+    return this.footerConfig || undefined;
+  }
+  
+  async updateFooter(footer: InsertFooter): Promise<Footer> {
+    const now = new Date();
+    this.footerConfig = {
+      id: 1,
+      ...footer,
+      isActive: true,
+      createdAt: this.footerConfig?.createdAt || now,
+      updatedAt: now
+    };
+    return this.footerConfig;
   }
 }
 

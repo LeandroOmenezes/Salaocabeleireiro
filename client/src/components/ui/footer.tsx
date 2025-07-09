@@ -1,71 +1,135 @@
 import { Link } from "wouter";
+import { MapPin, Phone, Clock, Mail, MessageCircle, Facebook, Instagram, Music, Youtube } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Footer as FooterType } from "@shared/schema";
 
 export default function Footer() {
+  const { data: footerData } = useQuery<FooterType>({
+    queryKey: ['/api/footer'],
+  });
+
+  // Fallback data in case footer config is not available
+  const footer = footerData || {
+    businessName: "Salão de Beleza Premium",
+    address: "Rua das Flores, 123 - Centro, São Paulo - SP",
+    phone: "(11) 3456-7890",
+    email: "contato@salaopremium.com.br",
+    whatsapp: "11964027914",
+    workingHours: "Segunda a Sexta: 9h às 18h | Sábado: 8h às 17h",
+    facebookUrl: "",
+    instagramUrl: "",
+    tiktokUrl: "",
+    youtubeUrl: "",
+  };
+
+  const openWhatsApp = () => {
+    const message = encodeURIComponent("Olá! Gostaria de agendar um horário.");
+    window.open(`https://wa.me/55${footer.whatsapp}?text=${message}`, '_blank');
+  };
+
+  const socialLinks = [
+    { url: footer.facebookUrl, icon: Facebook, label: "Facebook", color: "hover:text-blue-500" },
+    { url: footer.instagramUrl, icon: Instagram, label: "Instagram", color: "hover:text-pink-500" },
+    { url: footer.tiktokUrl, icon: Music, label: "TikTok", color: "hover:text-white" },
+    { url: footer.youtubeUrl, icon: Youtube, label: "YouTube", color: "hover:text-red-500" },
+  ].filter(link => link.url); // Only show links that have URLs
+
   return (
-    <footer className="bg-gray-800 text-white py-12">
+    <footer className="bg-gray-900 text-white py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
+          {/* Business Information */}
+          <div className="md:col-span-1">
             <h3 className="text-xl font-bold mb-4 flex items-center">
-              <i className="fas fa-cut mr-2 text-blue-500"></i> Salão de Beleza
+              <i className="fas fa-cut mr-2 text-blue-500"></i> 
+              {footer.businessName}
             </h3>
-            <p className="text-gray-400 mb-4">Transformando sua beleza e elevando sua autoestima desde 2010.</p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" className="text-gray-400 hover:text-white"><i className="fab fa-instagram"></i></a>
-              <a href="#" className="text-gray-400 hover:text-white"><i className="fab fa-whatsapp"></i></a>
-            </div>
+            <p className="text-gray-400 mb-4">
+              Transformando sua beleza com cuidado, estilo e profissionalismo.
+            </p>
+            
+            {/* Social Media Links */}
+            {socialLinks.length > 0 && (
+              <div className="flex space-x-4">
+                {socialLinks.map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`text-gray-400 ${social.color} transition-colors duration-200`}
+                    aria-label={social.label}
+                  >
+                    <social.icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
           
+          {/* Navigation */}
           <div>
             <h3 className="text-lg font-bold mb-4">Navegação</h3>
             <ul className="space-y-2">
-              <li><a href="#services" className="text-gray-400 hover:text-white">Serviços</a></li>
-              <li><a href="#prices" className="text-gray-400 hover:text-white">Preços</a></li>
-              <li><a href="#appointments" className="text-gray-400 hover:text-white">Agendamentos</a></li>
-              <li><a href="#reviews" className="text-gray-400 hover:text-white">Avaliações</a></li>
+              <li><a href="#services" className="text-gray-400 hover:text-white transition-colors">Serviços</a></li>
+              <li><a href="#prices" className="text-gray-400 hover:text-white transition-colors">Preços</a></li>
+              <li><a href="#appointments" className="text-gray-400 hover:text-white transition-colors">Agendamentos</a></li>
+              <li><a href="#reviews" className="text-gray-400 hover:text-white transition-colors">Avaliações</a></li>
             </ul>
           </div>
           
+          {/* Contact Information */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Contato</h3>
-            <ul className="space-y-2 text-gray-400">
+            <h3 className="text-lg font-bold mb-4 flex items-center">
+              <Phone className="w-5 h-5 mr-2" />
+              Contato
+            </h3>
+            <ul className="space-y-3 text-gray-400">
               <li className="flex items-start">
-                <i className="fas fa-map-marker-alt mt-1 mr-2"></i>
-                <span>Rua das Flores, 123<br/>Centro, Cidade - Estado</span>
+                <MapPin className="w-4 h-4 mt-1 mr-2 flex-shrink-0 text-blue-500" />
+                <span className="text-sm">{footer.address}</span>
               </li>
               <li className="flex items-center">
-                <i className="fas fa-phone-alt mr-2"></i>
-                <span>(99) 9999-9999</span>
+                <Phone className="w-4 h-4 mr-2 text-blue-500" />
+                <a href={`tel:${footer.phone}`} className="text-sm hover:text-white transition-colors">
+                  {footer.phone}
+                </a>
               </li>
               <li className="flex items-center">
-                <i className="fas fa-envelope mr-2"></i>
-                <span>contato@salaodebeleza.com</span>
+                <Mail className="w-4 h-4 mr-2 text-blue-500" />
+                <a href={`mailto:${footer.email}`} className="text-sm hover:text-white transition-colors">
+                  {footer.email}
+                </a>
+              </li>
+              <li className="flex items-center">
+                <MessageCircle className="w-4 h-4 mr-2 text-green-500" />
+                <button
+                  onClick={openWhatsApp}
+                  className="text-sm hover:text-white transition-colors"
+                >
+                  WhatsApp
+                </button>
               </li>
             </ul>
           </div>
           
+          {/* Working Hours */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Horário de Funcionamento</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li className="flex justify-between">
-                <span>Segunda a Sexta:</span>
-                <span>09:00 - 19:00</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Sábado:</span>
-                <span>09:00 - 18:00</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Domingo:</span>
-                <span>Fechado</span>
-              </li>
-            </ul>
+            <h3 className="text-lg font-bold mb-4 flex items-center">
+              <Clock className="w-5 h-5 mr-2" />
+              Horário de Funcionamento
+            </h3>
+            <div className="text-gray-400">
+              <p className="text-sm leading-relaxed">{footer.workingHours}</p>
+            </div>
           </div>
         </div>
         
+        {/* Footer Bottom */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>© {new Date().getFullYear()} Salão de Beleza. Todos os direitos reservados.</p>
+          <p className="text-sm">
+            © {new Date().getFullYear()} {footer.businessName}. Todos os direitos reservados.
+          </p>
         </div>
       </div>
     </footer>

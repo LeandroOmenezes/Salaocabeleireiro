@@ -159,6 +159,37 @@ export const insertBannerSchema = createInsertSchema(banner, {
   ctaLink: z.string().min(1, "Link do botão é obrigatório"),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
+// === Footer Configuration ===
+export const footer = pgTable("footer", {
+  id: serial("id").primaryKey(),
+  businessName: text("business_name").notNull(),
+  address: text("address").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  whatsapp: text("whatsapp").notNull(),
+  workingHours: text("working_hours").notNull(),
+  facebookUrl: text("facebook_url"),
+  instagramUrl: text("instagram_url"),
+  tiktokUrl: text("tiktok_url"),
+  youtubeUrl: text("youtube_url"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertFooterSchema = createInsertSchema(footer, {
+  businessName: z.string().min(1, "Nome do negócio é obrigatório"),
+  address: z.string().min(1, "Endereço é obrigatório"),
+  phone: z.string().min(1, "Telefone é obrigatório"),
+  email: z.string().email("Email inválido"),
+  whatsapp: z.string().min(1, "WhatsApp é obrigatório"),
+  workingHours: z.string().min(1, "Horário de funcionamento é obrigatório"),
+  facebookUrl: z.string().url("URL do Facebook inválida").optional().or(z.literal("")),
+  instagramUrl: z.string().url("URL do Instagram inválida").optional().or(z.literal("")),
+  tiktokUrl: z.string().url("URL do TikTok inválida").optional().or(z.literal("")),
+  youtubeUrl: z.string().url("URL do YouTube inválida").optional().or(z.literal("")),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -183,6 +214,9 @@ export type InsertSale = z.infer<typeof insertSaleSchema>;
 
 export type Banner = typeof banner.$inferSelect;
 export type InsertBanner = z.infer<typeof insertBannerSchema>;
+
+export type Footer = typeof footer.$inferSelect;
+export type InsertFooter = z.infer<typeof insertFooterSchema>;
 
 // Additional types for frontend select options
 export interface ServiceOption {

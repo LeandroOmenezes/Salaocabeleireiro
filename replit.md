@@ -160,3 +160,14 @@ Preferred communication style: Simple, everyday language.
 - **UX**: Botões "Ver na Home" para visualizar alterações instantaneamente
 - **Integração**: Página inicial usa dados dinâmicos do banner configurado
 - **Fallback**: Gradiente padrão quando não há imagem de fundo
+
+### Sistema de Gerenciamento de Rodapé (2025-07-09)
+- **Nova funcionalidade**: Administradores podem personalizar completamente o rodapé
+- **Schema**: Tabela `footer` com campos para dados do negócio, contato e redes sociais
+- **Backend**: Rotas `/api/footer` (GET/PUT) para gerenciar configurações
+- **Interface admin**: Página `/admin/footer` com formulário completo e preview em tempo real
+- **Componente**: `FooterManagement` com validação e preview do rodapé
+- **Validação**: URLs das redes sociais opcionais com validação de formato
+- **UX**: Botões "Ver na Home" para visualizar mudanças instantaneamente
+- **Integração**: Componente Footer atualizado para usar dados dinâmicos da configuração
+- **Fallback**: Dados padrão quando configuração não disponível

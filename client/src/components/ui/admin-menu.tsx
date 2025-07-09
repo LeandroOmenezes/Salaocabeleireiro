@@ -8,7 +8,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Layout
+  Layout,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +41,12 @@ export default function AdminMenu() {
       icon: Layout,
       label: "Banner Principal",
       description: "Personalizar página inicial"
+    },
+    {
+      href: "/admin/footer",
+      icon: FileText,
+      label: "Rodapé",
+      description: "Configurar informações de contato"
     }
   ];
 

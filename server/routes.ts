@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -727,6 +727,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       res.status(500).json({ message: "Erro ao fazer upload da imagem do banner" });
+    }
+  });
+
+  // === Footer Management ===
+  app.get("/api/footer", async (req: Request, res: Response) => {
+    try {
+      const footer = await storage.getFooter();
+      res.json(footer);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar configuração do rodapé" });
+    }
+  });
+
+  app.put("/api/footer", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar o rodapé." });
+      }
+
+      const footerData = insertFooterSchema.parse(req.body);
+      const footer = await storage.updateFooter(footerData);
+      
+      res.json({
+        message: "Rodapé atualizado com sucesso",
+        footer
+      });
+    } catch (error) {
+      console.error("Error updating footer:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados do rodapé inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar rodapé" });
+      }
     }
   });
 
