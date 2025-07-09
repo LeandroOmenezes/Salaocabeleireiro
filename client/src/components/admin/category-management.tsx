@@ -72,6 +72,8 @@ export default function CategoryManagement() {
       queryClient.invalidateQueries({ queryKey: ['/api/services/all'] });
       queryClient.invalidateQueries({ queryKey: ['/api/services/featured'] });
       queryClient.invalidateQueries({ queryKey: ['/api/prices'] });
+      // Força refetch imediato em todas as queries de categorias
+      queryClient.refetchQueries({ queryKey: ['/api/categories'] });
       setShowAddForm(false);
       form.reset();
     },
@@ -98,6 +100,8 @@ export default function CategoryManagement() {
       queryClient.invalidateQueries({ queryKey: ['/api/services/all'] });
       queryClient.invalidateQueries({ queryKey: ['/api/services/featured'] });
       queryClient.invalidateQueries({ queryKey: ['/api/prices'] });
+      // Força refetch imediato em todas as queries de categorias
+      queryClient.refetchQueries({ queryKey: ['/api/categories'] });
       setEditingId(null);
       editForm.reset();
     },

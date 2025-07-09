@@ -26,6 +26,7 @@ export default function ServiceManagement() {
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+    refetchOnWindowFocus: true,
   });
 
   const form = useForm<InsertService>({
