@@ -128,4 +128,18 @@ Preferred communication style: Simple, everyday language.
 - `/server`: Express backend with routes and authentication
 - `/shared`: Shared TypeScript schemas and types
 - `/migrations`: Database migration files
+- `/uploads`: Directory for uploaded service images (created automatically)
 - Configuration files in root for build tools and TypeScript
+
+## Recent Changes
+
+### Sistema de Upload de Imagens para Serviços (2025-07-09)
+- **Nova funcionalidade**: Administradores podem fazer upload de imagens personalizadas para cada serviço
+- **Backend**: Configuração do multer para upload seguro de imagens (JPEG, PNG, WebP até 5MB)
+- **Rota nova**: `/api/services/:id/upload-image` (POST) para upload de imagens
+- **Método storage**: `updateServiceImage()` para atualizar URL da imagem do serviço
+- **Interface admin**: Nova página `/admin/services` para gerenciar imagens dos serviços
+- **Componente**: `ServiceImageUpload` para interface de upload com preview
+- **Navegação**: Links "Gerenciar Imagens" adicionados no header para admins
+- **Armazenamento**: Imagens salvas em `/uploads` e servidas estaticamente
+- **Validação**: Tipos de arquivo e tamanho máximo validados no backend e frontend

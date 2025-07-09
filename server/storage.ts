@@ -33,6 +33,7 @@ export interface IStorage {
   getServiceById(id: number): Promise<Service | undefined>;
   getServicesByCategory(categoryId: number): Promise<Service[]>;
   createService(service: InsertService): Promise<Service>;
+  updateServiceImage(id: number, imageUrl: string): Promise<Service | undefined>;
   
   // Price Items
   getPriceItems(): Promise<PriceItem[]>;
@@ -389,6 +390,16 @@ export class MemStorage implements IStorage {
     const service: Service = { ...insertService, id };
     this.services.set(id, service);
     return service;
+  }
+
+  async updateServiceImage(id: number, imageUrl: string): Promise<Service | undefined> {
+    const service = this.services.get(id);
+    if (service) {
+      const updatedService = { ...service, imageUrl };
+      this.services.set(id, updatedService);
+      return updatedService;
+    }
+    return undefined;
   }
   
   // === Price Items ===

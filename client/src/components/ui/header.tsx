@@ -65,12 +65,20 @@ export default function Header() {
                 Meu Perfil
               </Link>
               {user.isAdmin && (
-                <Link 
-                  href="/dashboard" 
-                  className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link 
+                    href="/dashboard" 
+                    className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    href="/admin/services" 
+                    className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/admin/services" ? "text-blue-500 font-medium" : ""}`}
+                  >
+                    Gerenciar Imagens
+                  </Link>
+                </>
               )}
               <button 
                 onClick={() => logoutMutation.mutate()}
@@ -129,13 +137,22 @@ export default function Header() {
                 Meu Perfil
               </Link>
               {user.isAdmin && (
-                <Link 
-                  href="/dashboard" 
-                  className="block text-gray-700 py-2 hover:text-blue-500" 
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link 
+                    href="/dashboard" 
+                    className="block text-gray-700 py-2 hover:text-blue-500" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    href="/admin/services" 
+                    className="block text-gray-700 py-2 hover:text-blue-500" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Gerenciar Imagens
+                  </Link>
+                </>
               )}
               <button 
                 onClick={() => {

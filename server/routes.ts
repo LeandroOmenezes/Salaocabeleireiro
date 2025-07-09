@@ -4,10 +4,51 @@ import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
 import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema } from "@shared/schema";
 import { ZodError } from "zod";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import express from "express";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
+  
+  // Configure multer for file uploads
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  
+  const storage_config = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadsDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, 'service-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  });
+  
+  const upload = multer({
+    storage: storage_config,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = /jpeg|jpg|png|webp/;
+      const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+      const mimetype = allowedTypes.test(file.mimetype);
+      
+      if (mimetype && extname) {
+        return cb(null, true);
+      } else {
+        cb(new Error('Apenas imagens JPEG, PNG e WebP são permitidas'));
+      }
+    }
+  });
+  
+  // Serve uploaded images
+  app.use('/uploads', express.static(uploadsDir));
   
   // === Clients ===
   app.get("/api/clients", async (req: Request, res: Response) => {
@@ -160,6 +201,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(services);
     } catch (error) {
       res.status(500).json({ message: "Error fetching services by category" });
+    }
+  });
+
+  // Upload image for service
+  app.post("/api/services/:id/upload-image", upload.single('image'), async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem fazer upload de imagens." });
+      }
+
+      const serviceId = parseInt(req.params.id);
+      if (isNaN(serviceId)) {
+        return res.status(400).json({ message: "ID de serviço inválido" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhuma imagem foi enviada" });
+      }
+
+      // Create the image URL
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      // Update service with new image URL
+      const updatedService = await storage.updateServiceImage(serviceId, imageUrl);
+      
+      if (!updatedService) {
+        // If service doesn't exist, remove the uploaded file
+        fs.unlinkSync(req.file.path);
+        return res.status(404).json({ message: "Serviço não encontrado" });
+      }
+
+      res.json({
+        message: "Imagem enviada com sucesso",
+        service: updatedService,
+        imageUrl
+      });
+    } catch (error) {
+      console.error("Error uploading service image:", error);
+      // Remove the uploaded file if an error occurred
+      if (req.file) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error removing uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).json({ message: "Erro ao fazer upload da imagem" });
     }
   });
   

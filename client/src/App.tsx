@@ -9,6 +9,7 @@ import DashboardPage from "@/pages/dashboard-page";
 import ClientSalesPage from "@/pages/client-sales-page";
 import ResetPasswordPage from "@/pages/reset-password-page";
 import ProfilePage from "@/pages/profile-page";
+import ServiceManagementPage from "@/pages/service-management-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute, AdminProtectedRoute } from "@/lib/protected-route";
 
@@ -21,6 +22,7 @@ function Router() {
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <AdminProtectedRoute path="/dashboard" component={DashboardPage} />
       <AdminProtectedRoute path="/clients-sales" component={ClientSalesPage} />
+      <AdminProtectedRoute path="/admin/services" component={ServiceManagementPage} />
       <Route component={NotFound} />
     </Switch>
   );
