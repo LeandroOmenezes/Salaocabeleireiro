@@ -96,6 +96,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
   `;
   
   // Tentar SendGrid primeiro (produção)
+  console.log(`🔍 Verificando SendGrid API Key: ${process.env.SENDGRID_API_KEY ? 'ENCONTRADA' : 'NÃO ENCONTRADA'}`);
   if (process.env.SENDGRID_API_KEY) {
     try {
       const mailService = new MailService();
@@ -103,7 +104,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
       
       await mailService.send({
         to: email,
-        from: 'noreply@salaodebeleza.com', // Você precisa verificar este domínio no SendGrid
+        from: 'lleandro.m32@gmail.com', // Email verificado no SendGrid
         subject: '🔒 Recuperação de Senha - Salão de Beleza Premium',
         html: emailHTML
       });
