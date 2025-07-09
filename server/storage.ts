@@ -40,7 +40,10 @@ export interface IStorage {
   // Price Items
   getPriceItems(): Promise<PriceItem[]>;
   getPriceItemsByCategory(categoryId: number): Promise<PriceItem[]>;
+  getPriceItemById(id: number): Promise<PriceItem | undefined>;
   createPriceItem(priceItem: InsertPriceItem): Promise<PriceItem>;
+  updatePriceItem(id: number, priceItem: Partial<InsertPriceItem>): Promise<PriceItem | undefined>;
+  deletePriceItem(id: number): Promise<boolean>;
   
   // Appointments
   getAppointments(): Promise<Appointment[]>;
@@ -457,11 +460,29 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getPriceItemById(id: number): Promise<PriceItem | undefined> {
+    return this.priceItems.get(id);
+  }
+
   async createPriceItem(insertPriceItem: InsertPriceItem): Promise<PriceItem> {
     const id = this.currentPriceItemId++;
     const priceItem: PriceItem = { ...insertPriceItem, id };
     this.priceItems.set(id, priceItem);
     return priceItem;
+  }
+
+  async updatePriceItem(id: number, updates: Partial<InsertPriceItem>): Promise<PriceItem | undefined> {
+    const existingPriceItem = this.priceItems.get(id);
+    if (existingPriceItem) {
+      const updatedPriceItem = { ...existingPriceItem, ...updates };
+      this.priceItems.set(id, updatedPriceItem);
+      return updatedPriceItem;
+    }
+    return undefined;
+  }
+
+  async deletePriceItem(id: number): Promise<boolean> {
+    return this.priceItems.delete(id);
   }
   
   // === Appointments ===

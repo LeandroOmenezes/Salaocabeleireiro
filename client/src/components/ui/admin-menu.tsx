@@ -9,7 +9,8 @@ import {
   X,
   ChevronRight,
   Layout,
-  FileText
+  FileText,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +48,12 @@ export default function AdminMenu() {
       icon: FileText,
       label: "Rodapé",
       description: "Configurar informações de contato"
+    },
+    {
+      href: "/admin/prices",
+      icon: DollarSign,
+      label: "Tabela de Preços",
+      description: "Gerenciar preços dos serviços"
     }
   ];
 

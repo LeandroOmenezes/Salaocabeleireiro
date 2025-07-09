@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -273,6 +273,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(priceItems);
     } catch (error) {
       res.status(500).json({ message: "Error fetching price items by category" });
+    }
+  });
+
+  // === Price Management (Admin Only) ===
+  app.post("/api/admin/prices", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem criar preços." });
+      }
+
+      const priceData = insertPriceItemSchema.parse(req.body);
+      const priceItem = await storage.createPriceItem(priceData);
+      
+      res.status(201).json({
+        message: "Item de preço criado com sucesso",
+        priceItem
+      });
+    } catch (error) {
+      console.error("Error creating price item:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados do preço inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao criar item de preço" });
+      }
+    }
+  });
+
+  app.put("/api/admin/prices/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar preços." });
+      }
+
+      const id = parseInt(req.params.id);
+      const priceData = insertPriceItemSchema.partial().parse(req.body);
+      const updatedPriceItem = await storage.updatePriceItem(id, priceData);
+      
+      if (!updatedPriceItem) {
+        return res.status(404).json({ message: "Item de preço não encontrado" });
+      }
+
+      res.json({
+        message: "Item de preço atualizado com sucesso",
+        priceItem: updatedPriceItem
+      });
+    } catch (error) {
+      console.error("Error updating price item:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados do preço inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar item de preço" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/prices/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem remover preços." });
+      }
+
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePriceItem(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Item de preço não encontrado" });
+      }
+
+      res.json({ message: "Item de preço removido com sucesso" });
+    } catch (error) {
+      console.error("Error deleting price item:", error);
+      res.status(500).json({ message: "Erro ao remover item de preço" });
     }
   });
   

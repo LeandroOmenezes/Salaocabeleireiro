@@ -171,3 +171,14 @@ Preferred communication style: Simple, everyday language.
 - **UX**: Botões "Ver na Home" para visualizar mudanças instantaneamente
 - **Integração**: Componente Footer atualizado para usar dados dinâmicos da configuração
 - **Fallback**: Dados padrão quando configuração não disponível
+
+### Sistema de Gerenciamento de Preços (2025-07-09)
+- **Nova funcionalidade**: Administradores podem gerenciar completamente a tabela de preços
+- **Backend**: Rotas CRUD `/api/admin/prices` (POST/PUT/DELETE) para gerenciar preços
+- **Interface admin**: Página `/admin/prices` com funcionalidades completas de CRUD
+- **Funcionalidades**: Criar, editar, remover e visualizar itens de preço por categoria
+- **Edição inline**: Sistema de edição direta na tabela para agilizar alterações
+- **Validação**: Formulários com validação de campos obrigatórios e tipos de dados
+- **UX**: Organização por categorias e botão "Ver na Home" para preview
+- **Integração**: Tabela de preços na home atualizada automaticamente com mudanças
+- **Storage**: Métodos CRUD implementados no sistema de armazenamento em memória
