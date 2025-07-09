@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Falha no login",
-        description: error.message || "Usuário ou senha inválidos",
+        description: error.message || "Email ou senha inválidos",
         variant: "destructive",
       });
     },
