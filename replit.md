@@ -182,3 +182,14 @@ Preferred communication style: Simple, everyday language.
 - **UX**: Organização por categorias e botão "Ver na Home" para preview
 - **Integração**: Tabela de preços na home atualizada automaticamente com mudanças
 - **Storage**: Métodos CRUD implementados no sistema de armazenamento em memória
+
+### Sistema de Gerenciamento Completo de Serviços (2025-07-09)
+- **Funcionalidade expandida**: Administradores podem criar novos serviços e remover serviços descontinuados
+- **Backend**: Rota POST `/api/admin/services` para criar serviços e DELETE `/api/admin/services/:id` para remover
+- **Interface renovada**: Componente `ServiceManagement` substitui `ServiceImageUpload` com funcionalidades completas
+- **Formulário de criação**: Interface para adicionar novos serviços com nome, descrição, preços, categoria e ícone
+- **Remoção segura**: Confirmação antes de remover serviços para evitar exclusões acidentais
+- **Upload de imagens**: Mantida funcionalidade de upload de imagens personalizadas para cada serviço
+- **Validação**: Formulários com validação completa usando Zod e React Hook Form
+- **UX**: Layout em cards com informações organizadas e botões de ação claramente visíveis
+- **Integração**: Atualizações automáticas na página inicial quando serviços são adicionados ou removidos

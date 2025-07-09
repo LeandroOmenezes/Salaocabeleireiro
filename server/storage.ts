@@ -36,6 +36,7 @@ export interface IStorage {
   getServicesByCategory(categoryId: number): Promise<Service[]>;
   createService(service: InsertService): Promise<Service>;
   updateServiceImage(id: number, imageUrl: string): Promise<Service | undefined>;
+  deleteService(id: number): Promise<boolean>;
   
   // Price Items
   getPriceItems(): Promise<PriceItem[]>;
@@ -447,6 +448,10 @@ export class MemStorage implements IStorage {
       return updatedService;
     }
     return undefined;
+  }
+
+  async deleteService(id: number): Promise<boolean> {
+    return this.services.delete(id);
   }
   
   // === Price Items ===

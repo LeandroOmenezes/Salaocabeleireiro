@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -249,6 +249,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       res.status(500).json({ message: "Erro ao fazer upload da imagem" });
+    }
+  });
+
+  // === Service Management (Admin Only) ===
+  app.post("/api/admin/services", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem criar serviços." });
+      }
+
+      const serviceData = insertServiceSchema.parse(req.body);
+      const service = await storage.createService(serviceData);
+      
+      res.status(201).json({
+        message: "Serviço criado com sucesso",
+        service
+      });
+    } catch (error) {
+      console.error("Error creating service:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados do serviço inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao criar serviço" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/services/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem remover serviços." });
+      }
+
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteService(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Serviço não encontrado" });
+      }
+
+      res.json({ message: "Serviço removido com sucesso" });
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      res.status(500).json({ message: "Erro ao remover serviço" });
     }
   });
   

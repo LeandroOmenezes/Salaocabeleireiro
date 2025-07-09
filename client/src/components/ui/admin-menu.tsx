@@ -34,8 +34,8 @@ export default function AdminMenu() {
     {
       href: "/admin/services",
       icon: Upload,
-      label: "Gerenciar Imagens",
-      description: "Upload de fotos dos serviços"
+      label: "Gerenciar Serviços",
+      description: "Criar, editar e remover serviços"
     },
     {
       href: "/admin/banner",
