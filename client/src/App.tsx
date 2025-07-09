@@ -13,6 +13,7 @@ import ServiceManagementPage from "@/pages/service-management-page";
 import BannerManagementPage from "@/pages/banner-management-page";
 import FooterManagementPage from "@/pages/footer-management-page";
 import PriceManagementPage from "@/pages/price-management-page";
+import CategoryManagementPage from "@/pages/category-management-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute, AdminProtectedRoute } from "@/lib/protected-route";
 
@@ -29,6 +30,7 @@ function Router() {
       <AdminProtectedRoute path="/admin/banner" component={BannerManagementPage} />
       <AdminProtectedRoute path="/admin/footer" component={FooterManagementPage} />
       <AdminProtectedRoute path="/admin/prices" component={PriceManagementPage} />
+      <AdminProtectedRoute path="/admin/categories" component={CategoryManagementPage} />
       <Route component={NotFound} />
     </Switch>
   );

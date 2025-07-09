@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Layout,
   FileText,
-  DollarSign
+  DollarSign,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -54,6 +55,12 @@ export default function AdminMenu() {
       icon: DollarSign,
       label: "Tabela de Preços",
       description: "Gerenciar preços dos serviços"
+    },
+    {
+      href: "/admin/categories",
+      icon: Layers,
+      label: "Categorias",
+      description: "Gerenciar categorias de serviços"
     }
   ];
 

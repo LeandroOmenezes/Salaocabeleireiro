@@ -28,6 +28,8 @@ export interface IStorage {
   getCategories(): Promise<Category[]>;
   getCategoryById(id: number): Promise<Category | undefined>;
   createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
+  deleteCategory(id: number): Promise<boolean>;
   
   // Services
   getServices(): Promise<Service[]>;
@@ -412,6 +414,29 @@ export class MemStorage implements IStorage {
     const category: Category = { ...insertCategory, id };
     this.categories.set(id, category);
     return category;
+  }
+
+  async updateCategory(id: number, updates: Partial<InsertCategory>): Promise<Category | undefined> {
+    const category = this.categories.get(id);
+    if (category) {
+      const updatedCategory = { ...category, ...updates };
+      this.categories.set(id, updatedCategory);
+      return updatedCategory;
+    }
+    return undefined;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    // Remove all services in this category first
+    const servicesToDelete = Array.from(this.services.values()).filter(service => service.categoryId === id);
+    servicesToDelete.forEach(service => this.services.delete(service.id));
+    
+    // Remove all price items in this category
+    const priceItemsToDelete = Array.from(this.priceItems.values()).filter(item => item.categoryId === id);
+    priceItemsToDelete.forEach(item => this.priceItems.delete(item.id));
+    
+    // Remove the category
+    return this.categories.delete(id);
   }
   
   // === Services ===

@@ -193,3 +193,15 @@ Preferred communication style: Simple, everyday language.
 - **Validação**: Formulários com validação completa usando Zod e React Hook Form
 - **UX**: Layout em cards com informações organizadas e botões de ação claramente visíveis
 - **Integração**: Atualizações automáticas na página inicial quando serviços são adicionados ou removidos
+
+### Sistema de Gerenciamento Completo de Categorias (2025-07-09)
+- **Nova funcionalidade**: Administradores podem criar, editar e remover categorias inteiras de serviços
+- **Backend**: Rotas CRUD completas `/api/admin/categories` (POST/PUT/DELETE) para gerenciar categorias
+- **Remoção em cascata**: Ao remover uma categoria, todos os serviços e preços relacionados são removidos automaticamente
+- **Interface completa**: Componente `CategoryManagement` com formulários de criação e edição inline
+- **Contadores inteligentes**: Exibe quantidade de serviços e preços relacionados a cada categoria
+- **Confirmação avançada**: Sistema de confirmação que informa exatamente quantos itens serão removidos
+- **Validação robusta**: Formulários validados com Zod para criação e edição de categorias
+- **UX intuitiva**: Cards organizados com badges indicando conteúdo relacionado e avisos de remoção
+- **Integração completa**: Atualizações automáticas em todas as páginas quando categorias são modificadas
+- **Menu administrativo**: Nova opção "Categorias" no painel admin para acesso direto

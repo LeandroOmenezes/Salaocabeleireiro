@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema, insertCategorySchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -293,6 +293,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting service:", error);
       res.status(500).json({ message: "Erro ao remover serviço" });
+    }
+  });
+
+  // === Category Management (Admin Only) ===
+  app.post("/api/admin/categories", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem criar categorias." });
+      }
+
+      const categoryData = insertCategorySchema.parse(req.body);
+      const category = await storage.createCategory(categoryData);
+      
+      res.status(201).json({
+        message: "Categoria criada com sucesso",
+        category
+      });
+    } catch (error) {
+      console.error("Error creating category:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados da categoria inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao criar categoria" });
+      }
+    }
+  });
+
+  app.put("/api/admin/categories/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar categorias." });
+      }
+
+      const id = parseInt(req.params.id);
+      const categoryData = insertCategorySchema.partial().parse(req.body);
+      const category = await storage.updateCategory(id, categoryData);
+      
+      if (!category) {
+        return res.status(404).json({ message: "Categoria não encontrada" });
+      }
+
+      res.json({
+        message: "Categoria atualizada com sucesso",
+        category
+      });
+    } catch (error) {
+      console.error("Error updating category:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados da categoria inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar categoria" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/categories/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem remover categorias." });
+      }
+
+      const id = parseInt(req.params.id);
+      
+      // Check if there are services or price items in this category
+      const services = await storage.getServicesByCategory(id);
+      const priceItems = await storage.getPriceItemsByCategory(id);
+      
+      const deleted = await storage.deleteCategory(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Categoria não encontrada" });
+      }
+
+      const deletedCount = services.length + priceItems.length;
+      res.json({ 
+        message: `Categoria removida com sucesso. ${deletedCount} itens relacionados também foram removidos.`,
+        deletedServices: services.length,
+        deletedPriceItems: priceItems.length
+      });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ message: "Erro ao remover categoria" });
     }
   });
   
