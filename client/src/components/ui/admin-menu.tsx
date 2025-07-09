@@ -89,15 +89,15 @@ export default function AdminMenu() {
 
       {/* Menu Panel */}
       <div className={`
-        fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50
+        fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
       `}>
         {/* Header */}
-        <div className="bg-blue-600 text-white p-6">
+        <div className="flex-shrink-0 bg-blue-600 text-white p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold">Painel Admin</h2>
-              <p className="text-blue-100 text-sm">Ferramentas de administração</p>
+              <h2 className="text-lg font-bold">Painel Admin</h2>
+              <p className="text-blue-100 text-xs">Ferramentas de administração</p>
             </div>
             <Button
               variant="ghost"
@@ -105,13 +105,13 @@ export default function AdminMenu() {
               onClick={() => setIsOpen(false)}
               className="text-white hover:bg-blue-700"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        {/* Menu Items */}
-        <div className="p-4 space-y-2">
+        {/* Menu Items - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
@@ -122,7 +122,7 @@ export default function AdminMenu() {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={`
-                  block p-4 rounded-lg border transition-all duration-200
+                  block p-3 rounded-lg border transition-all duration-200
                   ${isActive 
                     ? 'bg-blue-50 border-blue-200 text-blue-700' 
                     : 'hover:bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300'
@@ -133,15 +133,15 @@ export default function AdminMenu() {
                   <div className={`p-2 rounded-md ${
                     isActive ? 'bg-blue-100' : 'bg-gray-100'
                   }`}>
-                    <Icon className={`w-5 h-5 ${
+                    <Icon className={`w-4 h-4 ${
                       isActive ? 'text-blue-600' : 'text-gray-600'
                     }`} />
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">{item.label}</div>
-                    <div className="text-sm text-gray-500">{item.description}</div>
+                    <div className="font-medium text-sm">{item.label}</div>
+                    <div className="text-xs text-gray-500">{item.description}</div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                  <ChevronRight className="w-3 h-3 text-gray-400" />
                 </div>
               </Link>
             );
@@ -149,9 +149,9 @@ export default function AdminMenu() {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-gray-50">
-          <div className="text-center text-sm text-gray-500">
-            <Settings className="w-4 h-4 inline mr-1" />
+        <div className="flex-shrink-0 p-4 border-t bg-gray-50">
+          <div className="text-center text-xs text-gray-500">
+            <Settings className="w-3 h-3 inline mr-1" />
             Painel de Administração
           </div>
         </div>
