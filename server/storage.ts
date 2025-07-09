@@ -7,6 +7,7 @@ import { type Review, type InsertReview } from "@shared/schema";
 import { type Sale, type InsertSale } from "@shared/schema";
 import { type Banner, type InsertBanner } from "@shared/schema";
 import { type Footer, type InsertFooter } from "@shared/schema";
+import { type SiteConfig, type InsertSiteConfig } from "@shared/schema";
 
 export interface IStorage {
   // Users
@@ -73,6 +74,11 @@ export interface IStorage {
   // Footer
   getFooter(): Promise<Footer | undefined>;
   updateFooter(footer: InsertFooter): Promise<Footer>;
+  
+  // Site Configuration
+  getSiteConfig(): Promise<SiteConfig | undefined>;
+  updateSiteConfig(config: InsertSiteConfig): Promise<SiteConfig>;
+  updateSiteLogo(logoUrl: string): Promise<SiteConfig | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -86,6 +92,7 @@ export class MemStorage implements IStorage {
   private userLikes: Map<number, Set<number>>; // userId -> Set of reviewIds they liked
   private bannerConfig: Banner | null = null;
   private footerConfig: Footer | null = null;
+  private siteConfig: SiteConfig | null = null;
   
   private currentUserId: number;
   private currentCategoryId: number;
@@ -244,6 +251,17 @@ export class MemStorage implements IStorage {
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
+    };
+
+    // Seed default site configuration
+    this.siteConfig = {
+      id: 1,
+      siteName: "Salão de Beleza Premium",
+      siteSlogan: "Transformando sua beleza com carinho e qualidade",
+      logoUrl: "",
+      primaryColor: "#3b82f6",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     
     // Seed reviews
@@ -671,6 +689,34 @@ export class MemStorage implements IStorage {
       updatedAt: now
     };
     return this.footerConfig;
+  }
+
+  // === Site Configuration ===
+  async getSiteConfig(): Promise<SiteConfig | undefined> {
+    return this.siteConfig || undefined;
+  }
+
+  async updateSiteConfig(config: InsertSiteConfig): Promise<SiteConfig> {
+    const now = new Date();
+    this.siteConfig = {
+      id: 1,
+      ...config,
+      createdAt: this.siteConfig?.createdAt || now,
+      updatedAt: now
+    };
+    return this.siteConfig;
+  }
+
+  async updateSiteLogo(logoUrl: string): Promise<SiteConfig | undefined> {
+    if (this.siteConfig) {
+      this.siteConfig = {
+        ...this.siteConfig,
+        logoUrl,
+        updatedAt: new Date()
+      };
+      return this.siteConfig;
+    }
+    return undefined;
   }
 }
 

@@ -190,6 +190,24 @@ export const insertFooterSchema = createInsertSchema(footer, {
   youtubeUrl: z.string().url("URL do YouTube inválida").optional().or(z.literal("")),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
+// === Site Configuration ===
+export const siteConfig = pgTable("site_config", {
+  id: serial("id").primaryKey(),
+  siteName: text("site_name").notNull(),
+  siteSlogan: text("site_slogan"),
+  logoUrl: text("logo_url"),
+  primaryColor: text("primary_color").default("#3b82f6"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertSiteConfigSchema = createInsertSchema(siteConfig, {
+  siteName: z.string().min(1, "Nome do site é obrigatório"),
+  siteSlogan: z.string().optional(),
+  logoUrl: z.string().url("URL inválida").optional().or(z.literal("")),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor deve estar no formato #RRGGBB").optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -217,6 +235,9 @@ export type InsertBanner = z.infer<typeof insertBannerSchema>;
 
 export type Footer = typeof footer.$inferSelect;
 export type InsertFooter = z.infer<typeof insertFooterSchema>;
+
+export type SiteConfig = typeof siteConfig.$inferSelect;
+export type InsertSiteConfig = z.infer<typeof insertSiteConfigSchema>;
 
 // Additional types for frontend select options
 export interface ServiceOption {

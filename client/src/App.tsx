@@ -12,6 +12,7 @@ import ProfilePage from "@/pages/profile-page";
 import ServiceManagementPage from "@/pages/service-management-page";
 import BannerManagementPage from "@/pages/banner-management-page";
 import FooterManagementPage from "@/pages/footer-management-page";
+import SiteConfigPage from "@/pages/site-config-page";
 import PriceManagementPage from "@/pages/price-management-page";
 import CategoryManagementPage from "@/pages/category-management-page";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -31,6 +32,7 @@ function Router() {
       <AdminProtectedRoute path="/admin/footer" component={FooterManagementPage} />
       <AdminProtectedRoute path="/admin/prices" component={PriceManagementPage} />
       <AdminProtectedRoute path="/admin/categories" component={CategoryManagementPage} />
+      <AdminProtectedRoute path="/admin/site-config" component={SiteConfigPage} />
       <Route component={NotFound} />
     </Switch>
   );

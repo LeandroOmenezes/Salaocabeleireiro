@@ -11,7 +11,8 @@ import {
   Layout,
   FileText,
   DollarSign,
-  Layers
+  Layers,
+  Palette
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -61,6 +62,12 @@ export default function AdminMenu() {
       icon: Layers,
       label: "Categorias",
       description: "Gerenciar categorias de serviços"
+    },
+    {
+      href: "/admin/site-config",
+      icon: Palette,
+      label: "Configuração do Site",
+      description: "Personalizar nome, logo e cores"
     }
   ];
 

@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema, insertCategorySchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema, insertCategorySchema, insertSiteConfigSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -959,6 +959,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Erro ao atualizar rodapé" });
       }
+    }
+  });
+
+  // === Site Configuration ===
+  app.get("/api/site-config", async (req: Request, res: Response) => {
+    try {
+      const config = await storage.getSiteConfig();
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar configuração do site" });
+    }
+  });
+
+  app.put("/api/site-config", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar as configurações do site." });
+      }
+
+      const configData = insertSiteConfigSchema.parse(req.body);
+      const config = await storage.updateSiteConfig(configData);
+      
+      res.json({
+        message: "Configuração do site atualizada com sucesso",
+        config
+      });
+    } catch (error) {
+      console.error("Error updating site config:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados da configuração inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar configuração do site" });
+      }
+    }
+  });
+
+  app.post("/api/site-config/upload-logo", upload.single('logo'), async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem fazer upload da logo." });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhuma imagem foi enviada" });
+      }
+
+      // Create the logo URL
+      const logoUrl = `/uploads/${req.file.filename}`;
+      
+      // Update site config with new logo
+      const updatedConfig = await storage.updateSiteLogo(logoUrl);
+      
+      if (!updatedConfig) {
+        // If site config doesn't exist, remove the uploaded file
+        fs.unlinkSync(req.file.path);
+        return res.status(404).json({ message: "Configuração do site não encontrada" });
+      }
+
+      res.json({
+        message: "Logo do site atualizada com sucesso",
+        config: updatedConfig,
+        logoUrl
+      });
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      // Remove the uploaded file if an error occurred
+      if (req.file) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error removing uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).json({ message: "Erro ao fazer upload da logo" });
     }
   });
 
