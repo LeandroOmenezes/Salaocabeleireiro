@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { Footer, insertFooterSchema, type InsertFooter } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,34 +22,36 @@ export default function FooterManagement() {
   const form = useForm<InsertFooter>({
     resolver: zodResolver(insertFooterSchema),
     defaultValues: {
-      businessName: footer?.businessName || "",
-      address: footer?.address || "",
-      phone: footer?.phone || "",
-      email: footer?.email || "",
-      whatsapp: footer?.whatsapp || "",
-      workingHours: footer?.workingHours || "",
-      facebookUrl: footer?.facebookUrl || "",
-      instagramUrl: footer?.instagramUrl || "",
-      tiktokUrl: footer?.tiktokUrl || "",
-      youtubeUrl: footer?.youtubeUrl || "",
+      businessName: "",
+      address: "",
+      phone: "",
+      email: "",
+      whatsapp: "",
+      workingHours: "",
+      facebookUrl: "",
+      instagramUrl: "",
+      tiktokUrl: "",
+      youtubeUrl: "",
     },
   });
 
   // Update form when footer data is loaded
-  if (footer && !form.formState.isDirty) {
-    form.reset({
-      businessName: footer.businessName,
-      address: footer.address,
-      phone: footer.phone,
-      email: footer.email,
-      whatsapp: footer.whatsapp,
-      workingHours: footer.workingHours,
-      facebookUrl: footer.facebookUrl || "",
-      instagramUrl: footer.instagramUrl || "",
-      tiktokUrl: footer.tiktokUrl || "",
-      youtubeUrl: footer.youtubeUrl || "",
-    });
-  }
+  useEffect(() => {
+    if (footer) {
+      form.reset({
+        businessName: footer.businessName,
+        address: footer.address,
+        phone: footer.phone,
+        email: footer.email,
+        whatsapp: footer.whatsapp,
+        workingHours: footer.workingHours,
+        facebookUrl: footer.facebookUrl || "",
+        instagramUrl: footer.instagramUrl || "",
+        tiktokUrl: footer.tiktokUrl || "",
+        youtubeUrl: footer.youtubeUrl || "",
+      });
+    }
+  }, [footer, form]);
 
   const updateFooterMutation = useMutation({
     mutationFn: async (data: InsertFooter) => {
