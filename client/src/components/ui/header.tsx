@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import AdminMenu from "./admin-menu";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,14 +37,6 @@ export default function Header() {
           <a href="#prices" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Preços</a>
           <a href="#appointments" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Agendamentos</a>
           <a href="#reviews" className="text-gray-700 hover:text-blue-500 transition-colors duration-200">Avaliações</a>
-          {user && user.isAdmin && (
-            <Link 
-              href="/clients-sales" 
-              className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/clients-sales" ? "text-blue-500 font-medium" : ""}`}
-            >
-              Gestão de Clientes/Vendas
-            </Link>
-          )}
           
           {user ? (
             <div className="flex items-center space-x-4">
@@ -64,22 +57,7 @@ export default function Header() {
               >
                 Meu Perfil
               </Link>
-              {user.isAdmin && (
-                <>
-                  <Link 
-                    href="/dashboard" 
-                    className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    href="/admin/services" 
-                    className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/admin/services" ? "text-blue-500 font-medium" : ""}`}
-                  >
-                    Gerenciar Imagens
-                  </Link>
-                </>
-              )}
+              {user.isAdmin && <AdminMenu />}
               <button 
                 onClick={() => logoutMutation.mutate()}
                 className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
@@ -106,15 +84,6 @@ export default function Header() {
           <a href="#prices" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Preços</a>
           <a href="#appointments" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Agendamentos</a>
           <a href="#reviews" className="block text-gray-700 py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>Avaliações</a>
-          {user && user.isAdmin && (
-            <Link 
-              href="/clients-sales" 
-              className="block text-gray-700 py-2 hover:text-blue-500"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Gestão de Clientes/Vendas
-            </Link>
-          )}
           
           {user ? (
             <>
@@ -137,22 +106,9 @@ export default function Header() {
                 Meu Perfil
               </Link>
               {user.isAdmin && (
-                <>
-                  <Link 
-                    href="/dashboard" 
-                    className="block text-gray-700 py-2 hover:text-blue-500" 
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    href="/admin/services" 
-                    className="block text-gray-700 py-2 hover:text-blue-500" 
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Gerenciar Imagens
-                  </Link>
-                </>
+                <div className="py-2">
+                  <AdminMenu />
+                </div>
               )}
               <button 
                 onClick={() => {

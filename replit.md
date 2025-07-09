@@ -140,6 +140,13 @@ Preferred communication style: Simple, everyday language.
 - **Método storage**: `updateServiceImage()` para atualizar URL da imagem do serviço
 - **Interface admin**: Nova página `/admin/services` para gerenciar imagens dos serviços
 - **Componente**: `ServiceImageUpload` para interface de upload com preview
-- **Navegação**: Links "Gerenciar Imagens" adicionados no header para admins
+- **Navegação**: Menu hambúrguer administrativo implementado para organizar opções
 - **Armazenamento**: Imagens salvas em `/uploads` e servidas estaticamente
 - **Validação**: Tipos de arquivo e tamanho máximo validados no backend e frontend
+
+### Menu Hambúrguer Administrativo (2025-07-09)
+- **Interface melhorada**: Menu lateral deslizante para administradores
+- **Organização**: Consolidação de todas as funções admin em um painel
+- **Componente**: `AdminMenu` com design responsivo e animações suaves
+- **UX**: Redução da poluição visual no header principal
+- **Funcionalidades**: Dashboard, Clientes/Vendas, e Gerenciamento de Imagens organizados
