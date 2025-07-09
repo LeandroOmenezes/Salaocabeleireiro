@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -26,8 +26,7 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
-  const { register } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { registerMutation } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
@@ -42,20 +41,13 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
     },
   });
 
-  async function onSubmit(data: RegisterFormValues) {
-    setIsLoading(true);
-    try {
-      await register({
-        username: data.username,
-        password: data.password,
-        name: data.name,
-        phone: data.phone,
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  function onSubmit(data: RegisterFormValues) {
+    registerMutation.mutate({
+      username: data.username,
+      password: data.password,
+      name: data.name,
+      phone: data.phone,
+    });
   }
 
   return (
@@ -176,9 +168,9 @@ export default function RegisterForm({ onToggleForm }: RegisterFormProps) {
         <Button
           type="submit"
           className="w-full bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium"
-          disabled={isLoading}
+          disabled={registerMutation.isPending}
         >
-          {isLoading ? "Cadastrando..." : "Cadastrar"}
+          {registerMutation.isPending ? "Cadastrando..." : "Cadastrar"}
         </Button>
         
         <div className="text-center mt-4">

@@ -248,30 +248,53 @@ export function setupAuth(app: Express) {
     try {
       const { username, password, name, phone } = req.body;
       
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
+      // Validar campos obrigatórios
+      if (!username || !password || !name || !phone) {
+        return res.status(400).json({ message: "Todos os campos são obrigatórios" });
+      }
+      
+      // Validar formato de email
+      if (!username.includes('@') || !username.includes('.')) {
+        return res.status(400).json({ message: "Email inválido" });
+      }
+      
+      // Validar tamanho da senha
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Senha deve ter no mínimo 6 caracteres" });
+      }
+      
+      // Validar nome
+      if (name.length < 3) {
+        return res.status(400).json({ message: "Nome deve ter pelo menos 3 caracteres" });
+      }
+      
+      // Validar telefone
+      if (phone.length < 10) {
+        return res.status(400).json({ message: "Telefone inválido" });
       }
       
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
+        return res.status(400).json({ message: "Já existe uma conta com este email" });
       }
 
       const user = await storage.createUser({
         username,
         password: await hashPassword(password),
-        name: name || username.split('@')[0],
-        phone
+        name,
+        phone,
+        isAdmin: false // Novos usuários não são admin por padrão
       });
 
       req.login(user, (err) => {
         if (err) return next(err);
         // Don't send the password hash to the client
-        const { password, ...userWithoutPassword } = user;
+        const { password: _, ...userWithoutPassword } = user;
         res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
-      next(error);
+      console.error("Erro no registro:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
 
