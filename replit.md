@@ -150,3 +150,13 @@ Preferred communication style: Simple, everyday language.
 - **Componente**: `AdminMenu` com design responsivo e animações suaves
 - **UX**: Redução da poluição visual no header principal
 - **Funcionalidades**: Dashboard, Clientes/Vendas, e Gerenciamento de Imagens organizados
+
+### Sistema de Gerenciamento de Banner (2025-07-09)
+- **Nova funcionalidade**: Administradores podem personalizar o banner principal da home
+- **Schema**: Tabela `banner` com campos para título, subtítulo, texto/link do botão e imagem de fundo
+- **Backend**: Rotas `/api/banner` (GET/PUT) e `/api/banner/upload-image` (POST)
+- **Interface admin**: Página `/admin/banner` com formulário e upload de imagem
+- **Componente**: `BannerManagement` com preview em tempo real
+- **UX**: Botões "Ver na Home" para visualizar alterações instantaneamente
+- **Integração**: Página inicial usa dados dinâmicos do banner configurado
+- **Fallback**: Gradiente padrão quando não há imagem de fundo

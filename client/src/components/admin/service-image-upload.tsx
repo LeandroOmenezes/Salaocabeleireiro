@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Service } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Upload, X } from "lucide-react";
+import { Camera, Upload, X, Eye, ExternalLink } from "lucide-react";
 
 interface ServiceImageUploadProps {
   service: Service;

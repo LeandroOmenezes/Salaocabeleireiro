@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Upload, X, Save, Image as ImageIcon } from "lucide-react";
+import { Camera, Upload, X, Save, Image as ImageIcon, ExternalLink, Eye } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export default function BannerManagement() {
@@ -174,10 +174,24 @@ export default function BannerManagement() {
     <div className="space-y-8">
       {/* Header */}
       <div className="border-b pb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Configuração do Banner</h2>
-        <p className="text-gray-600">
-          Personalize o banner principal da página inicial com textos e imagem de fundo.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Configuração do Banner</h2>
+            <p className="text-gray-600">
+              Personalize o banner principal da página inicial com textos e imagem de fundo.
+            </p>
+          </div>
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+          >
+            <Eye className="w-4 h-4" />
+            <span>Ver na Home</span>
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
       </div>
 
       {/* Current Banner Preview */}
@@ -283,14 +297,26 @@ export default function BannerManagement() {
               />
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={updateBannerMutation.isPending}
-              className="w-full md:w-auto"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {updateBannerMutation.isPending ? "Salvando..." : "Salvar Alterações"}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                type="submit" 
+                disabled={updateBannerMutation.isPending}
+                className="flex-1 sm:flex-none"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {updateBannerMutation.isPending ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+              
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors border"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Visualizar</span>
+              </a>
+            </div>
           </form>
         </Form>
       </div>
