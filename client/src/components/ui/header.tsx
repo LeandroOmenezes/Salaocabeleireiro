@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useSiteConfig } from "@/hooks/use-site-config";
 import AdminMenu from "./admin-menu";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logoutMutation } = useAuth();
+  const { data: siteConfig } = useSiteConfig();
   const [location] = useLocation();
 
   const toggleMobileMenu = () => {
@@ -16,8 +18,18 @@ export default function Header() {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2">
-          <i className="fas fa-cut text-blue-500 text-xl"></i>
-          <span className="text-2xl font-bold text-gray-800">Salão de Beleza</span>
+          {siteConfig?.logoUrl ? (
+            <img 
+              src={siteConfig.logoUrl} 
+              alt={siteConfig.siteName} 
+              className="h-8 w-8 object-contain"
+            />
+          ) : (
+            <i className="fas fa-cut text-blue-500 text-xl"></i>
+          )}
+          <span className="text-2xl font-bold text-gray-800">
+            {siteConfig?.siteName || "Salão de Beleza"}
+          </span>
         </Link>
         
         {/* Mobile menu button */}

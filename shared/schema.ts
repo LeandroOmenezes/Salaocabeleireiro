@@ -204,7 +204,7 @@ export const siteConfig = pgTable("site_config", {
 export const insertSiteConfigSchema = createInsertSchema(siteConfig, {
   siteName: z.string().min(1, "Nome do site é obrigatório"),
   siteSlogan: z.string().optional(),
-  logoUrl: z.string().url("URL inválida").optional().or(z.literal("")),
+  logoUrl: z.string().optional(),
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor deve estar no formato #RRGGBB").optional(),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 

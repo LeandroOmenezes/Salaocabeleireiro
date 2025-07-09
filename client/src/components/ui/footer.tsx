@@ -2,11 +2,13 @@ import { Link } from "wouter";
 import { MapPin, Phone, Clock, Mail, MessageCircle, Facebook, Instagram, Music, Youtube } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Footer as FooterType } from "@shared/schema";
+import { useSiteConfig } from "@/hooks/use-site-config";
 
 export default function Footer() {
   const { data: footerData } = useQuery<FooterType>({
     queryKey: ['/api/footer'],
   });
+  const { data: siteConfig } = useSiteConfig();
 
   // Fallback data in case footer config is not available
   const footer = footerData || {
@@ -41,8 +43,16 @@ export default function Footer() {
           {/* Business Information */}
           <div className="md:col-span-1">
             <h3 className="text-xl font-bold mb-4 flex items-center">
-              <i className="fas fa-cut mr-2 text-blue-500"></i> 
-              {footer.businessName}
+              {siteConfig?.logoUrl ? (
+                <img 
+                  src={siteConfig.logoUrl} 
+                  alt={siteConfig.siteName} 
+                  className="h-6 w-6 mr-2 object-contain"
+                />
+              ) : (
+                <i className="fas fa-cut mr-2 text-blue-500"></i>
+              )}
+              {siteConfig?.siteName || footer.businessName}
             </h3>
             <p className="text-gray-400 mb-4">
               Transformando sua beleza com cuidado, estilo e profissionalismo.
