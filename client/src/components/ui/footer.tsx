@@ -138,9 +138,6 @@ export default function Footer() {
         {/* Footer Bottom */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
           <p className="text-sm">
-            © {new Date().getFullYear()} {siteConfig?.siteName || footer.businessName}. Todos os direitos reservados.
-          </p>
-          <p className="mt-2 text-sm">
             Desenvolvido por <span className="text-blue-400 font-medium">Leandro Menezes</span> | Todos os direitos reservados 2025
           </p>
         </div>
