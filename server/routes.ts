@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema } from "@shared/schema";
+import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
@@ -650,6 +650,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Erro ao redefinir senha:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // === Banner Management ===
+  app.get("/api/banner", async (req: Request, res: Response) => {
+    try {
+      const banner = await storage.getBanner();
+      res.json(banner);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar configuração do banner" });
+    }
+  });
+
+  app.put("/api/banner", async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar o banner." });
+      }
+
+      const bannerData = insertBannerSchema.parse(req.body);
+      const banner = await storage.updateBanner(bannerData);
+      
+      res.json({
+        message: "Banner atualizado com sucesso",
+        banner
+      });
+    } catch (error) {
+      console.error("Error updating banner:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados do banner inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar banner" });
+      }
+    }
+  });
+
+  // Upload background image for banner
+  app.post("/api/banner/upload-image", upload.single('image'), async (req: Request, res: Response) => {
+    try {
+      // Only allow authenticated admin users
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem fazer upload de imagens." });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhuma imagem foi enviada" });
+      }
+
+      // Create the image URL
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      // Update banner with new background image
+      const updatedBanner = await storage.updateBannerImage(imageUrl);
+      
+      if (!updatedBanner) {
+        // If banner doesn't exist, remove the uploaded file
+        fs.unlinkSync(req.file.path);
+        return res.status(404).json({ message: "Configuração de banner não encontrada" });
+      }
+
+      res.json({
+        message: "Imagem de fundo do banner atualizada com sucesso",
+        banner: updatedBanner,
+        imageUrl
+      });
+    } catch (error) {
+      console.error("Error uploading banner image:", error);
+      // Remove the uploaded file if an error occurred
+      if (req.file) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error removing uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).json({ message: "Erro ao fazer upload da imagem do banner" });
     }
   });
 

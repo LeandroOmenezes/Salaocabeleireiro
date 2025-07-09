@@ -5,6 +5,7 @@ import { type PriceItem, type InsertPriceItem } from "@shared/schema";
 import { type Appointment, type InsertAppointment } from "@shared/schema";
 import { type Review, type InsertReview } from "@shared/schema";
 import { type Sale, type InsertSale } from "@shared/schema";
+import { type Banner, type InsertBanner } from "@shared/schema";
 
 export interface IStorage {
   // Users
@@ -56,6 +57,11 @@ export interface IStorage {
   getSales(): Promise<Sale[]>;
   getSalesByDate(startDate: Date, endDate: Date): Promise<Sale[]>;
   createSale(sale: InsertSale): Promise<Sale>;
+  
+  // Banner
+  getBanner(): Promise<Banner | undefined>;
+  updateBanner(banner: InsertBanner): Promise<Banner>;
+  updateBannerImage(backgroundImage: string): Promise<Banner | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -67,6 +73,7 @@ export class MemStorage implements IStorage {
   private reviews: Map<number, Review>;
   private sales: Map<number, Sale>;
   private userLikes: Map<number, Set<number>>; // userId -> Set of reviewIds they liked
+  private bannerConfig: Banner | null = null;
   
   private currentUserId: number;
   private currentCategoryId: number;
@@ -195,6 +202,19 @@ export class MemStorage implements IStorage {
     ];
     
     priceItems.forEach(priceItem => this.createPriceItem(priceItem));
+    
+    // Seed default banner
+    this.bannerConfig = {
+      id: 1,
+      title: "Bem-vindo ao Nosso Salão de Beleza",
+      subtitle: "Transformamos sua beleza com cuidado, estilo e profissionalismo. Venha descobrir o que há de melhor em tratamentos personalizados.",
+      ctaText: "Agendar Horário",
+      ctaLink: "#appointments",
+      backgroundImage: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     
     // Seed reviews
     const reviews: InsertReview[] = [
@@ -530,6 +550,35 @@ export class MemStorage implements IStorage {
     
     this.sales.set(id, sale);
     return sale;
+  }
+  
+  // === Banner ===
+  async getBanner(): Promise<Banner | undefined> {
+    return this.bannerConfig || undefined;
+  }
+  
+  async updateBanner(banner: InsertBanner): Promise<Banner> {
+    const now = new Date();
+    this.bannerConfig = {
+      id: 1,
+      ...banner,
+      isActive: true,
+      createdAt: this.bannerConfig?.createdAt || now,
+      updatedAt: now
+    };
+    return this.bannerConfig;
+  }
+  
+  async updateBannerImage(backgroundImage: string): Promise<Banner | undefined> {
+    if (this.bannerConfig) {
+      this.bannerConfig = {
+        ...this.bannerConfig,
+        backgroundImage,
+        updatedAt: new Date()
+      };
+      return this.bannerConfig;
+    }
+    return undefined;
   }
 }
 

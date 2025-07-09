@@ -7,7 +7,8 @@ import {
   Upload, 
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Layout
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +34,12 @@ export default function AdminMenu() {
       icon: Upload,
       label: "Gerenciar Imagens",
       description: "Upload de fotos dos serviços"
+    },
+    {
+      href: "/admin/banner",
+      icon: Layout,
+      label: "Banner Principal",
+      description: "Personalizar página inicial"
     }
   ];
 

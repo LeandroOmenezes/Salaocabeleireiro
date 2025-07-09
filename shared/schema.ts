@@ -139,6 +139,26 @@ export const insertSaleSchema = createInsertSchema(sales, {
   paymentMethod: z.string().min(1),
 }).omit({ id: true, createdAt: true, serviceName: true });
 
+// === Banner ===
+export const banner = pgTable("banner", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  subtitle: text("subtitle").notNull(),
+  ctaText: text("cta_text").notNull(),
+  ctaLink: text("cta_link").notNull(),
+  backgroundImage: text("background_image"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBannerSchema = createInsertSchema(banner, {
+  title: z.string().min(1, "Título é obrigatório"),
+  subtitle: z.string().min(1, "Subtítulo é obrigatório"),
+  ctaText: z.string().min(1, "Texto do botão é obrigatório"),
+  ctaLink: z.string().min(1, "Link do botão é obrigatório"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -160,6 +180,9 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 
 export type Sale = typeof sales.$inferSelect;
 export type InsertSale = z.infer<typeof insertSaleSchema>;
+
+export type Banner = typeof banner.$inferSelect;
+export type InsertBanner = z.infer<typeof insertBannerSchema>;
 
 // Additional types for frontend select options
 export interface ServiceOption {
