@@ -205,3 +205,18 @@ Preferred communication style: Simple, everyday language.
 - **UX intuitiva**: Cards organizados com badges indicando conteúdo relacionado e avisos de remoção
 - **Integração completa**: Atualizações automáticas em todas as páginas quando categorias são modificadas
 - **Menu administrativo**: Nova opção "Categorias" no painel admin para acesso direto
+
+### Sistema de Configuração do Site (2025-07-09)
+- **Nova funcionalidade**: Administradores podem personalizar completamente a identidade visual do site
+- **Schema**: Tabela `site_config` com campos para nome do site, logo, slogan e cor primária
+- **Backend**: Rotas `/api/site-config` (GET/PUT) e `/api/site-config/upload-logo` (POST) para gerenciamento
+- **Upload de logo**: Sistema completo de upload de logo personalizada com validação de tipos e tamanho
+- **Interface admin**: Página `/admin/site-config` com formulários organizados e preview em tempo real
+- **Componente**: `SiteConfigManagement` com upload de arquivos e seletor de cores integrado
+- **Hook personalizado**: `useSiteConfig` para buscar configurações em toda a aplicação
+- **Cores dinâmicas**: Sistema `useThemeColor` que aplica cores personalizadas automaticamente
+- **Integração completa**: Nome e logo personalizados aparecem no header, footer e toda a aplicação
+- **Validação**: Formulários com validação Zod para todos os campos de configuração
+- **UX**: Botões "Ver na Home" para visualizar alterações instantaneamente
+- **Conversão de cores**: Sistema que converte hex para HSL e aplica variações para hover/estados
+- **Rodapé personalizado**: Informações do desenvolvedor "Leandro Menezes" integradas no rodapé
