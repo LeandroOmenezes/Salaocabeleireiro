@@ -240,8 +240,11 @@ export function setupAuth(app: Express) {
     const baseUrl = getBaseUrl();
     const callbackUrl = `${baseUrl}/api/auth/google/callback`;
     
-    console.log("Base URL:", baseUrl);
-    console.log("Google callback URL:", callbackUrl);
+    console.log("🌐 Base URL:", baseUrl);
+    console.log("🔗 Google callback URL:", callbackUrl);
+    console.log("⚠️  IMPORTANTE: Adicione esta URL no Google Cloud Console:");
+    console.log(`   Authorized redirect URIs: ${callbackUrl}`);
+    console.log(`   JavaScript origins: ${baseUrl}`);
     
     // Verificar se as credenciais do Google são válidas
     if (!process.env.GOOGLE_CLIENT_ID.includes('.googleusercontent.com')) {
