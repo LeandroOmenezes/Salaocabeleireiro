@@ -59,11 +59,19 @@ export default function Header() {
                 </div>
               </div>
               <Link 
-                href="/dashboard" 
-                className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
+                href="/profile" 
+                className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/profile" ? "text-blue-500 font-medium" : ""}`}
               >
-                Dashboard
+                Meu Perfil
               </Link>
+              {user.isAdmin && (
+                <Link 
+                  href="/dashboard" 
+                  className={`text-gray-700 hover:text-blue-500 transition-colors duration-200 ${location === "/dashboard" ? "text-blue-500 font-medium" : ""}`}
+                >
+                  Dashboard
+                </Link>
+              )}
               <button 
                 onClick={() => logoutMutation.mutate()}
                 className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
@@ -114,12 +122,21 @@ export default function Header() {
                 </div>
               </div>
               <Link 
-                href="/dashboard" 
+                href="/profile" 
                 className="block text-gray-700 py-2 hover:text-blue-500" 
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Dashboard
+                Meu Perfil
               </Link>
+              {user.isAdmin && (
+                <Link 
+                  href="/dashboard" 
+                  className="block text-gray-700 py-2 hover:text-blue-500" 
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
               <button 
                 onClick={() => {
                   logoutMutation.mutate();
