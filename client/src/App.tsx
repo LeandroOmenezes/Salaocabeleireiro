@@ -17,6 +17,7 @@ import PriceManagementPage from "@/pages/price-management-page";
 import CategoryManagementPage from "@/pages/category-management-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute, AdminProtectedRoute } from "@/lib/protected-route";
+import { useThemeColor } from "@/hooks/use-theme-color";
 
 function Router() {
   return (
@@ -38,12 +39,22 @@ function Router() {
   );
 }
 
+function AppContent() {
+  useThemeColor(); // Aplicar cores personalizadas
+  
+  return (
+    <>
+      <Router />
+      <Toaster />
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
-        <Toaster />
+        <AppContent />
       </AuthProvider>
     </QueryClientProvider>
   );
