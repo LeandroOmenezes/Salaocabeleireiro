@@ -154,16 +154,16 @@ export class MemStorage implements IStorage {
 
       // Check if admin user already exists
       const existingAdmin = await this.getUserByUsername(
-        "lleandro.m32@gmail.com",
+        "administrador@teste.com",
       );
 
       if (!existingAdmin) {
         // Create admin user
         await this.createUser({
-          username: "lleandro.m32@gmail.com",
-          password: await hashPassword("Isa2018#"),
+          username: "administrador@teste.com",
+          password: await hashPassword("admin@admin"),
           name: "Administrador",
-          phone: "11964027914",
+          phone: "11900000000",
           isAdmin: true,
         });
         console.log("Admin user created successfully");
@@ -303,7 +303,7 @@ export class MemStorage implements IStorage {
       address: "Rua das Flores, 123 - Centro, São Paulo - SP, 01234-567",
       phone: "(11) 3456-7890",
       email: "contato@salaopremium.com.br",
-      whatsapp: "11964027914",
+      whatsapp: "11900000000",
       workingHours: "Segunda a Sexta: 9h às 18h | Sábado: 8h às 17h",
       facebookUrl: "https://facebook.com/salaopremium",
       instagramUrl: "https://instagram.com/salaopremium",
