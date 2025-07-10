@@ -1,13 +1,25 @@
-import { users, type User, type InsertUser } from "@shared/schema";
-import { type Category, type InsertCategory } from "@shared/schema";
-import { type Service, type InsertService } from "@shared/schema";
-import { type PriceItem, type InsertPriceItem } from "@shared/schema";
-import { type Appointment, type InsertAppointment } from "@shared/schema";
-import { type Review, type InsertReview } from "@shared/schema";
-import { type Sale, type InsertSale } from "@shared/schema";
-import { type Banner, type InsertBanner } from "@shared/schema";
-import { type Footer, type InsertFooter } from "@shared/schema";
-import { type SiteConfig, type InsertSiteConfig } from "@shared/schema";
+import { 
+  users, categories, services, priceItems, appointments, reviews, sales,
+  banner, footer, siteConfig,
+  type User, type InsertUser,
+  type Category, type InsertCategory,
+  type Service, type InsertService,
+  type PriceItem, type InsertPriceItem,
+  type Appointment, type InsertAppointment,
+  type Review, type InsertReview,
+  type Sale, type InsertSale,
+  type Banner, type InsertBanner,
+  type Footer, type InsertFooter,
+  type SiteConfig, type InsertSiteConfig
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, gte, lte } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import createMemoryStore from "memorystore";
+import { pool } from "./db";
+
+const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   // Users
@@ -101,9 +113,13 @@ export interface IStorage {
   getSiteConfig(): Promise<SiteConfig | undefined>;
   updateSiteConfig(config: InsertSiteConfig): Promise<SiteConfig>;
   updateSiteLogo(logoUrl: string): Promise<SiteConfig | undefined>;
+
+  // Session store
+  sessionStore: session.Store;
 }
 
 export class MemStorage implements IStorage {
+  sessionStore: session.Store;
   private users: Map<number, User>;
   private categories: Map<number, Category>;
   private services: Map<number, Service>;
@@ -125,6 +141,9 @@ export class MemStorage implements IStorage {
   private currentSaleId: number;
 
   constructor() {
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000,
+    });
     this.users = new Map();
     this.categories = new Map();
     this.services = new Map();
@@ -819,4 +838,326 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+const PostgresSessionStore = connectPg(session);
+
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
+  }
+
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUserPassword(id: number, password: string): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set({ password })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Clients
+  async getClients(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.isAdmin, false));
+  }
+
+  async getClientById(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users)
+      .where(and(eq(users.id, id), eq(users.isAdmin, false)));
+    return user || undefined;
+  }
+
+  async createClient(client: { name: string; phone: string; email: string }): Promise<User> {
+    const [user] = await db.insert(users).values({
+      username: client.email,
+      password: '',
+      name: client.name,
+      phone: client.phone,
+      email: client.email,
+      isAdmin: false
+    }).returning();
+    return user;
+  }
+
+  async updateClient(id: number, client: { name?: string; phone?: string; email?: string }): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set(client)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async deleteClient(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Categories
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories);
+  }
+
+  async getCategoryById(id: number): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.id, id));
+    return category || undefined;
+  }
+
+  async createCategory(insertCategory: InsertCategory): Promise<Category> {
+    const [category] = await db.insert(categories).values(insertCategory).returning();
+    return category;
+  }
+
+  async updateCategory(id: number, updates: Partial<InsertCategory>): Promise<Category | undefined> {
+    const [category] = await db.update(categories)
+      .set(updates)
+      .where(eq(categories.id, id))
+      .returning();
+    return category || undefined;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    // Delete related services and price items first
+    await db.delete(services).where(eq(services.categoryId, id));
+    await db.delete(priceItems).where(eq(priceItems.categoryId, id));
+    
+    const result = await db.delete(categories).where(eq(categories.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Services
+  async getServices(): Promise<Service[]> {
+    return await db.select().from(services);
+  }
+
+  async getFeaturedServices(): Promise<Service[]> {
+    return await db.select().from(services).where(eq(services.featured, true));
+  }
+
+  async getServiceById(id: number): Promise<Service | undefined> {
+    const [service] = await db.select().from(services).where(eq(services.id, id));
+    return service || undefined;
+  }
+
+  async getServicesByCategory(categoryId: number): Promise<Service[]> {
+    return await db.select().from(services).where(eq(services.categoryId, categoryId));
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const [service] = await db.insert(services).values(insertService).returning();
+    return service;
+  }
+
+  async updateServiceImage(id: number, imageUrl: string): Promise<Service | undefined> {
+    const [service] = await db.update(services)
+      .set({ imageUrl })
+      .where(eq(services.id, id))
+      .returning();
+    return service || undefined;
+  }
+
+  async deleteService(id: number): Promise<boolean> {
+    const result = await db.delete(services).where(eq(services.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Price Items
+  async getPriceItems(): Promise<PriceItem[]> {
+    return await db.select().from(priceItems);
+  }
+
+  async getPriceItemsByCategory(categoryId: number): Promise<PriceItem[]> {
+    return await db.select().from(priceItems).where(eq(priceItems.categoryId, categoryId));
+  }
+
+  async getPriceItemById(id: number): Promise<PriceItem | undefined> {
+    const [priceItem] = await db.select().from(priceItems).where(eq(priceItems.id, id));
+    return priceItem || undefined;
+  }
+
+  async createPriceItem(insertPriceItem: InsertPriceItem): Promise<PriceItem> {
+    const [priceItem] = await db.insert(priceItems).values(insertPriceItem).returning();
+    return priceItem;
+  }
+
+  async updatePriceItem(id: number, updates: Partial<InsertPriceItem>): Promise<PriceItem | undefined> {
+    const [priceItem] = await db.update(priceItems)
+      .set(updates)
+      .where(eq(priceItems.id, id))
+      .returning();
+    return priceItem || undefined;
+  }
+
+  async deletePriceItem(id: number): Promise<boolean> {
+    const result = await db.delete(priceItems).where(eq(priceItems.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Appointments
+  async getAppointments(): Promise<Appointment[]> {
+    return await db.select().from(appointments).orderBy(desc(appointments.createdAt));
+  }
+
+  async getAppointmentById(id: number): Promise<Appointment | undefined> {
+    const [appointment] = await db.select().from(appointments).where(eq(appointments.id, id));
+    return appointment || undefined;
+  }
+
+  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+    const [appointment] = await db.insert(appointments).values(insertAppointment).returning();
+    return appointment;
+  }
+
+  async updateAppointmentStatus(id: number, status: string): Promise<Appointment | undefined> {
+    const [appointment] = await db.update(appointments)
+      .set({ status })
+      .where(eq(appointments.id, id))
+      .returning();
+    return appointment || undefined;
+  }
+
+  // Reviews
+  async getReviews(): Promise<Review[]> {
+    return await db.select().from(reviews).orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values(insertReview).returning();
+    return review;
+  }
+
+  async toggleLikeReview(reviewId: number, userId: number): Promise<{ review: Review; userLiked: boolean } | undefined> {
+    // This would need a separate likes table for proper implementation
+    // For now, we'll just return the review without like functionality
+    const [review] = await db.select().from(reviews).where(eq(reviews.id, reviewId));
+    if (!review) return undefined;
+    
+    return { review, userLiked: false };
+  }
+
+  async getUserLikes(userId: number): Promise<number[]> {
+    // Would need a separate likes table
+    return [];
+  }
+
+  // Sales
+  async getSales(): Promise<Sale[]> {
+    return await db.select().from(sales).orderBy(desc(sales.createdAt));
+  }
+
+  async getSalesByDate(startDate: Date, endDate: Date): Promise<Sale[]> {
+    return await db.select().from(sales)
+      .where(and(
+        gte(sales.createdAt, startDate),
+        lte(sales.createdAt, endDate)
+      ))
+      .orderBy(desc(sales.createdAt));
+  }
+
+  async createSale(insertSale: InsertSale): Promise<Sale> {
+    const [sale] = await db.insert(sales).values(insertSale).returning();
+    return sale;
+  }
+
+  // Banner
+  async getBanner(): Promise<Banner | undefined> {
+    const [bannerData] = await db.select().from(banner).limit(1);
+    return bannerData || undefined;
+  }
+
+  async updateBanner(insertBanner: InsertBanner): Promise<Banner> {
+    // Try to update first, if no rows affected, insert
+    const [updated] = await db.update(banner)
+      .set(insertBanner)
+      .returning();
+    
+    if (updated) {
+      return updated;
+    }
+    
+    const [created] = await db.insert(banner).values(insertBanner).returning();
+    return created;
+  }
+
+  async updateBannerImage(backgroundImage: string): Promise<Banner | undefined> {
+    const [updated] = await db.update(banner)
+      .set({ backgroundImage })
+      .returning();
+    return updated || undefined;
+  }
+
+  // Footer
+  async getFooter(): Promise<Footer | undefined> {
+    const [footerData] = await db.select().from(footer).limit(1);
+    return footerData || undefined;
+  }
+
+  async updateFooter(insertFooter: InsertFooter): Promise<Footer> {
+    // Try to update first, if no rows affected, insert
+    const [updated] = await db.update(footer)
+      .set(insertFooter)
+      .returning();
+    
+    if (updated) {
+      return updated;
+    }
+    
+    const [created] = await db.insert(footer).values(insertFooter).returning();
+    return created;
+  }
+
+  // Site Configuration
+  async getSiteConfig(): Promise<SiteConfig | undefined> {
+    const [config] = await db.select().from(siteConfig).limit(1);
+    return config || undefined;
+  }
+
+  async updateSiteConfig(insertConfig: InsertSiteConfig): Promise<SiteConfig> {
+    // Try to update first, if no rows affected, insert
+    const [updated] = await db.update(siteConfig)
+      .set(insertConfig)
+      .returning();
+    
+    if (updated) {
+      return updated;
+    }
+    
+    const [created] = await db.insert(siteConfig).values(insertConfig).returning();
+    return created;
+  }
+
+  async updateSiteLogo(logoUrl: string): Promise<SiteConfig | undefined> {
+    const [updated] = await db.update(siteConfig)
+      .set({ logoUrl })
+      .returning();
+    return updated || undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();
