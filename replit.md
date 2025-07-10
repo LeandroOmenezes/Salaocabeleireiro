@@ -235,11 +235,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Sistema de Diagnóstico e Correção do Google OAuth (2025-07-10)
 - **Problema resolvido**: Google OAuth funcionando completamente após configuração das URLs no Google Cloud Console
-- **Diagnóstico automático**: Página `/oauth-diagnostics` com detecção automática de URLs e instruções específicas
-- **Scripts de correção**: Ferramentas `fix-google-oauth.js` e `diagnostico-google-oauth.js` para debug
+- **URL de produção atualizada**: https://salaocabeleireiro-lomenezes.replit.app
 - **Configuração dinâmica**: Sistema detecta automaticamente URL do Replit e gera configurações corretas
-- **Mensagens amigáveis**: Páginas de erro com links diretos para solução de problemas
-- **Tela de verificação Google**: Aviso normal do Google sobre verificação de app - não impede funcionamento
 - **Funcionamento confirmado**: Login Google operacional com criação automática de usuários
 - **Logs detalhados**: Sistema de logging para acompanhar processo de autenticação
 - **Fallback inteligente**: Mantém autenticação local como alternativa sempre disponível
+- **Limpeza do projeto**: Removidos todos os arquivos de teste e diagnóstico desnecessários
