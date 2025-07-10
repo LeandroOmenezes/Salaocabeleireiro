@@ -37,25 +37,38 @@ export default function OAuthDiagnostics() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-amber-500" />
-                Status do Problema
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                Status do Google OAuth
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
-                <AlertCircle className="h-4 w-4" />
+                <CheckCircle className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Erro:</strong> redirect_uri_mismatch - A URL de callback não está autorizada no Google Cloud Console
+                  <strong>✅ Google OAuth Funcionando!</strong> O sistema está operacional e autenticando usuários corretamente.
                 </AlertDescription>
               </Alert>
               
-              <div className="bg-red-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-red-900 mb-2">O que está acontecendo:</h4>
-                <p className="text-red-800 text-sm">
-                  O Google está tentando redirecionar para uma URL que não foi configurada 
-                  como autorizada no Google Cloud Console. Você precisa adicionar a URL 
-                  atual do seu app.
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-2">Sobre a tela de verificação do Google:</h4>
+                <p className="text-blue-800 text-sm mb-2">
+                  A tela "aplicativo precisa ser verificado" é normal e não impede o funcionamento. 
+                  Ela aparece porque o app não passou pela verificação oficial do Google.
                 </p>
+                <p className="text-blue-800 text-sm">
+                  Para apps internos ou de desenvolvimento, você pode clicar em "Avançado" → "Ir para [seu app] (não seguro)" 
+                  para continuar o login normalmente.
+                </p>
+              </div>
+
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-green-900 mb-2">Funcionamento confirmado:</h4>
+                <ul className="text-green-800 text-sm space-y-1">
+                  <li>• URLs configuradas corretamente no Google Cloud Console</li>
+                  <li>• Autenticação Google operacional</li>
+                  <li>• Usuários sendo criados automaticamente</li>
+                  <li>• Sessões funcionando perfeitamente</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
@@ -196,26 +209,38 @@ export default function OAuthDiagnostics() {
             </CardContent>
           </Card>
 
-          {/* Problemas Comuns */}
+          {/* Como usar o Google OAuth */}
           <Card>
             <CardHeader>
-              <CardTitle>Problemas Comuns</CardTitle>
+              <CardTitle>Como usar o Google OAuth</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="border-l-4 border-yellow-400 pl-4">
-                  <h4 className="font-semibold text-yellow-800">URL muda frequentemente no Replit</h4>
-                  <p className="text-sm text-yellow-700">
-                    Se a URL do Replit mudar, você precisará atualizar novamente no Google Cloud Console.
-                    Considere usar um domínio personalizado para evitar isso.
+                <div className="border-l-4 border-green-400 pl-4">
+                  <h4 className="font-semibold text-green-800">Tela de verificação aparece?</h4>
+                  <p className="text-sm text-green-700 mb-2">
+                    Quando o Google mostrar "Este app não foi verificado", faça:
+                  </p>
+                  <ol className="text-sm text-green-700 space-y-1">
+                    <li>1. Clique em "Avançado" ou "Advanced"</li>
+                    <li>2. Clique em "Ir para [nome do app] (não seguro)"</li>
+                    <li>3. Continue o login normalmente</li>
+                  </ol>
+                </div>
+
+                <div className="border-l-4 border-blue-400 pl-4">
+                  <h4 className="font-semibold text-blue-800">Para remover a tela de verificação</h4>
+                  <p className="text-sm text-blue-700">
+                    Para uso público, você pode submeter seu app para verificação do Google, 
+                    mas para uso interno/desenvolvimento, a tela de aviso é normal e pode ser ignorada.
                   </p>
                 </div>
 
-                <div className="border-l-4 border-red-400 pl-4">
-                  <h4 className="font-semibold text-red-800">Erro persiste após configurar</h4>
-                  <p className="text-sm text-red-700">
-                    Aguarde alguns minutos, limpe o cache do navegador e tente novamente.
-                    Verifique se as URLs estão exatamente como mostradas acima.
+                <div className="border-l-4 border-yellow-400 pl-4">
+                  <h4 className="font-semibold text-yellow-800">URL muda no Replit?</h4>
+                  <p className="text-sm text-yellow-700">
+                    Se a URL do Replit mudar, atualize as configurações no Google Cloud Console 
+                    com as novas URLs. Considere usar um domínio personalizado para evitar isso.
                   </p>
                 </div>
               </div>

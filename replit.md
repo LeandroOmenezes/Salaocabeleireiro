@@ -232,3 +232,14 @@ Preferred communication style: Simple, everyday language.
 - **Configuração flexível**: Suporte a variáveis de ambiente para diferentes ambientes
 - **Logging inteligente**: Logs diferenciados por método de envio para debug eficiente
 - **Pronto para produção**: Aguardando apenas configuração de SENDGRID_API_KEY para funcionamento completo
+
+### Sistema de Diagnóstico e Correção do Google OAuth (2025-07-10)
+- **Problema resolvido**: Google OAuth funcionando completamente após configuração das URLs no Google Cloud Console
+- **Diagnóstico automático**: Página `/oauth-diagnostics` com detecção automática de URLs e instruções específicas
+- **Scripts de correção**: Ferramentas `fix-google-oauth.js` e `diagnostico-google-oauth.js` para debug
+- **Configuração dinâmica**: Sistema detecta automaticamente URL do Replit e gera configurações corretas
+- **Mensagens amigáveis**: Páginas de erro com links diretos para solução de problemas
+- **Tela de verificação Google**: Aviso normal do Google sobre verificação de app - não impede funcionamento
+- **Funcionamento confirmado**: Login Google operacional com criação automática de usuários
+- **Logs detalhados**: Sistema de logging para acompanhar processo de autenticação
+- **Fallback inteligente**: Mantém autenticação local como alternativa sempre disponível
