@@ -88,7 +88,8 @@ export default function AppointmentForm() {
         // Capturar erro de conflito de horário especificamente
         if (error.status === 409) {
           const errorData = await error.json();
-          throw new Error(errorData.message || "Já existe um agendamento para este horário. Escolha outro horário.");
+          // Mensagem mais amigável para o cliente
+          throw new Error("Este horário já está ocupado. Por favor, escolha outro horário disponível.");
         }
         throw error;
       }
@@ -108,7 +109,7 @@ export default function AppointmentForm() {
       
       if (error.message?.includes("horário")) {
         title = "Horário não disponível";
-        description = error.message;
+        description = "Este horário já está ocupado. Por favor, escolha outro horário.";
       } else if (error.message) {
         description = error.message;
       }

@@ -540,28 +540,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verificar se já existe um agendamento no mesmo horário
       const existingAppointments = await storage.getAppointments();
-      console.log(`[appointments] Checking conflicts for ${appointmentData.date} at ${appointmentData.time}`);
-      console.log(`[appointments] Found ${existingAppointments.length} existing appointments`);
-      
-      const conflictingAppointment = existingAppointments.find(existing => {
-        const dateMatch = existing.date === appointmentData.date;
-        const timeMatch = existing.time === appointmentData.time;
-        const notCancelled = existing.status !== 'cancelled';
-        
-        console.log(`[appointments] Checking appointment ${existing.id}: date=${existing.date}(${dateMatch}), time=${existing.time}(${timeMatch}), status=${existing.status}(${notCancelled})`);
-        
-        return dateMatch && timeMatch && notCancelled;
-      });
+      const conflictingAppointment = existingAppointments.find(existing => 
+        existing.date === appointmentData.date && 
+        existing.time === appointmentData.time &&
+        existing.status !== 'cancelled'
+      );
       
       if (conflictingAppointment) {
-        console.log(`[appointments] CONFLICT DETECTED! Existing appointment: ${conflictingAppointment.name} at ${conflictingAppointment.date} ${conflictingAppointment.time}`);
         return res.status(409).json({ 
-          message: "Já existe um agendamento confirmado para este horário. Por favor, escolha outro horário.",
-          conflictingAppointment: {
-            clientName: conflictingAppointment.name,
-            date: conflictingAppointment.date,
-            time: conflictingAppointment.time
-          }
+          message: "Este horário já está ocupado. Por favor, escolha outro horário disponível."
         });
       }
       
