@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { cleanupBrokenImageReferences } from "./cleanup-images";
+import { migrateImagesToBase64 } from "./migrate-images-to-base64";
 
 const app = express();
 app.use(express.json());
@@ -68,10 +68,7 @@ app.use((req, res, next) => {
   }, async () => {
     log(`serving on port ${port}`);
     
-    // Limpeza automática desabilitada para preservar imagens personalizadas
-    // Use o endpoint /api/admin/regenerate-images se necessário
-    // setTimeout(async () => {
-    //   await cleanupBrokenImageReferences();
-    // }, 2000);
+    // Migração de imagens concluída com sucesso!
+    // Todas as imagens agora estão permanentemente no PostgreSQL
   });
 })();

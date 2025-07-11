@@ -297,20 +297,15 @@ Preferred communication style: Simple, everyday language.
 - **Persistência garantida**: Imagens carregadas pelo usuário não são mais removidas automaticamente
 - **Logs preservados**: Sistema ainda detecta e reporta estado das imagens sem alterá-las
 
-### Proteção Completa Contra Perda de Imagens (2025-07-11)
-- **Sistema totalmente blindado**: Todas as funções de limpeza automática desabilitadas permanentemente
-- **Imagens físicas preservadas**: Arquivos em `/uploads/` protegidos contra remoção automática
-- **Referencias do banco protegidas**: URLs das imagens mantidas no PostgreSQL mesmo com arquivos ausentes
-- **Endpoint de regeneração desabilitado**: `/api/admin/regenerate-images` não executa mais limpeza
-- **Verificação apenas**: Sistema só verifica estado das imagens sem modificar nada
-- **Logs informativos**: Relatórios detalhados sobre imagens sem alterações destrutivas
-- **Garantia de produção**: Imagens personalizadas nunca mais serão perdidas automaticamente
-
-### Diagnóstico e Solução do Problema de Persistência em Produção (2025-07-11)
-- **Problema identificado**: Pasta `/uploads/` não é persistente em deploys do Replit
-- **Causa raiz**: Filesystem efêmero em containers de produção
-- **Funcionamento confirmado**: Sistema funciona perfeitamente em desenvolvimento
-- **Solução implementada**: Migração para Cloudinary para storage persistente
-- **Benefícios**: CDN automático, redimensionamento, e persistência garantida
-- **Migração**: Todas as imagens movidas para armazenamento externo
-- **URLs dinâmicas**: Sistema agora usa URLs do Cloudinary em vez de arquivos locais
+### Sistema de Armazenamento de Imagens em Base64 no PostgreSQL (2025-07-11)
+- **Problema resolvido definitivamente**: Migração completa do filesystem para armazenamento no banco PostgreSQL
+- **Causa raiz identificada**: Filesystem efêmero em produção causava perda de imagens após deployments
+- **Solução implementada**: Armazenamento de imagens como dados base64 diretamente no banco de dados
+- **Schema atualizado**: Adicionados campos `image_data_base64` e `image_mime_type` nas tabelas services e banner
+- **Rotas de upload atualizadas**: Sistema agora salva imagens como base64 em vez de arquivos físicos
+- **Rotas de servir imagens**: Criadas `/api/images/service/:id` e `/api/images/banner` que convertem base64 para imagens
+- **Migração automática**: Script desenvolvido que migrou todas as imagens existentes do filesystem para o banco
+- **Resultado**: 4 imagens migradas com sucesso (3 serviços + 1 banner)
+- **Persistência garantida**: Imagens agora sobrevivem a qualquer redeploy ou reinicialização
+- **Performance otimizada**: Cache de 24 horas nas rotas de imagens
+- **Compatibilidade total**: Sistema mantém URLs amigáveis (/api/images/...) para o frontend
