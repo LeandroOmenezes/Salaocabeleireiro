@@ -64,6 +64,11 @@ export interface IStorage {
     id: number,
     imageUrl: string,
   ): Promise<Service | undefined>;
+  updateServiceImageData(
+    id: number,
+    imageDataBase64: string,
+    mimeType: string,
+  ): Promise<Service | undefined>;
   updateServiceFeatured(
     id: number,
     featured: boolean,
@@ -112,6 +117,7 @@ export interface IStorage {
   getBanner(): Promise<Banner | undefined>;
   updateBanner(banner: InsertBanner): Promise<Banner>;
   updateBannerImage(backgroundImage: string): Promise<Banner | undefined>;
+  updateBannerImageData(imageDataBase64: string, mimeType: string): Promise<Banner | undefined>;
 
   // Footer
   getFooter(): Promise<Footer | undefined>;
@@ -607,6 +613,25 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async updateServiceImageData(
+    id: number,
+    imageDataBase64: string,
+    mimeType: string,
+  ): Promise<Service | undefined> {
+    const service = this.services.get(id);
+    if (service) {
+      const updatedService = { 
+        ...service, 
+        imageDataBase64,
+        imageMimeType: mimeType,
+        imageUrl: `/api/images/service/${id}`
+      };
+      this.services.set(id, updatedService);
+      return updatedService;
+    }
+    return undefined;
+  }
+
   async updateServiceFeatured(
     id: number,
     featured: boolean,
@@ -827,6 +852,23 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async updateBannerImageData(
+    imageDataBase64: string,
+    mimeType: string,
+  ): Promise<Banner | undefined> {
+    if (this.bannerConfig) {
+      this.bannerConfig = {
+        ...this.bannerConfig,
+        backgroundImageDataBase64: imageDataBase64,
+        backgroundImageMimeType: mimeType,
+        backgroundImage: "/api/images/banner",
+        updatedAt: new Date(),
+      };
+      return this.bannerConfig;
+    }
+    return undefined;
+  }
+
   // === Footer ===
   async getFooter(): Promise<Footer | undefined> {
     return this.footerConfig || undefined;
@@ -1017,6 +1059,24 @@ export class DatabaseStorage implements IStorage {
     return service || undefined;
   }
 
+  async updateServiceImageData(id: number, imageDataBase64: string, mimeType: string): Promise<Service | undefined> {
+    try {
+      const [service] = await db
+        .update(services)
+        .set({ 
+          imageDataBase64,
+          imageMimeType: mimeType,
+          imageUrl: `/api/images/service/${id}` // Update URL to point to our API
+        })
+        .where(eq(services.id, id))
+        .returning();
+      return service || undefined;
+    } catch (error) {
+      console.error("Error updating service image data:", error);
+      return undefined;
+    }
+  }
+
   async updateServiceFeatured(id: number, featured: boolean): Promise<Service | undefined> {
     const [service] = await db.update(services)
       .set({ featured })
@@ -1161,6 +1221,24 @@ export class DatabaseStorage implements IStorage {
       .set({ backgroundImage })
       .returning();
     return updated || undefined;
+  }
+
+  async updateBannerImageData(imageDataBase64: string, mimeType: string): Promise<Banner | undefined> {
+    try {
+      const [updated] = await db
+        .update(banner)
+        .set({ 
+          backgroundImageDataBase64: imageDataBase64,
+          backgroundImageMimeType: mimeType,
+          backgroundImage: "/api/images/banner", // Update URL to point to our API
+          updatedAt: new Date()
+        })
+        .returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error("Error updating banner image data:", error);
+      return undefined;
+    }
   }
 
   // Footer

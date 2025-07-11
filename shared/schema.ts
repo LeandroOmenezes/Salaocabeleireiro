@@ -45,6 +45,8 @@ export const services = pgTable("services", {
   categoryId: integer("category_id").notNull(),
   icon: text("icon").notNull(),
   imageUrl: text("image_url"),
+  imageDataBase64: text("image_data_base64"),
+  imageMimeType: text("image_mime_type"),
   featured: boolean("featured").default(false),
 });
 
@@ -147,6 +149,8 @@ export const banner = pgTable("banner", {
   ctaText: text("cta_text").notNull(),
   ctaLink: text("cta_link").notNull(),
   backgroundImage: text("background_image"),
+  backgroundImageDataBase64: text("background_image_data_base64"),
+  backgroundImageMimeType: text("background_image_mime_type"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

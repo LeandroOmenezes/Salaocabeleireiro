@@ -221,22 +221,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nenhuma imagem foi enviada" });
       }
 
-      // Create the image URL
-      const imageUrl = `/uploads/${req.file.filename}`;
+      // Read the file and convert to base64
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const imageBase64 = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
       
-      // Update service with new image URL
-      const updatedService = await storage.updateServiceImage(serviceId, imageUrl);
+      // Update service with image data in database
+      const updatedService = await storage.updateServiceImageData(serviceId, imageBase64, mimeType);
+      
+      // Remove the temporary uploaded file
+      fs.unlinkSync(req.file.path);
       
       if (!updatedService) {
-        // If service doesn't exist, remove the uploaded file
-        fs.unlinkSync(req.file.path);
         return res.status(404).json({ message: "Serviço não encontrado" });
       }
 
       res.json({
-        message: "Imagem enviada com sucesso",
+        message: "Imagem salva com sucesso no banco de dados",
         service: updatedService,
-        imageUrl
+        imageUrl: `/api/images/service/${serviceId}`
       });
     } catch (error) {
       console.error("Error uploading service image:", error);
@@ -971,22 +974,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nenhuma imagem foi enviada" });
       }
 
-      // Create the image URL
-      const imageUrl = `/uploads/${req.file.filename}`;
+      // Read the file and convert to base64
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const imageBase64 = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
       
-      // Update banner with new background image
-      const updatedBanner = await storage.updateBannerImage(imageUrl);
+      // Update banner with image data in database
+      const updatedBanner = await storage.updateBannerImageData(imageBase64, mimeType);
+      
+      // Remove the temporary uploaded file
+      fs.unlinkSync(req.file.path);
       
       if (!updatedBanner) {
-        // If banner doesn't exist, remove the uploaded file
-        fs.unlinkSync(req.file.path);
         return res.status(404).json({ message: "Configuração de banner não encontrada" });
       }
 
       res.json({
-        message: "Imagem de fundo do banner atualizada com sucesso",
+        message: "Imagem de fundo do banner salva no banco de dados",
         banner: updatedBanner,
-        imageUrl
+        imageUrl: "/api/images/banner"
       });
     } catch (error) {
       console.error("Error uploading banner image:", error);
@@ -1109,6 +1115,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       res.status(500).json({ message: "Erro ao fazer upload da logo" });
+    }
+  });
+
+  // === Image Serving Routes ===
+  
+  // Serve service images from database
+  app.get("/api/images/service/:id", async (req: Request, res: Response) => {
+    try {
+      const serviceId = parseInt(req.params.id);
+      if (isNaN(serviceId)) {
+        return res.status(400).json({ message: "ID de serviço inválido" });
+      }
+
+      const service = await storage.getServiceById(serviceId);
+      if (!service || !service.imageDataBase64) {
+        return res.status(404).json({ message: "Imagem não encontrada" });
+      }
+
+      // Convert base64 back to buffer
+      const imageBuffer = Buffer.from(service.imageDataBase64, 'base64');
+      
+      // Set proper content type
+      res.set('Content-Type', service.imageMimeType || 'image/jpeg');
+      res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      
+      res.send(imageBuffer);
+    } catch (error) {
+      console.error("Error serving service image:", error);
+      res.status(500).json({ message: "Erro ao servir imagem" });
+    }
+  });
+
+  // Serve banner image from database
+  app.get("/api/images/banner", async (req: Request, res: Response) => {
+    try {
+      const banner = await storage.getBanner();
+      if (!banner || !banner.backgroundImageDataBase64) {
+        return res.status(404).json({ message: "Imagem do banner não encontrada" });
+      }
+
+      // Convert base64 back to buffer
+      const imageBuffer = Buffer.from(banner.backgroundImageDataBase64, 'base64');
+      
+      // Set proper content type
+      res.set('Content-Type', banner.backgroundImageMimeType || 'image/jpeg');
+      res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      
+      res.send(imageBuffer);
+    } catch (error) {
+      console.error("Error serving banner image:", error);
+      res.status(500).json({ message: "Erro ao servir imagem do banner" });
     }
   });
 
