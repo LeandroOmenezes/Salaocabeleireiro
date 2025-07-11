@@ -48,13 +48,13 @@ function Hero() {
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <a 
             href={ctaLink} 
-            className="bg-blue-500 text-white px-8 py-4 rounded-full hover:bg-blue-600 transition-colors duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
+            className="bg-blue-500 text-white px-8 py-4 rounded-xl hover:bg-blue-600 transition-colors duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
           >
             {ctaText}
           </a>
           <a 
             href="#services" 
-            className="bg-white text-blue-500 border border-blue-500 px-8 py-4 rounded-full hover:bg-gray-100 transition-colors duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
+            className="bg-white text-blue-500 border border-blue-500 px-8 py-4 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-medium text-lg shadow-lg hover:shadow-xl"
           >
             Nossos Serviços
           </a>
