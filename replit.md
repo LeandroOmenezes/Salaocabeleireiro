@@ -305,3 +305,12 @@ Preferred communication style: Simple, everyday language.
 - **Verificação apenas**: Sistema só verifica estado das imagens sem modificar nada
 - **Logs informativos**: Relatórios detalhados sobre imagens sem alterações destrutivas
 - **Garantia de produção**: Imagens personalizadas nunca mais serão perdidas automaticamente
+
+### Diagnóstico e Solução do Problema de Persistência em Produção (2025-07-11)
+- **Problema identificado**: Pasta `/uploads/` não é persistente em deploys do Replit
+- **Causa raiz**: Filesystem efêmero em containers de produção
+- **Funcionamento confirmado**: Sistema funciona perfeitamente em desenvolvimento
+- **Solução implementada**: Migração para Cloudinary para storage persistente
+- **Benefícios**: CDN automático, redimensionamento, e persistência garantida
+- **Migração**: Todas as imagens movidas para armazenamento externo
+- **URLs dinâmicas**: Sistema agora usa URLs do Cloudinary em vez de arquivos locais
