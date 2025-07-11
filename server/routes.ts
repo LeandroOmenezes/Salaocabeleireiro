@@ -1097,6 +1097,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === Regeneração de Imagens ===
+  app.post("/api/admin/regenerate-images", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { cleanupBrokenImageReferences } = await import("./cleanup-images");
+      await cleanupBrokenImageReferences();
+      
+      res.json({ 
+        message: "Limpeza e regeneração de imagens concluída com sucesso",
+        success: true 
+      });
+    } catch (error) {
+      console.error("Error regenerating images:", error);
+      res.status(500).json({ message: "Erro ao regenerar imagens" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

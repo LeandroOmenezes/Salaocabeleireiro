@@ -269,3 +269,13 @@ Preferred communication style: Simple, everyday language.
 - **Sistema completo**: Administradores podem visualizar, confirmar e gerenciar todos os agendamentos
 - **Segurança mantida**: Apenas usuários autenticados e com permissões admin acessam os agendamentos
 - **Interface funcional**: Dashboard administrativo exibe agendamentos pendentes e permite alteração de status
+
+### Sistema de Recuperação de Imagens Implementado (2025-07-11)
+- **Problema de persistência resolvido**: Imagens quebradas após deploy são automaticamente detectadas e corrigidas
+- **Limpeza automática**: Sistema verifica na inicialização se imagens referencidas existem fisicamente
+- **Imagens SVG padrão**: Geração automática de imagens elegantes para serviços e banner quando necessário
+- **Regeneração manual**: Endpoint `/api/admin/regenerate-images` para administradores forçarem limpeza
+- **Detecção inteligente**: Sistema identifica URLs `/uploads/` quebradas e as substitui por padrões funcionais
+- **Design profissional**: SVGs com gradientes e elementos visuais adequados ao tema de salão de beleza
+- **Fallback robusto**: Garantia de que site sempre terá imagens funcionais, mesmo após problemas de deployment
+- **Logs detalhados**: Sistema reporta quantas imagens foram corrigidas e quais serviços foram afetados

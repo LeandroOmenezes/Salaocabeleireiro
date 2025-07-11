@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { cleanupBrokenImageReferences } from "./cleanup-images";
 
 const app = express();
 app.use(express.json());
@@ -64,7 +65,12 @@ app.use((req, res, next) => {
     port,
     host: "0.0.0.0",
     reusePort: true,
-  }, () => {
+  }, async () => {
     log(`serving on port ${port}`);
+    
+    // Executar limpeza de imagens quebradas na inicialização
+    setTimeout(async () => {
+      await cleanupBrokenImageReferences();
+    }, 2000); // Aguardar 2 segundos para o servidor inicializar completamente
   });
 })();
