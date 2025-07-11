@@ -325,6 +325,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/admin/services/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem editar serviços." });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID de serviço inválido" });
+      }
+
+      const validatedData = insertServiceSchema.parse(req.body);
+      const updated = await storage.updateService(id, validatedData);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Serviço não encontrado" });
+      }
+
+      res.json({ message: "Serviço atualizado com sucesso", service: updated });
+    } catch (error) {
+      console.error("Error updating service:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados do serviço inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar serviço" });
+      }
+    }
+  });
+
   // === Category Management (Admin Only) ===
   app.post("/api/admin/categories", async (req: Request, res: Response) => {
     try {

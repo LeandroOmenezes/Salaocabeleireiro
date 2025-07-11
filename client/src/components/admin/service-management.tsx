@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Image as ImageIcon, Eye, ExternalLink, Plus, Trash2, Save, X, Star, Wrench } from "lucide-react";
+import { Upload, Image as ImageIcon, Eye, ExternalLink, Plus, Trash2, Save, X, Star, Wrench, Edit } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,6 +19,7 @@ export default function ServiceManagement() {
   const queryClient = useQueryClient();
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
 
   const { data: services, isLoading: servicesLoading } = useQuery<Service[]>({
     queryKey: ['/api/services/all'],
@@ -30,6 +31,19 @@ export default function ServiceManagement() {
   });
 
   const form = useForm<InsertService>({
+    resolver: zodResolver(insertServiceSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      minPrice: 0,
+      maxPrice: 0,
+      categoryId: 1,
+      icon: "fas fa-spa",
+      featured: false,
+    },
+  });
+
+  const editForm = useForm<InsertService>({
     resolver: zodResolver(insertServiceSchema),
     defaultValues: {
       name: "",
@@ -110,6 +124,29 @@ export default function ServiceManagement() {
     },
   });
 
+  const editServiceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: InsertService }) => {
+      const response = await apiRequest('PUT', `/api/admin/services/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso!",
+        description: "Serviço atualizado com sucesso",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/all'] });
+      setEditingService(null);
+      editForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao atualizar serviço",
+        variant: "destructive",
+      });
+    },
+  });
+
   const uploadImageMutation = useMutation({
     mutationFn: async ({ serviceId, file }: { serviceId: number; file: File }) => {
       const formData = new FormData();
@@ -181,6 +218,25 @@ export default function ServiceManagement() {
 
   const handleToggleFeatured = (serviceId: number, currentFeatured: boolean) => {
     toggleFeaturedMutation.mutate({ id: serviceId, featured: !currentFeatured });
+  };
+
+  const handleEditService = (service: Service) => {
+    setEditingService(service);
+    editForm.reset({
+      name: service.name,
+      description: service.description,
+      minPrice: service.minPrice,
+      maxPrice: service.maxPrice,
+      categoryId: service.categoryId,
+      icon: service.icon,
+      featured: service.featured || false,
+    });
+  };
+
+  const onEditSubmit = (data: InsertService) => {
+    if (editingService) {
+      editServiceMutation.mutate({ id: editingService.id, data });
+    }
   };;
 
   const getCategoryName = (categoryId: number) => {
@@ -483,13 +539,13 @@ export default function ServiceManagement() {
                   />
                   
                   <div className="space-y-2">
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => document.getElementById(`upload-${service.id}`)?.click()}
                         disabled={uploadingId === service.id}
-                        className="flex-1"
+                        className="col-span-2"
                       >
                         <Upload className="w-4 h-4 mr-1" />
                         {uploadingId === service.id ? "Enviando..." : "Upload"}
@@ -503,6 +559,18 @@ export default function ServiceManagement() {
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditService(service)}
+                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Editar
                       </Button>
                     </div>
                     
@@ -536,6 +604,180 @@ export default function ServiceManagement() {
               <Plus className="w-4 h-4 mr-2" />
               Adicionar Primeiro Serviço
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Edit Form */}
+      {editingService && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Editar Serviço: {editingService.name}
+            </CardTitle>
+            <CardDescription>
+              Atualize as informações do serviço
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Serviço</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Categoria</FormLabel>
+                        <Select 
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          value={field.value?.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione uma categoria" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories?.map((category) => (
+                              <SelectItem key={category.id} value={category.id.toString()}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="minPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preço Mínimo (R$)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="maxPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preço Máximo (R$)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="icon"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ícone (FontAwesome)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ex: fas fa-cut" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={editForm.control}
+                    name="featured"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel>Serviço em Destaque</FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={editForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Descreva os detalhes do serviço oferecido"
+                          className="min-h-[100px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-4">
+                  <Button 
+                    type="submit"
+                    disabled={editServiceMutation.isPending}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {editServiceMutation.isPending ? "Salvando..." : "Salvar Alterações"}
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditingService(null)}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       )}
