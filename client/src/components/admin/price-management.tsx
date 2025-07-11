@@ -256,7 +256,10 @@ export default function PriceManagement() {
                             min="0"
                             placeholder="50.00"
                             {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === "" ? 0 : parseFloat(value) || 0);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -277,7 +280,10 @@ export default function PriceManagement() {
                             min="0"
                             placeholder="80.00"
                             {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === "" ? 0 : parseFloat(value) || 0);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -380,13 +386,19 @@ function PriceItemRow({
 }) {
   const [editData, setEditData] = useState({
     name: item.name,
-    minPrice: item.minPrice,
-    maxPrice: item.maxPrice,
+    minPrice: item.minPrice.toString(),
+    maxPrice: item.maxPrice.toString(),
     categoryId: item.categoryId,
   });
 
   const handleSave = () => {
-    onSave(item, editData);
+    const dataToSave = {
+      name: editData.name,
+      minPrice: parseFloat(editData.minPrice) || 0,
+      maxPrice: parseFloat(editData.maxPrice) || 0,
+      categoryId: editData.categoryId,
+    };
+    onSave(item, dataToSave);
   };
 
   const formatPrice = (price: number) => {
@@ -411,7 +423,7 @@ function PriceItemRow({
             step="0.01"
             min="0"
             value={editData.minPrice}
-            onChange={(e) => setEditData({ ...editData, minPrice: parseFloat(e.target.value) || 0 })}
+            onChange={(e) => setEditData({ ...editData, minPrice: e.target.value })}
             placeholder="Preço mín."
           />
           <Input
@@ -419,7 +431,7 @@ function PriceItemRow({
             step="0.01"
             min="0"
             value={editData.maxPrice}
-            onChange={(e) => setEditData({ ...editData, maxPrice: parseFloat(e.target.value) || 0 })}
+            onChange={(e) => setEditData({ ...editData, maxPrice: e.target.value })}
             placeholder="Preço máx."
           />
         </div>

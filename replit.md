@@ -252,3 +252,12 @@ Preferred communication style: Simple, everyday language.
 - **Compatibilidade mantida**: Interface IStorage preservada para manter funcionamento da aplicação
 - **Fallback removido**: Sistema não depende mais de dados temporários em memória
 - **Produção pronta**: Configuração robusta para ambiente de produção com dados persistentes
+
+### Sistema de Edição Completo de Serviços e Correção de Tabela de Preços (2025-07-11)
+- **Edição de serviços finalizada**: Sistema completo com rota PUT `/api/admin/services/:id` funcional
+- **Método updateService implementado**: Adicionado tanto no MemStorage quanto DatabaseStorage
+- **Interface de edição completa**: Formulário com todos os campos (nome, descrição, preços, categoria, ícone, destaque)
+- **Problema da tabela de preços corrigido**: Campos numéricos agora permitem deletar valores zero
+- **UX melhorada**: Campos de preço usam strings durante edição, convertendo para números apenas no save
+- **Validação aprimorada**: Tratamento correto de valores vazios e conversão de tipos
+- **Funcionalidade completa**: Administradores podem criar, editar, deletar e destacar serviços
