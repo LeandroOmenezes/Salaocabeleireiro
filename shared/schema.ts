@@ -208,20 +208,6 @@ export const insertSiteConfigSchema = createInsertSchema(siteConfig, {
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor deve estar no formato #RRGGBB").optional(),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
-// === Login Background Configuration ===
-export const loginBackground = pgTable("login_background", {
-  id: serial("id").primaryKey(),
-  backgroundImage: text("background_image"),
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const insertLoginBackgroundSchema = createInsertSchema(loginBackground, {
-  backgroundImage: z.string().optional(),
-  isActive: z.boolean().optional(),
-}).omit({ id: true, createdAt: true, updatedAt: true });
-
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -252,9 +238,6 @@ export type InsertFooter = z.infer<typeof insertFooterSchema>;
 
 export type SiteConfig = typeof siteConfig.$inferSelect;
 export type InsertSiteConfig = z.infer<typeof insertSiteConfigSchema>;
-
-export type LoginBackground = typeof loginBackground.$inferSelect;
-export type InsertLoginBackground = z.infer<typeof insertLoginBackgroundSchema>;
 
 // Additional types for frontend select options
 export interface ServiceOption {
