@@ -68,9 +68,10 @@ app.use((req, res, next) => {
   }, async () => {
     log(`serving on port ${port}`);
     
-    // Executar limpeza de imagens quebradas na inicialização
-    setTimeout(async () => {
-      await cleanupBrokenImageReferences();
-    }, 2000); // Aguardar 2 segundos para o servidor inicializar completamente
+    // Limpeza automática desabilitada para preservar imagens personalizadas
+    // Use o endpoint /api/admin/regenerate-images se necessário
+    // setTimeout(async () => {
+    //   await cleanupBrokenImageReferences();
+    // }, 2000);
   });
 })();

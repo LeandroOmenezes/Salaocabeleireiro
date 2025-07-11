@@ -288,3 +288,11 @@ Preferred communication style: Simple, everyday language.
 - **Tratamento no frontend**: Interface exibe mensagem amigável quando horário está ocupado
 - **Exclusão de cancelados**: Apenas agendamentos ativos (não cancelados) geram conflito
 - **Integridade garantida**: Sistema mantém organização perfeita da agenda do salão
+
+### Correção do Sistema de Limpeza de Imagens (2025-07-11)
+- **Problema identificado**: Limpeza automática removendo imagens personalizadas válidas na inicialização
+- **Solução implementada**: Limpeza automática desabilitada para preservar uploads do usuário
+- **Imagens restauradas**: Imagens personalizadas mantidas no banco de dados
+- **Limpeza manual**: Endpoint `/api/admin/regenerate-images` disponível quando necessário
+- **Persistência garantida**: Imagens carregadas pelo usuário não são mais removidas automaticamente
+- **Logs preservados**: Sistema ainda detecta e reporta estado das imagens sem alterá-las
