@@ -1119,16 +1119,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { cleanupBrokenImageReferences } = await import("./cleanup-images");
-      await cleanupBrokenImageReferences();
+      // LIMPEZA DESABILITADA PARA PROTEGER IMAGENS PERSONALIZADAS
+      console.log("🔒 Regeneração de imagens desabilitada para preservar uploads do usuário");
       
       res.json({ 
-        message: "Limpeza e regeneração de imagens concluída com sucesso",
-        success: true 
+        message: "Regeneração de imagens desabilitada para proteger suas imagens personalizadas",
+        success: false,
+        note: "Suas imagens estão protegidas e não serão removidas"
       });
     } catch (error) {
-      console.error("Error regenerating images:", error);
-      res.status(500).json({ message: "Erro ao regenerar imagens" });
+      console.error("Error in regenerate images endpoint:", error);
+      res.status(500).json({ message: "Erro ao processar regeneração de imagens" });
     }
   });
 
