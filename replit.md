@@ -261,3 +261,11 @@ Preferred communication style: Simple, everyday language.
 - **UX melhorada**: Campos de preço usam strings durante edição, convertendo para números apenas no save
 - **Validação aprimorada**: Tratamento correto de valores vazios e conversão de tipos
 - **Funcionalidade completa**: Administradores podem criar, editar, deletar e destacar serviços
+
+### Sistema de Agendamentos Corrigido e Funcional (2025-07-11)
+- **Problema crítico resolvido**: API de agendamentos agora retorna dados corretamente para administradores
+- **Autenticação corrigida**: Rota `/api/appointments` verifica autenticação e permissões admin adequadamente
+- **Persistência confirmada**: Agendamentos salvos no PostgreSQL aparecem no painel administrativo
+- **Sistema completo**: Administradores podem visualizar, confirmar e gerenciar todos os agendamentos
+- **Segurança mantida**: Apenas usuários autenticados e com permissões admin acessam os agendamentos
+- **Interface funcional**: Dashboard administrativo exibe agendamentos pendentes e permite alteração de status
