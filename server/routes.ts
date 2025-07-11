@@ -1112,6 +1112,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === Login Background Management ===
+  app.get("/api/login-background", async (req: Request, res: Response) => {
+    try {
+      const background = await storage.getLoginBackground();
+      res.json(background || { backgroundImage: null, isActive: true });
+    } catch (error) {
+      console.error("Error fetching login background:", error);
+      res.status(500).json({ message: "Erro ao buscar imagem de fundo do login" });
+    }
+  });
+
+  app.put("/api/login-background", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const background = await storage.updateLoginBackground(req.body);
+      res.json(background);
+    } catch (error) {
+      console.error("Error updating login background:", error);
+      res.status(500).json({ message: "Erro ao atualizar configuração de fundo do login" });
+    }
+  });
+
+  app.post("/api/login-background/upload-image", upload.single('image'), async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhuma imagem foi enviada" });
+      }
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      // Update login background with new image
+      const updatedBackground = await storage.updateLoginBackgroundImage(imageUrl);
+      
+      if (!updatedBackground) {
+        // If background doesn't exist, remove the uploaded file
+        fs.unlinkSync(req.file.path);
+        return res.status(404).json({ message: "Configuração de fundo não encontrada" });
+      }
+
+      res.json({
+        message: "Imagem de fundo do login atualizada com sucesso",
+        background: updatedBackground,
+        imageUrl
+      });
+    } catch (error) {
+      console.error("Error uploading login background:", error);
+      // Remove the uploaded file if an error occurred
+      if (req.file) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error removing uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).json({ message: "Erro ao fazer upload da imagem de fundo" });
+    }
+  });
+
+  app.delete("/api/login-background/image", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const updatedBackground = await storage.updateLoginBackgroundImage(null);
+      
+      res.json({
+        message: "Imagem de fundo do login removida com sucesso",
+        background: updatedBackground
+      });
+    } catch (error) {
+      console.error("Error removing login background:", error);
+      res.status(500).json({ message: "Erro ao remover imagem de fundo" });
+    }
+  });
+
   // === Regeneração de Imagens ===
   app.post("/api/admin/regenerate-images", async (req: Request, res: Response) => {
     try {

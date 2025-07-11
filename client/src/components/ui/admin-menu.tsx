@@ -52,6 +52,12 @@ export default function AdminMenu() {
       description: "Configurar informações de contato"
     },
     {
+      href: "/admin/login-background",
+      icon: Image,
+      label: "Fundo do Login",
+      description: "Personalizar página de login"
+    },
+    {
       href: "/admin/prices",
       icon: DollarSign,
       label: "Tabela de Preços",

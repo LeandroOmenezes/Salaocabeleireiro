@@ -1,6 +1,6 @@
 import { 
   users, categories, services, priceItems, appointments, reviews, sales,
-  banner, footer, siteConfig,
+  banner, footer, siteConfig, loginBackground,
   type User, type InsertUser,
   type Category, type InsertCategory,
   type Service, type InsertService,
@@ -10,7 +10,8 @@ import {
   type Sale, type InsertSale,
   type Banner, type InsertBanner,
   type Footer, type InsertFooter,
-  type SiteConfig, type InsertSiteConfig
+  type SiteConfig, type InsertSiteConfig,
+  type LoginBackground, type InsertLoginBackground
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
@@ -122,6 +123,11 @@ export interface IStorage {
   updateSiteConfig(config: InsertSiteConfig): Promise<SiteConfig>;
   updateSiteLogo(logoUrl: string): Promise<SiteConfig | undefined>;
 
+  // Login Background
+  getLoginBackground(): Promise<LoginBackground | undefined>;
+  updateLoginBackground(background: InsertLoginBackground): Promise<LoginBackground>;
+  updateLoginBackgroundImage(backgroundImage: string | null): Promise<LoginBackground | undefined>;
+
   // Session store
   sessionStore: session.Store;
 }
@@ -139,6 +145,7 @@ export class MemStorage implements IStorage {
   private bannerConfig: Banner | null = null;
   private footerConfig: Footer | null = null;
   private siteConfig: SiteConfig | null = null;
+  private loginBackgroundConfig: LoginBackground | null = null;
 
   private currentUserId: number;
   private currentCategoryId: number;
@@ -871,6 +878,45 @@ export class MemStorage implements IStorage {
     }
     return undefined;
   }
+
+  // === Login Background ===
+  async getLoginBackground(): Promise<LoginBackground | undefined> {
+    return this.loginBackgroundConfig || undefined;
+  }
+
+  async updateLoginBackground(background: InsertLoginBackground): Promise<LoginBackground> {
+    const now = new Date();
+    this.loginBackgroundConfig = {
+      id: 1,
+      ...background,
+      isActive: true,
+      createdAt: this.loginBackgroundConfig?.createdAt || now,
+      updatedAt: now,
+    };
+    return this.loginBackgroundConfig;
+  }
+
+  async updateLoginBackgroundImage(backgroundImage: string | null): Promise<LoginBackground | undefined> {
+    if (!this.loginBackgroundConfig) {
+      // Create default if not exists
+      const now = new Date();
+      this.loginBackgroundConfig = {
+        id: 1,
+        backgroundImage,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+      };
+      return this.loginBackgroundConfig;
+    }
+
+    this.loginBackgroundConfig = {
+      ...this.loginBackgroundConfig,
+      backgroundImage,
+      updatedAt: new Date(),
+    };
+    return this.loginBackgroundConfig;
+  }
 }
 
 const PostgresSessionStore = connectPg(session);
@@ -1208,6 +1254,43 @@ export class DatabaseStorage implements IStorage {
       .set({ logoUrl })
       .returning();
     return updated || undefined;
+  }
+
+  // Login Background
+  async getLoginBackground(): Promise<LoginBackground | undefined> {
+    const [background] = await db.select().from(loginBackground).limit(1);
+    return background || undefined;
+  }
+
+  async updateLoginBackground(insertBackground: InsertLoginBackground): Promise<LoginBackground> {
+    // Try to update first, if no rows affected, insert
+    const [updated] = await db.update(loginBackground)
+      .set(insertBackground)
+      .returning();
+    
+    if (updated) {
+      return updated;
+    }
+    
+    const [created] = await db.insert(loginBackground).values(insertBackground).returning();
+    return created;
+  }
+
+  async updateLoginBackgroundImage(backgroundImage: string | null): Promise<LoginBackground | undefined> {
+    // Try to update existing record first
+    const [updated] = await db.update(loginBackground)
+      .set({ backgroundImage })
+      .returning();
+    
+    if (updated) {
+      return updated;
+    }
+    
+    // If no record exists, create one
+    const [created] = await db.insert(loginBackground)
+      .values({ backgroundImage, isActive: true })
+      .returning();
+    return created;
   }
 }
 
