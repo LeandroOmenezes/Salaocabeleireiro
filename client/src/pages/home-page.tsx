@@ -66,7 +66,7 @@ function Hero() {
 
 function Services() {
   const { data: services, isLoading } = useQuery<Service[]>({
-    queryKey: ['/api/services/featured'],
+    queryKey: ['/api/services/all'],
   });
 
   return (

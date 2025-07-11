@@ -99,8 +99,17 @@ function getServiceIcon(serviceName: string) {
 }
 
 export default function ServiceCard({ service }: ServiceCardProps) {
+  const featuredClass = service.featured 
+    ? "bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1 ring-2 ring-yellow-400 ring-opacity-50" 
+    : "bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1";
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+    <div className={featuredClass}>
+      {service.featured && (
+        <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs font-bold px-3 py-1 text-center">
+          ⭐ SERVIÇO EM DESTAQUE
+        </div>
+      )}
       <div className="w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
         {service.imageUrl ? (
           <img 

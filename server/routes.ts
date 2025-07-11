@@ -296,6 +296,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/services/:id/featured", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Acesso negado. Apenas administradores podem alterar destaque de serviços." });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID de serviço inválido" });
+      }
+
+      const { featured } = req.body;
+      if (typeof featured !== 'boolean') {
+        return res.status(400).json({ message: "O campo featured deve ser um valor booleano" });
+      }
+
+      const updated = await storage.updateServiceFeatured(id, featured);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Serviço não encontrado" });
+      }
+
+      res.json({ message: "Status de destaque atualizado com sucesso" });
+    } catch (error) {
+      console.error("Error updating service featured status:", error);
+      res.status(500).json({ message: "Erro ao atualizar status de destaque" });
+    }
+  });
+
   // === Category Management (Admin Only) ===
   app.post("/api/admin/categories", async (req: Request, res: Response) => {
     try {

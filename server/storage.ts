@@ -64,6 +64,10 @@ export interface IStorage {
     id: number,
     imageUrl: string,
   ): Promise<Service | undefined>;
+  updateServiceFeatured(
+    id: number,
+    featured: boolean,
+  ): Promise<Service | undefined>;
   deleteService(id: number): Promise<boolean>;
 
   // Price Items
@@ -599,6 +603,19 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async updateServiceFeatured(
+    id: number,
+    featured: boolean,
+  ): Promise<Service | undefined> {
+    const service = this.services.get(id);
+    if (service) {
+      const updatedService = { ...service, featured };
+      this.services.set(id, updatedService);
+      return updatedService;
+    }
+    return undefined;
+  }
+
   async deleteService(id: number): Promise<boolean> {
     return this.services.delete(id);
   }
@@ -978,6 +995,14 @@ export class DatabaseStorage implements IStorage {
   async updateServiceImage(id: number, imageUrl: string): Promise<Service | undefined> {
     const [service] = await db.update(services)
       .set({ imageUrl })
+      .where(eq(services.id, id))
+      .returning();
+    return service || undefined;
+  }
+
+  async updateServiceFeatured(id: number, featured: boolean): Promise<Service | undefined> {
+    const [service] = await db.update(services)
+      .set({ featured })
       .where(eq(services.id, id))
       .returning();
     return service || undefined;

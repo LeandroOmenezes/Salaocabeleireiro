@@ -88,6 +88,28 @@ export default function ServiceManagement() {
     },
   });
 
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: async ({ id, featured }: { id: number; featured: boolean }) => {
+      const response = await apiRequest('PATCH', `/api/admin/services/${id}/featured`, { featured });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso!",
+        description: "Status de destaque atualizado",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/all'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/services/featured'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao alterar",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const uploadImageMutation = useMutation({
     mutationFn: async ({ serviceId, file }: { serviceId: number; file: File }) => {
       const formData = new FormData();
@@ -155,7 +177,11 @@ export default function ServiceManagement() {
     if (confirm("Tem certeza que deseja remover este serviço? Esta ação não pode ser desfeita.")) {
       deleteServiceMutation.mutate(id);
     }
-  };
+  }
+
+  const handleToggleFeatured = (serviceId: number, currentFeatured: boolean) => {
+    toggleFeaturedMutation.mutate({ id: serviceId, featured: !currentFeatured });
+  };;
 
   const getCategoryName = (categoryId: number) => {
     return categories?.find(cat => cat.id === categoryId)?.name || "Categoria não encontrada";
@@ -456,26 +482,42 @@ export default function ServiceManagement() {
                     id={`upload-${service.id}`}
                   />
                   
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById(`upload-${service.id}`)?.click()}
-                      disabled={uploadingId === service.id}
-                      className="flex-1"
-                    >
-                      <Upload className="w-4 h-4 mr-1" />
-                      {uploadingId === service.id ? "Enviando..." : "Upload"}
-                    </Button>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById(`upload-${service.id}`)?.click()}
+                        disabled={uploadingId === service.id}
+                        className="flex-1"
+                      >
+                        <Upload className="w-4 h-4 mr-1" />
+                        {uploadingId === service.id ? "Enviando..." : "Upload"}
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteService(service.id)}
+                        disabled={deleteServiceMutation.isPending}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                     
                     <Button
-                      variant="outline"
+                      variant={service.featured ? "default" : "outline"}
                       size="sm"
-                      onClick={() => handleDeleteService(service.id)}
-                      disabled={deleteServiceMutation.isPending}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleToggleFeatured(service.id, service.featured || false)}
+                      disabled={toggleFeaturedMutation.isPending}
+                      className={`w-full ${service.featured 
+                        ? "bg-yellow-500 hover:bg-yellow-600 text-white" 
+                        : "text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                      }`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Star className={`w-4 h-4 mr-1 ${service.featured ? "fill-current" : ""}`} />
+                      {service.featured ? "Em Destaque" : "Marcar Destaque"}
                     </Button>
                   </div>
                 </div>
