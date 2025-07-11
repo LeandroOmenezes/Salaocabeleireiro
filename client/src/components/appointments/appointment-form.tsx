@@ -81,8 +81,17 @@ export default function AppointmentForm() {
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormValues) => {
-      const response = await apiRequest("POST", "/api/appointments", data);
-      return response.json();
+      try {
+        const response = await apiRequest("POST", "/api/appointments", data);
+        return response.json();
+      } catch (error: any) {
+        // Capturar erro de conflito de horário especificamente
+        if (error.status === 409) {
+          const errorData = await error.json();
+          throw new Error(errorData.message || "Já existe um agendamento para este horário. Escolha outro horário.");
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -90,11 +99,23 @@ export default function AppointmentForm() {
         description: "Em breve entraremos em contato para confirmar.",
       });
       form.reset();
+      setSelectedCategoryId("");
+      setSelectedService("");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      let title = "Erro ao agendar";
+      let description = "Tente novamente mais tarde.";
+      
+      if (error.message?.includes("horário")) {
+        title = "Horário não disponível";
+        description = error.message;
+      } else if (error.message) {
+        description = error.message;
+      }
+      
       toast({
-        title: "Erro ao agendar",
-        description: error.message || "Tente novamente mais tarde.",
+        title,
+        description,
         variant: "destructive",
       });
     },

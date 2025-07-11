@@ -279,3 +279,12 @@ Preferred communication style: Simple, everyday language.
 - **Design profissional**: SVGs com gradientes e elementos visuais adequados ao tema de salão de beleza
 - **Fallback robusto**: Garantia de que site sempre terá imagens funcionais, mesmo após problemas de deployment
 - **Logs detalhados**: Sistema reporta quantas imagens foram corrigidas e quais serviços foram afetados
+
+### Sistema de Validação de Conflito de Horários (2025-07-11)
+- **Problema crítico resolvido**: Impossível criar dois agendamentos para o mesmo horário
+- **Validação robusta**: Sistema verifica conflitos antes de criar novos agendamentos
+- **Mensagens claras**: Erro 409 com explicação em português sobre horário ocupado
+- **Informações do conflito**: Mostra nome do cliente e horário já agendado
+- **Tratamento no frontend**: Interface exibe mensagem amigável quando horário está ocupado
+- **Exclusão de cancelados**: Apenas agendamentos ativos (não cancelados) geram conflito
+- **Integridade garantida**: Sistema mantém organização perfeita da agenda do salão
