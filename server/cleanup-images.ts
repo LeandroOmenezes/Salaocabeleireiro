@@ -36,6 +36,9 @@ export async function cleanupBrokenImageReferences() {
     
     console.log("🔒 Verificação concluída SEM MODIFICAÇÕES - imagens preservadas");
     
+    // SEED TAMBÉM DESABILITADO PARA PROTEGER IMAGENS PERSONALIZADAS
+    // await seedDefaultImages();
+    
   } catch (error) {
     console.error("❌ Erro durante verificação de imagens:", error);
   }

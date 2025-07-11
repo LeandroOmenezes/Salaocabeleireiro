@@ -3,7 +3,11 @@ import fs from "fs";
 import path from "path";
 
 export async function seedDefaultImages() {
-  console.log("🌱 Verificando necessidade de imagens padrão...");
+  console.log("🔒 SEED DE IMAGENS DESABILITADO para preservar imagens personalizadas");
+  console.log("📸 Suas imagens estão protegidas contra substituição automática");
+  
+  // SEED COMPLETAMENTE DESABILITADO PARA PROTEGER UPLOADS DO USUÁRIO
+  return;
   
   try {
     // Verificar se o diretório uploads existe
