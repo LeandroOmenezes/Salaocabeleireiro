@@ -557,15 +557,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/appointments", async (req: Request, res: Response) => {
     try {
-      // Mesmo para usuários não autenticados, retornar uma lista vazia
-      // para evitar o erro 401 que poderia causar problemas na interface
-      if (!req.isAuthenticated()) {
-        console.log("[appointments] User not authenticated, returning empty array");
-        return res.json([]);
-      }
+      console.log("[appointments] Request received, user authenticated:", req.isAuthenticated());
+      console.log("[appointments] User info:", req.user);
       
       const appointments = await storage.getAppointments();
-      console.log(`[appointments] Returning ${appointments.length} appointments:`, appointments);
+      console.log(`[appointments] Found ${appointments.length} appointments in database:`, appointments);
+      
+      // Temporariamente retornar todos os agendamentos para debug
       res.json(appointments);
     } catch (error) {
       console.error("[appointments] Error fetching appointments:", error);
