@@ -65,16 +65,16 @@ export default function SalesHistory() {
 
   return (
     <div className="bg-gray-100 p-6 rounded-lg shadow-md h-full">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold text-gray-800 flex items-center">
+      <div className="mb-4">
+        <h3 className="text-xl font-bold text-gray-800 flex items-center mb-3">
           <i className="fas fa-history mr-3 text-blue-500"></i> Histórico de Vendas
         </h3>
-        <div className="flex space-x-2">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
           <Button
             variant={filterPeriod === "day" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilterPeriod("day")}
-            className={filterPeriod === "day" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"}
+            className={`${filterPeriod === "day" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"} text-xs sm:text-sm px-2 sm:px-3`}
           >
             Hoje
           </Button>
@@ -82,7 +82,7 @@ export default function SalesHistory() {
             variant={filterPeriod === "week" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilterPeriod("week")}
-            className={filterPeriod === "week" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"}
+            className={`${filterPeriod === "week" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"} text-xs sm:text-sm px-2 sm:px-3`}
           >
             Semana
           </Button>
@@ -90,7 +90,7 @@ export default function SalesHistory() {
             variant={filterPeriod === "month" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilterPeriod("month")}
-            className={filterPeriod === "month" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"}
+            className={`${filterPeriod === "month" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"} text-xs sm:text-sm px-2 sm:px-3`}
           >
             Mês
           </Button>
@@ -98,7 +98,7 @@ export default function SalesHistory() {
             variant={filterPeriod === "all" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilterPeriod("all")}
-            className={filterPeriod === "all" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"}
+            className={`${filterPeriod === "all" ? "bg-blue-500 text-white" : "bg-white border border-gray-200 text-gray-700"} text-xs sm:text-sm px-2 sm:px-3`}
           >
             Todos
           </Button>
