@@ -26,11 +26,18 @@ const appointmentFormSchema = z.object({
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
+interface TimeSlot {
+  time: string;
+  available: boolean;
+  status: 'available' | 'occupied';
+}
+
 export default function AppointmentForm() {
   const { toast } = useToast();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>("");
   
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -59,6 +66,16 @@ export default function AppointmentForm() {
     },
     enabled: !!selectedCategoryId,
   });
+
+  const { data: timeSlots, isLoading: isLoadingTimeSlots } = useQuery<TimeSlot[]>({
+    queryKey: ['/api/appointments/available-times', selectedDate],
+    queryFn: async () => {
+      if (!selectedDate) return [];
+      const response = await fetch(`/api/appointments/available-times/${selectedDate}`);
+      return response.json();
+    },
+    enabled: !!selectedDate,
+  });
   
   useEffect(() => {
     if (categories && selectedCategoryId) {
@@ -78,6 +95,18 @@ export default function AppointmentForm() {
       }
     }
   }, [services, form]);
+
+  // Observar mudanças na data para buscar horários disponíveis
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'date' && value.date) {
+        setSelectedDate(value.date);
+        // Limpar horário selecionado quando a data mudar
+        form.setValue('time', '');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: AppointmentFormValues) => {
@@ -184,9 +213,8 @@ export default function AppointmentForm() {
     });
   };
 
-  const availableTimes = [
-    "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"
-  ];
+  // Obter data mínima (hoje)
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <Form {...form}>
@@ -349,23 +377,46 @@ export default function AppointmentForm() {
             name="time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-700 font-medium">Horário</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <SelectValue placeholder="Selecione um horário">
-                        {field.value}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {availableTimes.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
+                <FormLabel className="text-gray-700 font-medium">
+                  Horário {selectedDate && `- ${new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR')}`}
+                </FormLabel>
+                {!selectedDate ? (
+                  <div className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 text-center">
+                    Selecione uma data primeiro
+                  </div>
+                ) : isLoadingTimeSlots ? (
+                  <div className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                      Carregando horários...
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {timeSlots?.map((slot) => (
+                      <button
+                        key={slot.time}
+                        type="button"
+                        onClick={() => slot.available && field.onChange(slot.time)}
+                        disabled={!slot.available}
+                        className={`
+                          px-3 py-2 rounded-lg border text-sm font-medium transition-all duration-200
+                          ${field.value === slot.time 
+                            ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
+                            : slot.available 
+                              ? 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm' 
+                              : 'bg-red-50 text-red-400 border-red-200 cursor-not-allowed'
+                          }
+                        `}
+                      >
+                        {slot.time}
+                        {!slot.available && (
+                          <div className="text-xs mt-1">Ocupado</div>
+                        )}
+                      </button>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                )}
                 <FormMessage />
               </FormItem>
             )}

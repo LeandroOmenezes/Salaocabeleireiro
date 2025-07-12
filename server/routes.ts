@@ -536,6 +536,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // === Appointments ===
+  // Nova rota para buscar horários disponíveis
+  app.get("/api/appointments/available-times/:date", async (req: Request, res: Response) => {
+    try {
+      const date = req.params.date;
+      
+      // Gerar todos os horários possíveis (intervalo de 40 minutos)
+      const generateTimeSlots = () => {
+        const slots = [];
+        const startHour = 9; // 09:00
+        const endHour = 17; // 17:00 (último horário 16:20)
+        
+        for (let hour = startHour; hour < endHour; hour++) {
+          for (let minute = 0; minute < 60; minute += 40) {
+            const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            slots.push(timeString);
+          }
+        }
+        return slots;
+      };
+      
+      const allTimeSlots = generateTimeSlots();
+      
+      // Buscar agendamentos existentes para a data
+      const existingAppointments = await storage.getAppointments();
+      const bookedTimes = existingAppointments
+        .filter(appointment => 
+          appointment.date === date && 
+          appointment.status !== 'cancelled'
+        )
+        .map(appointment => appointment.time);
+      
+      // Criar lista de horários com status
+      const timeSlots = allTimeSlots.map(time => ({
+        time,
+        available: !bookedTimes.includes(time),
+        status: bookedTimes.includes(time) ? 'occupied' : 'available'
+      }));
+      
+      res.json(timeSlots);
+    } catch (error) {
+      console.error("[appointments] Error fetching available times:", error);
+      res.status(500).json({ message: "Erro ao buscar horários disponíveis" });
+    }
+  });
+
   app.post("/api/appointments", async (req: Request, res: Response) => {
     try {
       const appointmentData = insertAppointmentSchema.parse(req.body);
