@@ -407,7 +407,7 @@ export default function AppointmentForm() {
                           ${field.value === slot.time 
                             ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
                             : slot.available 
-                              ? 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm' 
+                              ? 'bg-green-50 text-green-700 border-green-200 hover:border-green-400 hover:bg-green-100 hover:shadow-sm' 
                               : 'bg-red-50 text-red-400 border-red-200 cursor-not-allowed'
                           }
                         `}
