@@ -23,6 +23,24 @@ interface UserAppointment {
   createdAt: string;
 }
 
+interface Service {
+  id: number;
+  name: string;
+  description: string;
+  minPrice: number;
+  maxPrice: number;
+  categoryId: number;
+  icon: string;
+  featured: boolean;
+  imageUrl?: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+}
+
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
 
@@ -50,18 +68,40 @@ export default function ProfilePage() {
     enabled: !!user,
   });
 
+  const { data: services = [] } = useQuery<Service[]>({
+    queryKey: ["/api/services/all"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  // Função para encontrar dados do serviço
+  const getServiceData = (serviceId: number) => {
+    return services.find(s => s.id === serviceId);
+  };
+
+  // Função para encontrar dados da categoria
+  const getCategoryData = (categoryId: number) => {
+    return categories.find(c => c.id === categoryId);
+  };
+
 
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -70,11 +110,28 @@ export default function ProfilePage() {
       case 'confirmed':
         return 'Confirmado';
       case 'pending':
-        return 'Pendente';
+        return 'Aguardando Confirmação';
       case 'cancelled':
         return 'Cancelado';
+      case 'completed':
+        return 'Realizado';
       default:
         return status;
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return '📅';
+      case 'pending':
+        return '⏳';
+      case 'cancelled':
+        return '❌';
+      case 'completed':
+        return '✅';
+      default:
+        return '📋';
     }
   };
 
@@ -134,76 +191,110 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {myAppointments.map((appointment) => (
-                        <div key={appointment.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                          <div className="space-y-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-                              <h3 className="font-semibold text-gray-900">
-                                Agendamento #{appointment.id}
-                              </h3>
-                              <Badge className={getStatusColor(appointment.status)}>
-                                {getStatusText(appointment.status)}
-                              </Badge>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
-                              <div className="flex items-center space-x-2">
-                                <Calendar className="w-4 h-4 flex-shrink-0" />
-                                <span>{new Date(appointment.date).toLocaleDateString('pt-BR')}</span>
+                      {myAppointments.map((appointment) => {
+                        const serviceData = getServiceData(appointment.serviceId);
+                        const categoryData = getCategoryData(appointment.categoryId);
+                        
+                        return (
+                          <div key={appointment.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                            <div className="space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    {serviceData && (
+                                      <i className={`${serviceData.icon} text-blue-500`}></i>
+                                    )}
+                                    <h3 className="font-semibold text-gray-900">
+                                      {serviceData?.name || `Serviço #${appointment.serviceId}`}
+                                    </h3>
+                                  </div>
+                                  {categoryData && (
+                                    <p className="text-sm text-gray-600 mb-1">
+                                      <i className={`${categoryData.icon} mr-1`}></i>
+                                      {categoryData.name}
+                                    </p>
+                                  )}
+                                  {serviceData && serviceData.minPrice && (
+                                    <p className="text-sm text-green-600 font-medium">
+                                      A partir de R$ {serviceData.minPrice.toFixed(2).replace('.', ',')}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge className={`${getStatusColor(appointment.status)} border flex items-center space-x-1 flex-shrink-0`}>
+                                  <span>{getStatusIcon(appointment.status)}</span>
+                                  <span>{getStatusText(appointment.status)}</span>
+                                </Badge>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <Clock className="w-4 h-4 flex-shrink-0" />
-                                <span>{appointment.time}</span>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                                <div className="flex items-center space-x-2">
+                                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                                  <span>{new Date(appointment.date).toLocaleDateString('pt-BR')}</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Clock className="w-4 h-4 flex-shrink-0" />
+                                  <span>{appointment.time}</span>
+                                </div>
                               </div>
-                            </div>
-                            
-                            {appointment.notes && (
-                              <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                                <p className="text-sm text-gray-600">
-                                  <strong>Observações:</strong> {appointment.notes}
-                                </p>
+                              
+                              {appointment.notes && (
+                                <div className="mt-3 p-3 bg-blue-50 rounded-md border-l-4 border-blue-200">
+                                  <p className="text-sm text-gray-700">
+                                    <strong className="text-blue-800">Observações:</strong> {appointment.notes}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
+                                Agendamento #{appointment.id} • Criado em: {new Date(appointment.createdAt).toLocaleDateString('pt-BR')} às{' '}
+                                {new Date(appointment.createdAt).toLocaleTimeString('pt-BR')}
                               </div>
-                            )}
-                            
-                            <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                              Criado em: {new Date(appointment.createdAt).toLocaleDateString('pt-BR')} às{' '}
-                              {new Date(appointment.createdAt).toLocaleTimeString('pt-BR')}
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </CardContent>
               </Card>
 
               {/* Estatísticas Rápidas */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                 <Card>
-                  <CardContent className="p-6 text-center">
-                    <Calendar className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{myAppointments.length}</div>
-                    <div className="text-sm text-gray-600">Total de Agendamentos</div>
+                  <CardContent className="p-4 text-center">
+                    <Calendar className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                    <div className="text-xl font-bold text-gray-900">{myAppointments.length}</div>
+                    <div className="text-xs text-gray-600">Total</div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-6 text-center">
-                    <Clock className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-lg mb-2">✅</div>
+                    <div className="text-xl font-bold text-green-600">
+                      {myAppointments.filter(a => a.status === 'completed').length}
+                    </div>
+                    <div className="text-xs text-gray-600">Realizados</div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <div className="text-lg mb-2">📅</div>
+                    <div className="text-xl font-bold text-blue-600">
                       {myAppointments.filter(a => a.status === 'confirmed').length}
                     </div>
-                    <div className="text-sm text-gray-600">Confirmados</div>
+                    <div className="text-xs text-gray-600">Confirmados</div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-6 text-center">
-                    <Star className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-lg mb-2">⏳</div>
+                    <div className="text-xl font-bold text-yellow-600">
                       {myAppointments.filter(a => a.status === 'pending').length}
                     </div>
-                    <div className="text-sm text-gray-600">Pendentes</div>
+                    <div className="text-xs text-gray-600">Pendentes</div>
                   </CardContent>
                 </Card>
               </div>
