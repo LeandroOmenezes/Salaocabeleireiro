@@ -309,3 +309,13 @@ Preferred communication style: Simple, everyday language.
 - **Persistência garantida**: Imagens agora sobrevivem a qualquer redeploy ou reinicialização
 - **Performance otimizada**: Cache de 24 horas nas rotas de imagens
 - **Compatibilidade total**: Sistema mantém URLs amigáveis (/api/images/...) para o frontend
+
+### Correção Definitiva de Mensagens de Erro de Login (2025-07-12)
+- **Problema resolvido**: Mensagens de erro técnicas aparecendo no frontend ("401: Email ou senha inválidos")
+- **Solução implementada**: Sistema inteligente de extração de mensagens em `client/src/lib/queryClient.ts`
+- **Funcionalidades**: Extração automática de mensagem do JSON de resposta com fallbacks para códigos de status
+- **Mensagens amigáveis**: Códigos 401, 403 e 500+ agora mostram mensagens em português limpo
+- **Cobertura completa**: Funciona tanto em desenvolvimento quanto em produção
+- **UX melhorada**: Usuários veem apenas "Email ou senha inválidos" em vez de códigos técnicos
+- **Robustez**: Sistema com dupla proteção - JSON parsing e fallback por código de status
+- **Confirmado funcionando**: Testado e aprovado pelo usuário em ambiente de produção
