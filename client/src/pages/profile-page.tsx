@@ -6,6 +6,8 @@ import Footer from "@/components/ui/footer";
 import { Calendar, Clock, User, Phone, Mail, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
+import { Redirect } from "wouter";
 
 interface UserAppointment {
   id: number;
@@ -22,13 +24,33 @@ interface UserAppointment {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
-  const { data: myAppointments = [], isLoading: appointmentsLoading } = useQuery<UserAppointment[]>({
+  // A ProtectedRoute já cuida da autenticação, então aqui só precisamos verificar se ainda está carregando
+  if (authLoading) {
+    return (
+      <div className="font-sans bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Carregando...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Se chegou até aqui, o usuário está autenticado (ProtectedRoute garante isso)
+
+  const { data: myAppointments = [], isLoading: appointmentsLoading, error: appointmentsError } = useQuery<UserAppointment[]>({
     queryKey: ["/api/my-appointments"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!user,
   });
+
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
