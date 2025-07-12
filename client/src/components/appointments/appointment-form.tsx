@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Category, ServiceOption } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { MessageSquare } from "lucide-react";
@@ -131,6 +131,9 @@ export default function AppointmentForm() {
       form.reset();
       setSelectedCategoryId("");
       setSelectedService("");
+      setSelectedDate("");
+      // Invalidar horários disponíveis para atualizar status visual
+      queryClient.invalidateQueries({ queryKey: ['/api/appointments/available-times'] });
     },
     onError: (error: any) => {
       let title = "Erro ao agendar";

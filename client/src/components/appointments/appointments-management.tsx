@@ -27,6 +27,8 @@ export default function AppointmentsManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
+      // Também invalidar horários disponíveis para atualizar status visual
+      queryClient.invalidateQueries({ queryKey: ['/api/appointments/available-times'] });
       toast({
         title: "Status atualizado",
         description: "O status do agendamento foi atualizado com sucesso.",
