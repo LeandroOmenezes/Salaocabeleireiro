@@ -11,10 +11,20 @@ async function throwIfResNotOk(res: Response) {
         throw new Error(errorData.message);
       }
     } catch {
-      // Se não for JSON válido, usar texto original
+      // Se não for JSON válido, usar apenas o status e a mensagem
+      if (res.status === 401) {
+        throw new Error("Email ou senha inválidos");
+      }
+      if (res.status === 403) {
+        throw new Error("Acesso negado");
+      }
+      if (res.status >= 500) {
+        throw new Error("Erro interno do servidor");
+      }
     }
     
-    throw new Error(`${res.status}: ${text}`);
+    // Fallback para outros tipos de erro
+    throw new Error(res.statusText || "Erro desconhecido");
   }
 }
 
