@@ -563,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bookedTimes = existingAppointments
         .filter(appointment => 
           appointment.date === date && 
-          appointment.status !== 'cancelled'
+          (appointment.status === 'pending' || appointment.status === 'confirmed')
         )
         .map(appointment => appointment.time);
       
@@ -591,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conflictingAppointment = existingAppointments.find(existing => 
         existing.date === appointmentData.date && 
         existing.time === appointmentData.time &&
-        existing.status !== 'cancelled'
+        (existing.status === 'pending' || existing.status === 'confirmed')
       );
       
       if (conflictingAppointment) {
