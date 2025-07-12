@@ -52,7 +52,8 @@ export default function AppointmentsManagement() {
   const filteredAppointments = getFilteredAppointments();
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    // Adicionar 'T00:00:00' para forçar timezone local e evitar problemas de UTC
+    const date = new Date(dateString + 'T00:00:00');
     return date.toLocaleDateString('pt-BR');
   };
 
