@@ -319,3 +319,19 @@ Preferred communication style: Simple, everyday language.
 - **UX melhorada**: Usuários veem apenas "Email ou senha inválidos" em vez de códigos técnicos
 - **Robustez**: Sistema com dupla proteção - JSON parsing e fallback por código de status
 - **Confirmado funcionando**: Testado e aprovado pelo usuário em ambiente de produção
+
+### Sistema de Agendamentos com Intervalos de 40 Minutos e Cache Corrigido (2025-07-12)
+- **Intervalos de 40 minutos**: Implementado sistema de horários (09:00, 09:40, 10:20, etc.) via API `/api/appointments/available-times/:date`
+- **Interface visual corrigida**: Horários disponíveis aparecem verdes, ocupados aparecem vermelhos com texto "Ocupado"
+- **Cache inteligente**: Sistema invalida automaticamente horários disponíveis quando admin confirma/cancela agendamentos
+- **Lógica de status**: Apenas agendamentos "pending" e "confirmed" ocupam horários; "cancelled" e "completed" liberam vagas
+- **Problema de timezone resolvido**: Datas no painel admin agora aparecem corretamente (12/07 em vez de 11/07)
+- **Funcionamento confirmado**: Agendamentos cancelados voltam a ficar disponíveis instantaneamente
+
+### Correção da Página de Perfil de Usuários (2025-07-12)
+- **Problema crítico resolvido**: Tela de perfil ficava branca para usuários não-admin
+- **Causa identificada**: Página tentava acessar `/api/appointments` (rota restrita para admins)
+- **Nova rota criada**: `/api/my-appointments` permite usuários verem apenas seus próprios agendamentos
+- **Segurança mantida**: Filtragem por email do usuário logado garante privacidade
+- **Interface completa**: Página de perfil mostra estatísticas e lista detalhada dos agendamentos pessoais
+- **Funciona em produção**: Correção arquitetural que resolve o problema em qualquer ambiente
