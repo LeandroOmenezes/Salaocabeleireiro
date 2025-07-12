@@ -634,6 +634,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error fetching appointments" });
     }
   });
+
+  // Nova rota para usuários verem seus próprios agendamentos
+  app.get("/api/my-appointments", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated()) {
+        console.log("[my-appointments] Unauthorized access attempt");
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = req.user as any;
+      const allAppointments = await storage.getAppointments();
+      
+      // Filtrar apenas os agendamentos do usuário atual
+      const userAppointments = allAppointments.filter(appointment => 
+        appointment.email === user.username
+      );
+      
+      console.log(`[my-appointments] Returning ${userAppointments.length} appointments for user ${user.username}`);
+      res.json(userAppointments);
+    } catch (error) {
+      console.error("[my-appointments] Error fetching user appointments:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
   
   app.patch("/api/appointments/:id/status", async (req: Request, res: Response) => {
     try {

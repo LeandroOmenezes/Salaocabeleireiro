@@ -24,16 +24,11 @@ interface UserAppointment {
 export default function ProfilePage() {
   const { user } = useAuth();
 
-  const { data: userAppointments = [], isLoading: appointmentsLoading } = useQuery<UserAppointment[]>({
-    queryKey: ["/api/appointments"],
+  const { data: myAppointments = [], isLoading: appointmentsLoading } = useQuery<UserAppointment[]>({
+    queryKey: ["/api/my-appointments"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!user,
   });
-
-  // Filtrar apenas os agendamentos do usuário atual
-  const myAppointments = userAppointments.filter(appointment => 
-    appointment.email === user?.username
-  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
