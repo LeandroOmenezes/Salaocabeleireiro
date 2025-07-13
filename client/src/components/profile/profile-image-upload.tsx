@@ -35,9 +35,20 @@ export function ProfileImageUpload({
       const formData = new FormData();
       formData.append('profileImage', file);
 
-      const res = await apiRequest("POST", "/api/user/upload-profile-image", formData, {
-        'Content-Type': undefined, // Let browser set boundary
+      // Use fetch directly for file upload
+      console.log("Sending request to /api/user/upload-profile-image");
+      console.log("FormData contains:", formData.get('profileImage'));
+      
+      const res = await fetch("/api/user/upload-profile-image", {
+        method: "POST",
+        body: formData,
+        credentials: 'include', // Include session cookies
       });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Erro no servidor' }));
+        throw new Error(errorData.error || `Erro ${res.status}: ${res.statusText}`);
+      }
 
       return await res.json();
     },
@@ -53,8 +64,8 @@ export function ProfileImageUpload({
     onError: (error: any) => {
       console.error("Erro ao fazer upload:", error);
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao fazer upload da imagem",
+        title: "Erro no upload",
+        description: error.message || "Não foi possível fazer upload da imagem. Tente novamente.",
         variant: "destructive",
       });
       setImagePreview(null);
@@ -65,11 +76,13 @@ export function ProfileImageUpload({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log("File selected:", file.name, file.type, file.size);
+
     // Validação do tipo de arquivo
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Erro",
-        description: "Por favor, selecione apenas arquivos de imagem",
+        title: "Tipo de arquivo inválido",
+        description: "Por favor, selecione apenas arquivos de imagem (JPG, PNG, WebP)",
         variant: "destructive",
       });
       return;
@@ -78,7 +91,7 @@ export function ProfileImageUpload({
     // Validação do tamanho (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "Erro",
+        title: "Arquivo muito grande",
         description: "A imagem deve ter no máximo 5MB",
         variant: "destructive",
       });
@@ -93,6 +106,7 @@ export function ProfileImageUpload({
     reader.readAsDataURL(file);
 
     // Upload da imagem
+    console.log("Starting upload...");
     uploadMutation.mutate(file);
   };
 

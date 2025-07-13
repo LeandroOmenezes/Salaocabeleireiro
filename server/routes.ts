@@ -1290,13 +1290,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // === User Profile Image Routes ===
+  // Test endpoint for debugging authentication
+  app.get("/api/user/test-auth", (req: Request, res: Response) => {
+    res.json({
+      authenticated: req.isAuthenticated(),
+      user: req.user ? { id: req.user.id, username: req.user.username } : null
+    });
+  });
+
   // Upload de imagem de perfil do usuário
   app.post("/api/user/upload-profile-image", upload.single('profileImage'), async (req: Request, res: Response) => {
+    console.log("=== UPLOAD PROFILE IMAGE DEBUG ===");
+    console.log("User authenticated:", req.isAuthenticated());
+    console.log("User data:", req.user ? { id: req.user.id, username: req.user.username } : null);
+    console.log("File received:", !!req.file);
+    console.log("Headers:", req.headers);
+    console.log("Body keys:", Object.keys(req.body));
+    
+    if (req.file) {
+      console.log("File details:", {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        fieldname: req.file.fieldname
+      });
+    }
+
     if (!req.isAuthenticated()) {
+      console.log("❌ User not authenticated");
       return res.status(401).json({ error: "Login necessário" });
     }
 
     if (!req.file) {
+      console.log("❌ No file in request");
       return res.status(400).json({ error: "Arquivo de imagem necessário" });
     }
 
