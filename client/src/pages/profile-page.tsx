@@ -88,6 +88,13 @@ export default function ProfilePage() {
     return categories.find(c => c.id === categoryId);
   };
 
+  // Função para formatar data corretamente sem problemas de timezone
+  const formatDate = (dateString: string) => {
+    // Adicionar 'T00:00:00' para forçar timezone local e evitar problemas de UTC
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR');
+  };
+
 
 
   const getStatusColor = (status: string) => {
@@ -229,7 +236,7 @@ export default function ProfilePage() {
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
                                 <div className="flex items-center space-x-2">
                                   <Calendar className="w-4 h-4 flex-shrink-0" />
-                                  <span>{new Date(appointment.date).toLocaleDateString('pt-BR')}</span>
+                                  <span>{formatDate(appointment.date)}</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <Clock className="w-4 h-4 flex-shrink-0" />
