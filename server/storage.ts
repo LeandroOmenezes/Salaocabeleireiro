@@ -1291,6 +1291,7 @@ export class DatabaseStorage implements IStorage {
       comment: reviewComments.comment,
       createdAt: reviewComments.createdAt,
       heartLikes: reviewComments.heartLikes,
+      thumbsLikes: reviewComments.thumbsLikes,
       // Include user profile image data
       userProfileImageBase64: users.profileImageBase64
     })
@@ -1299,7 +1300,8 @@ export class DatabaseStorage implements IStorage {
     .where(eq(reviewComments.reviewId, reviewId))
     .orderBy(desc(reviewComments.createdAt));
 
-    return comments;
+    console.log(`[storage-debug] Found ${comments.length} comments for review ${reviewId}`);
+    return comments as ReviewComment[];
   }
 
   async createReviewComment(comment: InsertReviewComment & { userId: number; userName: string }): Promise<ReviewComment> {
