@@ -46,7 +46,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
       setIsHeartAnimating(true);
       setTimeout(() => setIsHeartAnimating(false), 1000);
       
-      // Atualiza a cache das queries
+      // Atualiza a cache das queries (apenas reviews principais)
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/likes"] });
     },
@@ -70,7 +70,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
       setIsThumbsAnimating(true);
       setTimeout(() => setIsThumbsAnimating(false), 1000);
       
-      // Atualiza a cache das queries
+      // Atualiza a cache das queries (apenas reviews principais)
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/likes"] });
     },
