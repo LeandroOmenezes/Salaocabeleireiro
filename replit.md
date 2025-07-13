@@ -357,3 +357,10 @@ Preferred communication style: Simple, everyday language.
 - **Sequência correta**: 09:00, 09:40, 10:20, 11:00, 11:40, 12:20, 13:00, 13:40, etc.
 - **Método implementado**: Cálculo baseado em minutos totais com incrementos de 40 minutos
 - **Funcionamento confirmado**: Horários agora seguem intervalos exatos de 40 minutos
+
+### Extensão do Horário de Atendimento (2025-07-13)
+- **Ampliação solicitada**: Horário de atendimento estendido para comportar mais clientes
+- **Horário anterior**: 09:00 às 16:40 (12 horários disponíveis)
+- **Horário atual**: 09:00 às 17:40 (14 horários disponíveis)
+- **Horários adicionados**: 17:00 e 17:40 para atender mais 2 clientes por dia
+- **Capacidade aumentada**: +16,7% na capacidade diária de atendimento

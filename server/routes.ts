@@ -545,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const generateTimeSlots = () => {
         const slots = [];
         const startTime = 9 * 60; // 09:00 em minutos (540 minutos)
-        const endTime = 17 * 60; // 17:00 em minutos (1020 minutos)
+        const endTime = 18 * 60; // 18:00 em minutos (1080 minutos)
         const interval = 40; // 40 minutos
         
         for (let time = startTime; time < endTime; time += interval) {
