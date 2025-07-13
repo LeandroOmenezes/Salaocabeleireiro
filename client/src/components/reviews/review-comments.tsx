@@ -21,7 +21,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
 
   // Buscar comentários da review
   const { data: comments = [], isLoading } = useQuery<ReviewComment[]>({
-    queryKey: ["/api/reviews", reviewId, "comments"],
+    queryKey: [`/api/reviews/${reviewId}/comments`],
     enabled: showComments
   });
 
@@ -38,7 +38,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/reviews", reviewId, "comments"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/reviews/${reviewId}/comments`] });
       setNewComment("");
       toast({
         title: "Comentário adicionado!",
@@ -62,8 +62,23 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
     },
     onSuccess: (response) => {
       const { userLiked, comment, likeType } = response;
-      queryClient.invalidateQueries({ queryKey: ["/api/reviews", reviewId, "comments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user/comment-likes"] });
+      
+      // Atualização otimista para evitar piscamento
+      queryClient.setQueryData([`/api/reviews/${reviewId}/comments`], (oldComments: ReviewComment[] | undefined) => {
+        if (!oldComments) return oldComments;
+        return oldComments.map(c => 
+          c.id === comment.id ? { ...c, heartLikes: comment.heartLikes } : c
+        );
+      });
+      
+      queryClient.setQueryData(["/api/user/comment-likes"], (oldLikes: {heartLikes: number[]} | undefined) => {
+        if (!oldLikes) return oldLikes;
+        if (userLiked) {
+          return { heartLikes: [...oldLikes.heartLikes, comment.id] };
+        } else {
+          return { heartLikes: oldLikes.heartLikes.filter(id => id !== comment.id) };
+        }
+      });
       
       // Toast de feedback
       const emoji = likeType === 'heart' ? '❤️' : '👍';
