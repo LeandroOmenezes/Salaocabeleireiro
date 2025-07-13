@@ -393,3 +393,13 @@ Preferred communication style: Simple, everyday language.
 - **Animações independentes**: Cada botão tem suas próprias animações e estados visuais
 - **Contadores em tempo real**: Sincronização automática entre frontend e backend
 - **Funcionamento confirmado**: Sistema testado e aprovado com likes independentes funcionando perfeitamente
+
+### Sistema Completo de Imagens de Perfil nas Avaliações (2025-07-13)
+- **Problema crítico resolvido**: Imagens de perfil agora aparecem em todas as avaliações principais
+- **Campo userId adicionado**: Schema da tabela `reviews` expandido com campo `user_id` para associação com usuários
+- **Migração do banco**: Schema atualizado via `npm run db:push` com campo userId funcional
+- **Criação de reviews melhorada**: Sistema agora associa automaticamente avaliações ao usuário logado
+- **Query otimizada**: Método `getReviews()` usa LEFT JOIN com tabela `users` para buscar dados de perfil
+- **Dados históricos corrigidos**: Avaliações antigas manualmente associadas aos usuários corretos no banco
+- **Sistema unificado completo**: Imagens de perfil funcionando em header, perfil, comentários E avaliações principais
+- **Funcionalidade confirmada**: Testado e aprovado - todas as avaliações mostram fotos de perfil dos usuários
