@@ -240,9 +240,11 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                             userCommentLikes.heartLikes.includes(comment.id) ? "fill-current scale-110" : ""
                           }`}
                         />
-                        <span className="font-medium">
-                          {comment.heartLikes > 0 ? comment.heartLikes : null}
-                        </span>
+                        {comment.heartLikes > 0 && (
+                          <span className="font-medium">
+                            {comment.heartLikes}
+                          </span>
+                        )}
                       </Button>
 
                       {/* Botão Joinha */}
@@ -263,9 +265,11 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                             userCommentLikes.thumbsLikes.includes(comment.id) ? "fill-current scale-110" : ""
                           }`}
                         />
-                        <span className="font-medium" style={{display: comment.thumbsLikes > 0 ? 'inline' : 'none'}}>
-                          {comment.thumbsLikes}
-                        </span>
+                        {comment.thumbsLikes > 0 && (
+                          <span className="font-medium">
+                            {comment.thumbsLikes}
+                          </span>
+                        )}
                       </Button>
 
                       {/* Status do comentário */}
