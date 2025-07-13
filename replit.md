@@ -364,3 +364,10 @@ Preferred communication style: Simple, everyday language.
 - **Horário atual**: 09:00 às 17:40 (14 horários disponíveis)
 - **Horários adicionados**: 17:00 e 17:40 para atender mais 2 clientes por dia
 - **Capacidade aumentada**: +16,7% na capacidade diária de atendimento
+
+### Limpeza Final do Banco de Dados (2025-07-13)
+- **Usuários de teste removidos**: Eliminados "Usuario de teste" e "RAQUEL DE OLIVEIRA AMARO MENEZES"
+- **Agendamentos limpos**: Removidos agendamentos ID 18 e 15 dos usuários de teste
+- **Contas eliminadas**: Deletadas contas com IDs 8 e 9 da tabela users
+- **Banco organizado**: Sistema agora possui apenas usuário admin legítimo (lleandro.m32@gmail.com)
+- **Ambiente limpo**: Zero agendamentos de teste, banco pronto para produção
