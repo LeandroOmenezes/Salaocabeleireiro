@@ -25,7 +25,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
   });
 
   // Buscar likes do usuário em comentários
-  const { data: userCommentLikes = [] } = useQuery<number[]>({
+  const { data: userCommentLikes = { heartLikes: [], thumbsLikes: [] } } = useQuery<{heartLikes: number[], thumbsLikes: number[]}>({
     queryKey: ["/api/user/comment-likes"],
     enabled: !!user
   });
@@ -55,25 +55,28 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
 
   // Curtir/descurtir comentário
   const likeCommentMutation = useMutation({
-    mutationFn: async (commentId: number) => {
-      const res = await apiRequest("POST", `/api/comments/${commentId}/like`);
+    mutationFn: async ({ commentId, likeType }: { commentId: number; likeType: 'heart' | 'thumbs' }) => {
+      const res = await apiRequest("POST", `/api/comments/${commentId}/like/${likeType}`);
       return res.json();
     },
     onSuccess: (response) => {
-      const { userLiked, comment } = response;
+      const { userLiked, comment, likeType } = response;
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", reviewId, "comments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/comment-likes"] });
       
       // Toast de feedback
+      const emoji = likeType === 'heart' ? '❤️' : '👍';
+      const action = likeType === 'heart' ? 'coração' : 'joinha';
+      
       if (userLiked) {
         toast({
-          title: "❤️ Curtida adicionada!",
-          description: "Você curtiu este comentário.",
+          title: `${emoji} ${action.charAt(0).toUpperCase() + action.slice(1)} adicionado!`,
+          description: `Você deu ${action} neste comentário.`,
         });
       } else {
         toast({
-          title: "Curtida removida",
-          description: "Você removeu sua curtida do comentário.",
+          title: `${action.charAt(0).toUpperCase() + action.slice(1)} removido`,
+          description: `Você removeu seu ${action} do comentário.`,
         });
       }
     },
@@ -93,7 +96,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
     }
   };
 
-  const handleLikeComment = (commentId: number) => {
+  const handleLikeComment = (commentId: number, likeType: 'heart' | 'thumbs') => {
     if (!user) {
       toast({
         title: "Login necessário",
@@ -102,7 +105,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
       });
       return;
     }
-    likeCommentMutation.mutate(commentId);
+    likeCommentMutation.mutate({ commentId, likeType });
   };
 
   const formatDate = (dateString: string) => {
@@ -223,22 +226,22 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleLikeComment(comment.id)}
+                        onClick={() => handleLikeComment(comment.id, 'heart')}
                         disabled={!user || likeCommentMutation.isPending}
                         className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
-                          userCommentLikes.includes(comment.id)
+                          userCommentLikes.heartLikes.includes(comment.id)
                             ? "text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700"
                             : "text-gray-500 hover:text-red-600 hover:bg-red-50"
                         }`}
-                        title={userCommentLikes.includes(comment.id) ? "Remover curtida" : "Curtir comentário"}
+                        title={userCommentLikes.heartLikes.includes(comment.id) ? "Remover coração" : "Dar coração"}
                       >
                         <Heart
                           className={`h-4 w-4 mr-1 transition-all duration-200 ${
-                            userCommentLikes.includes(comment.id) ? "fill-current scale-110" : ""
+                            userCommentLikes.heartLikes.includes(comment.id) ? "fill-current scale-110" : ""
                           }`}
                         />
                         <span className="font-medium">
-                          {comment.likes > 0 ? comment.likes : ""}
+                          {comment.heartLikes > 0 ? comment.heartLikes : ""}
                         </span>
                       </Button>
 
@@ -246,32 +249,37 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleLikeComment(comment.id)}
+                        onClick={() => handleLikeComment(comment.id, 'thumbs')}
                         disabled={!user || likeCommentMutation.isPending}
                         className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
-                          userCommentLikes.includes(comment.id)
+                          userCommentLikes.thumbsLikes.includes(comment.id)
                             ? "text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
                             : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
                         }`}
-                        title="Dar joinha"
+                        title={userCommentLikes.thumbsLikes.includes(comment.id) ? "Remover joinha" : "Dar joinha"}
                       >
                         <ThumbsUp
-                          className={`h-4 w-4 transition-all duration-200 ${
-                            userCommentLikes.includes(comment.id) ? "fill-current scale-110" : ""
+                          className={`h-4 w-4 mr-1 transition-all duration-200 ${
+                            userCommentLikes.thumbsLikes.includes(comment.id) ? "fill-current scale-110" : ""
                           }`}
                         />
+                        <span className="font-medium">
+                          {comment.thumbsLikes > 0 ? comment.thumbsLikes : ""}
+                        </span>
                       </Button>
 
                       {/* Status do comentário */}
                       {user && (
                         <div className="flex items-center text-xs text-gray-400 ml-2">
-                          {userCommentLikes.includes(comment.id) ? (
-                            <span className="flex items-center animate-pulse">
-                              ❤️ <span className="ml-1">Você curtiu</span>
+                          {userCommentLikes.heartLikes.includes(comment.id) || userCommentLikes.thumbsLikes.includes(comment.id) ? (
+                            <span className="flex items-center">
+                              {userCommentLikes.heartLikes.includes(comment.id) && "❤️"}
+                              {userCommentLikes.thumbsLikes.includes(comment.id) && "👍"}
+                              <span className="ml-1">Você reagiu</span>
                             </span>
                           ) : (
                             <span className="flex items-center">
-                              💭 <span className="ml-1">Clique para curtir</span>
+                              💭 <span className="ml-1">Clique para reagir</span>
                             </span>
                           )}
                         </div>

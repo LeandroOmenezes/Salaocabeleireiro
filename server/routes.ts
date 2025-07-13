@@ -810,12 +810,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/comments/:commentId/like", async (req: Request, res: Response) => {
+  app.post("/api/comments/:commentId/like/:likeType", async (req: Request, res: Response) => {
     try {
       const commentId = parseInt(req.params.commentId);
+      const likeType = req.params.likeType as 'heart' | 'thumbs';
       
       if (isNaN(commentId)) {
         return res.status(400).json({ message: "ID do comentário inválido" });
+      }
+
+      if (!['heart', 'thumbs'].includes(likeType)) {
+        return res.status(400).json({ message: "Tipo de like inválido" });
       }
 
       // Verificar se o usuário está autenticado
@@ -823,7 +828,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "É necessário estar logado para curtir comentários" });
       }
       
-      const result = await storage.toggleLikeComment(commentId, req.user.id);
+      const result = await storage.toggleLikeComment(commentId, req.user.id, likeType);
 
       if (!result) {
         return res.status(404).json({ message: "Comentário não encontrado" });
@@ -831,7 +836,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(200).json({
         comment: result.comment,
-        userLiked: result.userLiked
+        userLiked: result.userLiked,
+        likeType
       });
     } catch (error) {
       res.status(500).json({ message: "Erro ao processar like no comentário" });

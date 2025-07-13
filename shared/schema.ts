@@ -127,20 +127,22 @@ export const reviewComments = pgTable("review_comments", {
   userId: integer("user_id").notNull(),
   userName: text("user_name").notNull(),
   comment: text("comment").notNull(),
-  likes: integer("likes").notNull().default(0),
+  heartLikes: integer("heart_likes").notNull().default(0),
+  thumbsLikes: integer("thumbs_likes").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertReviewCommentSchema = createInsertSchema(reviewComments, {
   reviewId: z.number().int(),
   comment: z.string().min(1),
-}).omit({ id: true, userId: true, userName: true, likes: true, createdAt: true });
+}).omit({ id: true, userId: true, userName: true, heartLikes: true, thumbsLikes: true, createdAt: true });
 
 // === Comment Likes ===
 export const commentLikes = pgTable("comment_likes", {
   id: serial("id").primaryKey(),
   commentId: integer("comment_id").notNull(),
   userId: integer("user_id").notNull(),
+  likeType: text("like_type").notNull(), // 'heart' ou 'thumbs'
   createdAt: timestamp("created_at").defaultNow(),
 });
 

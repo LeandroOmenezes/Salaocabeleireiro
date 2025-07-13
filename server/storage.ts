@@ -116,8 +116,9 @@ export interface IStorage {
   toggleLikeComment(
     commentId: number,
     userId: number,
+    likeType: 'heart' | 'thumbs',
   ): Promise<{ comment: ReviewComment; userLiked: boolean } | undefined>;
-  getUserCommentLikes(userId: number): Promise<number[]>;
+  getUserCommentLikes(userId: number): Promise<{heartLikes: number[], thumbsLikes: number[]}>;
 
   // Sales
   getSales(): Promise<Sale[]>;
@@ -1200,40 +1201,48 @@ export class DatabaseStorage implements IStorage {
     return newComment;
   }
 
-  async toggleLikeComment(commentId: number, userId: number): Promise<{ comment: ReviewComment; userLiked: boolean } | undefined> {
-    // Check if user already liked this comment
+  async toggleLikeComment(commentId: number, userId: number, likeType: 'heart' | 'thumbs'): Promise<{ comment: ReviewComment; userLiked: boolean } | undefined> {
+    // Check if user already liked this comment with this type
     const existingLike = await db.select().from(commentLikes)
       .where(and(
         eq(commentLikes.commentId, commentId),
-        eq(commentLikes.userId, userId)
+        eq(commentLikes.userId, userId),
+        eq(commentLikes.likeType, likeType)
       ));
 
     let userLiked: boolean;
+    const likeColumn = likeType === 'heart' ? reviewComments.heartLikes : reviewComments.thumbsLikes;
 
     if (existingLike.length > 0) {
-      // User already liked, remove like
+      // User already liked with this type, remove like
       await db.delete(commentLikes)
         .where(and(
           eq(commentLikes.commentId, commentId),
-          eq(commentLikes.userId, userId)
+          eq(commentLikes.userId, userId),
+          eq(commentLikes.likeType, likeType)
         ));
       
-      // Decrease likes count
+      // Decrease likes count for this type
       await db.update(reviewComments)
-        .set({ likes: sql`${reviewComments.likes} - 1` })
+        .set({ 
+          [likeType === 'heart' ? 'heartLikes' : 'thumbsLikes']: sql`${likeColumn} - 1`
+        })
         .where(eq(reviewComments.id, commentId));
       
       userLiked = false;
     } else {
-      // User hasn't liked, add like
+      // User hasn't liked with this type, add like
       await db.insert(commentLikes).values({
         commentId,
         userId,
+        likeType,
       });
       
-      // Increase likes count
+      // Increase likes count for this type
       await db.update(reviewComments)
-        .set({ likes: sql`${reviewComments.likes} + 1` })
+        .set({ 
+          [likeType === 'heart' ? 'heartLikes' : 'thumbsLikes']: sql`${likeColumn} + 1`
+        })
         .where(eq(reviewComments.id, commentId));
       
       userLiked = true;
@@ -1248,12 +1257,23 @@ export class DatabaseStorage implements IStorage {
     return { comment, userLiked };
   }
 
-  async getUserCommentLikes(userId: number): Promise<number[]> {
-    const likes = await db.select({ commentId: commentLikes.commentId })
+  async getUserCommentLikes(userId: number): Promise<{heartLikes: number[], thumbsLikes: number[]}> {
+    const allLikes = await db.select({ 
+      commentId: commentLikes.commentId, 
+      likeType: commentLikes.likeType 
+    })
       .from(commentLikes)
       .where(eq(commentLikes.userId, userId));
     
-    return likes.map(like => like.commentId);
+    const heartLikes = allLikes
+      .filter(like => like.likeType === 'heart')
+      .map(like => like.commentId);
+    
+    const thumbsLikes = allLikes
+      .filter(like => like.likeType === 'thumbs')
+      .map(like => like.commentId);
+    
+    return { heartLikes, thumbsLikes };
   }
 
   // Sales
