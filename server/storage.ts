@@ -1223,11 +1223,15 @@ export class DatabaseStorage implements IStorage {
         ));
       
       // Decrease likes count for this type
-      await db.update(reviewComments)
-        .set({ 
-          [likeType === 'heart' ? 'heartLikes' : 'thumbsLikes']: sql`${likeColumn} - 1`
-        })
-        .where(eq(reviewComments.id, commentId));
+      if (likeType === 'heart') {
+        await db.update(reviewComments)
+          .set({ heartLikes: sql`${reviewComments.heartLikes} - 1` })
+          .where(eq(reviewComments.id, commentId));
+      } else {
+        await db.update(reviewComments)
+          .set({ thumbsLikes: sql`${reviewComments.thumbsLikes} - 1` })
+          .where(eq(reviewComments.id, commentId));
+      }
       
       userLiked = false;
     } else {
@@ -1239,11 +1243,15 @@ export class DatabaseStorage implements IStorage {
       });
       
       // Increase likes count for this type
-      await db.update(reviewComments)
-        .set({ 
-          [likeType === 'heart' ? 'heartLikes' : 'thumbsLikes']: sql`${likeColumn} + 1`
-        })
-        .where(eq(reviewComments.id, commentId));
+      if (likeType === 'heart') {
+        await db.update(reviewComments)
+          .set({ heartLikes: sql`${reviewComments.heartLikes} + 1` })
+          .where(eq(reviewComments.id, commentId));
+      } else {
+        await db.update(reviewComments)
+          .set({ thumbsLikes: sql`${reviewComments.thumbsLikes} + 1` })
+          .where(eq(reviewComments.id, commentId));
+      }
       
       userLiked = true;
     }
