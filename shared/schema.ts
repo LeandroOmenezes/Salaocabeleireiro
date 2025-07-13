@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   email: text("email"),
   isAdmin: boolean("is_admin").default(false),
+  profileImageBase64: text("profile_image_base64"),
+  profileImageMimeType: text("profile_image_mime_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -21,6 +23,8 @@ export const insertUserSchema = createInsertSchema(users, {
   phone: z.string().min(8).optional(),
   email: z.string().email().optional(),
   isAdmin: z.boolean().optional(),
+  profileImageBase64: z.string().optional(),
+  profileImageMimeType: z.string().optional(),
 }).omit({ id: true, createdAt: true });
 
 // === Categories ===

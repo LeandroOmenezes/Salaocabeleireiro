@@ -1,48 +1,51 @@
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import { User } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+interface AvatarProps {
+  userId: number;
+  userName: string;
+  imageUrl?: string;
+  size?: "xs" | "sm" | "md" | "lg";
+  className?: string;
+}
 
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-      className
-    )}
-    {...props}
-  />
-))
-Avatar.displayName = AvatarPrimitive.Root.displayName
+export function Avatar({ userId, userName, imageUrl, size = "md", className = "" }: AvatarProps) {
+  const sizeClasses = {
+    xs: "h-6 w-6",
+    sm: "h-8 w-8", 
+    md: "h-10 w-10",
+    lg: "h-12 w-12"
+  };
 
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    {...props}
-  />
-))
-AvatarImage.displayName = AvatarPrimitive.Image.displayName
+  const iconSizes = {
+    xs: "h-3 w-3",
+    sm: "h-4 w-4",
+    md: "h-5 w-5", 
+    lg: "h-6 w-6"
+  };
 
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className
-    )}
-    {...props}
-  />
-))
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
+  const finalImageUrl = imageUrl ? `/api/images/user/${userId}` : null;
+  const initials = userName ? userName.charAt(0).toUpperCase() : "U";
 
-export { Avatar, AvatarImage, AvatarFallback }
+  return (
+    <div className={`${sizeClasses[size]} relative rounded-full overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center ${className}`}>
+      {finalImageUrl ? (
+        <img
+          src={finalImageUrl}
+          alt={`Foto de ${userName}`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // Fallback para iniciais se a imagem falhar
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const parent = target.parentElement;
+            if (parent) {
+              parent.innerHTML = `<span class="text-white font-medium text-xs">${initials}</span>`;
+            }
+          }}
+        />
+      ) : (
+        <span className="text-white font-medium text-xs">{initials}</span>
+      )}
+    </div>
+  );
+}

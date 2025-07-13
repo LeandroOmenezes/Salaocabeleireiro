@@ -6,6 +6,7 @@ import Footer from "@/components/ui/footer";
 import { Calendar, Clock, User, Phone, Mail, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ProfileImageUpload } from "@/components/profile/profile-image-upload";
 import { useEffect } from "react";
 import { Redirect } from "wouter";
 
@@ -152,8 +153,12 @@ export default function ProfilePage() {
               {/* Header do Perfil */}
               <div className="bg-white rounded-lg shadow-md p-4 sm:p-8 mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto sm:mx-0">
-                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                  <div className="mx-auto sm:mx-0">
+                    <ProfileImageUpload 
+                      userId={user.id} 
+                      currentImageUrl={user.profileImageBase64 ? `/api/images/user/${user.id}` : undefined}
+                      size="lg"
+                    />
                   </div>
                   <div className="flex-1 text-center sm:text-left">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words">{user?.name || user?.username}</h1>

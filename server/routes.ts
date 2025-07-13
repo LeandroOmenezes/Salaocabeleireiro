@@ -1289,7 +1289,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === User Profile Image Routes ===
+  // Upload de imagem de perfil do usuário
+  app.post("/api/user/upload-profile-image", upload.single('profileImage'), async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Login necessário" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Arquivo de imagem necessário" });
+    }
+
+    try {
+      // Ler o arquivo e converter para base64
+      const imageBuffer = fs.readFileSync(req.file.path);
+      const imageDataBase64 = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
+
+      // Atualizar usuário no banco
+      const updatedUser = await storage.updateUserProfileImage(req.user.id, imageDataBase64, mimeType);
+      
+      // Remover arquivo temporário
+      fs.unlinkSync(req.file.path);
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      res.json({ message: "Imagem de perfil atualizada com sucesso", user: updatedUser });
+    } catch (error) {
+      console.error("Erro ao fazer upload da imagem de perfil:", error);
+      // Limpar arquivo temporário em caso de erro
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
   // === Image Serving Routes ===
+  
+  // Serve user profile images from database
+  app.get("/api/images/user/:id", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+
+      if (!user || !user.profileImageBase64 || !user.profileImageMimeType) {
+        return res.status(404).json({ error: "Imagem de perfil não encontrada" });
+      }
+
+      // Converter base64 para buffer
+      const imageBuffer = Buffer.from(user.profileImageBase64, 'base64');
+
+      // Configurar headers
+      res.set({
+        'Content-Type': user.profileImageMimeType,
+        'Content-Length': imageBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=86400' // Cache por 24 horas
+      });
+
+      res.send(imageBuffer);
+    } catch (error) {
+      console.error("Erro ao servir imagem de perfil:", error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
   
   // Serve service images from database
   app.get("/api/images/service/:id", async (req: Request, res: Response) => {

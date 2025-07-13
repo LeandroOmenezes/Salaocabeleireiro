@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar } from "@/components/ui/avatar";
 import type { ReviewComment } from "@shared/schema";
 
 interface ReviewCommentsProps {
@@ -143,11 +144,13 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
           {user && (
             <form onSubmit={handleSubmitComment} className="mb-4">
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center">
-                    <User className="h-4 w-4 text-white" />
-                  </div>
-                </div>
+                <Avatar 
+                  userId={user.id}
+                  userName={user.name || user.username}
+                  imageUrl={user.profileImageBase64 ? `/api/images/user/${user.id}` : undefined}
+                  size="sm"
+                  className="flex-shrink-0"
+                />
                 <div className="flex-1">
                   <Textarea
                     value={newComment}
@@ -200,11 +203,13 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
             <div className="space-y-4">
               {comments.map((comment) => (
                 <div key={comment.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-600 flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
+                  <Avatar 
+                    userId={comment.userId}
+                    userName={comment.userName}
+                    imageUrl={comment.userId ? `/api/images/user/${comment.userId}` : undefined}
+                    size="sm"
+                    className="flex-shrink-0"
+                  />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">

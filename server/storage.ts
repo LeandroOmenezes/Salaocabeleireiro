@@ -30,6 +30,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserPassword(id: number, password: string): Promise<User | undefined>;
+  updateUserProfileImage(id: number, imageDataBase64: string, mimeType: string): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
 
   // Clients
@@ -463,6 +464,20 @@ export class MemStorage implements IStorage {
     const user = this.users.get(id);
     if (user) {
       const updatedUser = { ...user, password };
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
+  }
+
+  async updateUserProfileImage(
+    id: number,
+    imageDataBase64: string,
+    mimeType: string,
+  ): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (user) {
+      const updatedUser = { ...user, profileImageBase64: imageDataBase64, profileImageMimeType: mimeType };
       this.users.set(id, updatedUser);
       return updatedUser;
     }
@@ -963,6 +978,14 @@ export class DatabaseStorage implements IStorage {
   async updateUserPassword(id: number, password: string): Promise<User | undefined> {
     const [user] = await db.update(users)
       .set({ password })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async updateUserProfileImage(id: number, imageDataBase64: string, mimeType: string): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set({ profileImageBase64: imageDataBase64, profileImageMimeType: mimeType })
       .where(eq(users.id, id))
       .returning();
     return user || undefined;
