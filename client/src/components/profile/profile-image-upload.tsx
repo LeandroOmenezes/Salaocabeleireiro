@@ -37,7 +37,8 @@ export function ProfileImageUpload({
 
       // Use fetch directly for file upload
       console.log("Sending request to /api/user/upload-profile-image");
-      console.log("FormData contains:", formData.get('profileImage'));
+      console.log("File object:", file);
+      console.log("FormData entries:", Array.from(formData.entries()));
       
       const res = await fetch("/api/user/upload-profile-image", {
         method: "POST",
@@ -52,14 +53,21 @@ export function ProfileImageUpload({
 
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Upload successful:", data);
       toast({
         title: "Sucesso!",
         description: "Imagem de perfil atualizada com sucesso",
       });
-      // Invalidate user data to refetch with new image
+      // Force refresh user data and clear all caches
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.refetchQueries({ queryKey: ["/api/user"] });
       setImagePreview(null);
+      
+      // Force page refresh as a last resort
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
     onError: (error: any) => {
       console.error("Erro ao fazer upload:", error);

@@ -23,17 +23,18 @@ export function Avatar({ userId, userName, imageUrl, size = "md", className = ""
     lg: "h-6 w-6"
   };
 
-  const finalImageUrl = imageUrl ? `/api/images/user/${userId}` : null;
+  const finalImageUrl = imageUrl;
   const initials = userName ? userName.charAt(0).toUpperCase() : "U";
 
   return (
     <div className={`${sizeClasses[size]} relative rounded-full overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center ${className}`}>
       {finalImageUrl ? (
         <img
-          src={finalImageUrl}
+          src={`${finalImageUrl}?t=${Date.now()}`}
           alt={`Foto de ${userName}`}
           className="w-full h-full object-cover"
           onError={(e) => {
+            console.log("Error loading image:", finalImageUrl);
             // Fallback para iniciais se a imagem falhar
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
