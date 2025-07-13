@@ -59,15 +59,21 @@ export function ProfileImageUpload({
         title: "Sucesso!",
         description: "Imagem de perfil atualizada com sucesso",
       });
-      // Force refresh user data and clear all caches
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      
+      // Update user data directly in cache
+      if (data.user) {
+        queryClient.setQueryData(["/api/user"], data.user);
+      }
+      
+      // Clear image caches
+      queryClient.invalidateQueries({ queryKey: ["/api/images/user"] });
+      
       setImagePreview(null);
       
-      // Force page refresh as a last resort
+      // Force page refresh to ensure all components update
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 500);
     },
     onError: (error: any) => {
       console.error("Erro ao fazer upload:", error);
@@ -122,7 +128,9 @@ export function ProfileImageUpload({
     fileInputRef.current?.click();
   };
 
-  const imageUrl = imagePreview || (currentImageUrl ? `/api/images/user/${userId}` : null);
+  // Check if user has a profile image
+  const userHasImage = user?.profileImageBase64;
+  const imageUrl = imagePreview || (userHasImage ? `/api/images/user/${userId}?t=${Date.now()}` : currentImageUrl);
   const canUpload = user && user.id === userId;
 
   return (

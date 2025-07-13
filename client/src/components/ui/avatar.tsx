@@ -30,7 +30,8 @@ export function Avatar({ userId, userName, imageUrl, size = "md", className = ""
     <div className={`${sizeClasses[size]} relative rounded-full overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center ${className}`}>
       {finalImageUrl ? (
         <img
-          src={`${finalImageUrl}?t=${Date.now()}`}
+          key={`${userId}-${Date.now()}`}
+          src={`${finalImageUrl}?cache=${Math.random()}`}
           alt={`Foto de ${userName}`}
           className="w-full h-full object-cover"
           onError={(e) => {
