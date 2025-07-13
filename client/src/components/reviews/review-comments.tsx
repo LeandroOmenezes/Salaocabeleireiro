@@ -21,7 +21,6 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
   // Buscar comentários da review
   const { data: comments = [], isLoading } = useQuery<ReviewComment[]>({
     queryKey: ["/api/reviews", reviewId, "comments"],
-    queryFn: () => fetch(`/api/reviews/${reviewId}/comments`).then(res => res.json()),
     enabled: showComments
   });
 
