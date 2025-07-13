@@ -271,7 +271,9 @@ export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 
-export type ReviewComment = typeof reviewComments.$inferSelect;
+export type ReviewComment = typeof reviewComments.$inferSelect & {
+  userProfileImageBase64?: string | null;
+};
 export type InsertReviewComment = z.infer<typeof insertReviewCommentSchema>;
 
 export type CommentLike = typeof commentLikes.$inferSelect;

@@ -206,7 +206,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                   <Avatar 
                     userId={comment.userId}
                     userName={comment.userName}
-                    imageUrl={comment.userId ? `/api/images/user/${comment.userId}` : undefined}
+                    imageUrl={comment.userProfileImageBase64 ? `/api/images/user/${comment.userId}` : undefined}
                     size="sm"
                     className="flex-shrink-0"
                   />
