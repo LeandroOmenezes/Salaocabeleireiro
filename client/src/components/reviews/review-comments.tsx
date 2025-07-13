@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { MessageCircle, Heart, Send, User, ChevronDown, ChevronUp, ThumbsUp } from "lucide-react";
+import { MessageCircle, Heart, Send, User, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
@@ -25,7 +25,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
   });
 
   // Buscar likes do usuário em comentários
-  const { data: userCommentLikes = { heartLikes: [], thumbsLikes: [] } } = useQuery<{heartLikes: number[], thumbsLikes: number[]}>({
+  const { data: userCommentLikes = { heartLikes: [] } } = useQuery<{heartLikes: number[]}>({
     queryKey: ["/api/user/comment-likes"],
     enabled: !!user
   });
@@ -96,7 +96,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
     }
   };
 
-  const handleLikeComment = (commentId: number, likeType: 'heart' | 'thumbs') => {
+  const handleLikeComment = (commentId: number) => {
     if (!user) {
       toast({
         title: "Login necessário",
@@ -105,7 +105,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
       });
       return;
     }
-    likeCommentMutation.mutate({ commentId, likeType });
+    likeCommentMutation.mutate({ commentId, likeType: 'heart' });
   };
 
   const formatDate = (dateString: string) => {
@@ -226,7 +226,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleLikeComment(comment.id, 'heart')}
+                        onClick={() => handleLikeComment(comment.id)}
                         disabled={!user || likeCommentMutation.isPending}
                         className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
                           userCommentLikes.heartLikes.includes(comment.id)
@@ -243,39 +243,18 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                         <span className="text-sm font-medium">{comment.heartLikes}</span>
                       </Button>
 
-                      {/* Botão Joinha */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleLikeComment(comment.id, 'thumbs')}
-                        disabled={!user || likeCommentMutation.isPending}
-                        className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
-                          userCommentLikes.thumbsLikes.includes(comment.id)
-                            ? "text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
-                            : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
-                        }`}
-                        title={userCommentLikes.thumbsLikes.includes(comment.id) ? "Remover joinha" : "Dar joinha"}
-                      >
-                        <ThumbsUp
-                          className={`h-4 w-4 mr-1 transition-all duration-200 ${
-                            userCommentLikes.thumbsLikes.includes(comment.id) ? "fill-current scale-110" : ""
-                          }`}
-                        />
-                        <span className="text-sm font-medium">{comment.thumbsLikes}</span>
-                      </Button>
+
 
                       {/* Status do comentário */}
                       {user && (
                         <div className="flex items-center text-xs text-gray-400 ml-2">
-                          {userCommentLikes.heartLikes.includes(comment.id) || userCommentLikes.thumbsLikes.includes(comment.id) ? (
+                          {userCommentLikes.heartLikes.includes(comment.id) ? (
                             <span className="flex items-center">
-                              {userCommentLikes.heartLikes.includes(comment.id) && "❤️"}
-                              {userCommentLikes.thumbsLikes.includes(comment.id) && "👍"}
-                              <span className="ml-1">Você reagiu</span>
+                              ❤️ <span className="ml-1">Você curtiu</span>
                             </span>
                           ) : (
                             <span className="flex items-center">
-                              💭 <span className="ml-1">Clique para reagir</span>
+                              💭 <span className="ml-1">Clique no coração para curtir</span>
                             </span>
                           )}
                         </div>
