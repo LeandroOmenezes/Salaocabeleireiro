@@ -371,3 +371,13 @@ Preferred communication style: Simple, everyday language.
 - **Contas eliminadas**: Deletadas contas com IDs 8 e 9 da tabela users
 - **Banco organizado**: Sistema agora possui apenas usuário admin legítimo (lleandro.m32@gmail.com)
 - **Ambiente limpo**: Zero agendamentos de teste, banco pronto para produção
+
+### Sistema de Comentários Aninhados com Curtidas Melhorado (2025-07-13)
+- **Funcionalidade completa implementada**: Sistema de comentários threaded para reviews com funcionalidade de like/unlike
+- **Interface aprimorada**: Botões de coração (❤️) e joinha (👍) com animações e feedback visual em tempo real
+- **Usuários podem curtir próprios comentários**: Removida restrição que impedia autocurtidas
+- **Feedback visual melhorado**: Toasts informativos, contadores de likes, e indicadores visuais de status
+- **Estrutura do banco**: Tabelas `review_comments` e `comment_likes` criadas e funcionais
+- **Autenticação robusta**: Sistema completo de validação de usuário para comentários e curtidas
+- **UX moderna**: Interface responsiva com estados de hover, animações de escala e cores temáticas
+- **Performance otimizada**: Invalidação inteligente de cache e sincronização automática de dados

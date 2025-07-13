@@ -813,7 +813,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/comments/:commentId/like", async (req: Request, res: Response) => {
     try {
       const commentId = parseInt(req.params.commentId);
-      console.log("🔄 Tentativa de like no comentário:", commentId);
       
       if (isNaN(commentId)) {
         return res.status(400).json({ message: "ID do comentário inválido" });
@@ -821,32 +820,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Verificar se o usuário está autenticado
       if (!req.isAuthenticated() || !req.user) {
-        console.log("❌ Usuário não autenticado tentando curtir comentário");
         return res.status(401).json({ message: "É necessário estar logado para curtir comentários" });
       }
-
-      console.log("✅ Usuário autenticado:", req.user.username, "tentando curtir comentário", commentId);
       
       const result = await storage.toggleLikeComment(commentId, req.user.id);
 
       if (!result) {
-        console.log("❌ Comentário não encontrado:", commentId);
         return res.status(404).json({ message: "Comentário não encontrado" });
       }
-
-      console.log("✅ Like processado com sucesso:", {
-        commentId,
-        userId: req.user.id,
-        userLiked: result.userLiked,
-        totalLikes: result.comment.likes
-      });
 
       res.status(200).json({
         comment: result.comment,
         userLiked: result.userLiked
       });
     } catch (error) {
-      console.error("❌ Erro ao processar like no comentário:", error);
       res.status(500).json({ message: "Erro ao processar like no comentário" });
     }
   });

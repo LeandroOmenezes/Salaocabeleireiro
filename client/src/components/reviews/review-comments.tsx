@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { MessageCircle, Heart, Send, User, ChevronDown, ChevronUp } from "lucide-react";
+import { MessageCircle, Heart, Send, User, ChevronDown, ChevronUp, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
@@ -59,9 +59,23 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
       const res = await apiRequest("POST", `/api/comments/${commentId}/like`);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const { userLiked, comment } = response;
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", reviewId, "comments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/comment-likes"] });
+      
+      // Toast de feedback
+      if (userLiked) {
+        toast({
+          title: "❤️ Curtida adicionada!",
+          description: "Você curtiu este comentário.",
+        });
+      } else {
+        toast({
+          title: "Curtida removida",
+          description: "Você removeu sua curtida do comentário.",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -203,26 +217,65 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                       </p>
                     </div>
                     
-                    {/* Botão de curtir comentário */}
-                    <div className="flex items-center mt-2">
+                    {/* Botões de curtir comentário */}
+                    <div className="flex items-center gap-3 mt-2">
+                      {/* Botão Coração */}
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleLikeComment(comment.id)}
                         disabled={!user || likeCommentMutation.isPending}
-                        className={`text-xs ${
+                        className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
                           userCommentLikes.includes(comment.id)
-                            ? "text-red-600 hover:text-red-700"
-                            : "text-gray-500 hover:text-red-600"
+                            ? "text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700"
+                            : "text-gray-500 hover:text-red-600 hover:bg-red-50"
                         }`}
+                        title={userCommentLikes.includes(comment.id) ? "Remover curtida" : "Curtir comentário"}
                       >
                         <Heart
-                          className={`h-4 w-4 mr-1 ${
-                            userCommentLikes.includes(comment.id) ? "fill-current" : ""
+                          className={`h-4 w-4 mr-1 transition-all duration-200 ${
+                            userCommentLikes.includes(comment.id) ? "fill-current scale-110" : ""
                           }`}
                         />
-                        {comment.likes > 0 && comment.likes}
+                        <span className="font-medium">
+                          {comment.likes > 0 ? comment.likes : ""}
+                        </span>
                       </Button>
+
+                      {/* Botão Joinha */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleLikeComment(comment.id)}
+                        disabled={!user || likeCommentMutation.isPending}
+                        className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
+                          userCommentLikes.includes(comment.id)
+                            ? "text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
+                            : "text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                        }`}
+                        title="Dar joinha"
+                      >
+                        <ThumbsUp
+                          className={`h-4 w-4 transition-all duration-200 ${
+                            userCommentLikes.includes(comment.id) ? "fill-current scale-110" : ""
+                          }`}
+                        />
+                      </Button>
+
+                      {/* Status do comentário */}
+                      {user && (
+                        <div className="flex items-center text-xs text-gray-400 ml-2">
+                          {userCommentLikes.includes(comment.id) ? (
+                            <span className="flex items-center animate-pulse">
+                              ❤️ <span className="ml-1">Você curtiu</span>
+                            </span>
+                          ) : (
+                            <span className="flex items-center">
+                              💭 <span className="ml-1">Clique para curtir</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
