@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação - Sistema de Gestão para Salão de Beleza</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .toc h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .toc a {
+            color: #333;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+            transition: color 0.3s;
+        }
+        
+        .toc a:hover {
+            color: #667eea;
+        }
+        
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 2.2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            color: #667eea;
+        }
+        
+        h3 {
+            font-size: 1.4em;
+            color: #34495e;
+        }
+        
+        h4 {
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .feature-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .credentials {
+            background: #fff5f5;
+            border: 2px solid #e53e3e;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .credentials h4 {
+            color: #e53e3e;
+            margin-top: 0;
+        }
+        
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .tech-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .tech-item h4 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+        }
+        
+        @media print {
+            body {
+                max-width: 100%;
+                padding: 15px;
+                font-size: 12pt;
+                line-height: 1.4;
+            }
+            
+            .header {
+                background: #667eea !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            
+            .toc {
+                break-inside: avoid;
+            }
+            
+            h1, h2, h3 {
+                break-after: avoid;
+            }
+            
+            .feature-box, .success-box, .warning-box {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sistema de Gestão para Salão de Beleza</h1>
+        <p>Documentação Completa v2.0 | Ateliê de Beleza</p>
+    </div>
+    
+    <div class="toc">
+        <h2>📋 Índice</h2>
+        <ul>
+            <li><a href="#visao-geral">1. Visão Geral do Sistema</a></li>
+            <li><a href="#arquitetura">2. Arquitetura Técnica</a></li>
+            <li><a href="#funcionalidades">3. Funcionalidades Principais</a></li>
+            <li><a href="#manual-usuario">4. Manual do Usuário</a></li>
+            <li><a href="#manual-admin">5. Manual do Administrador</a></li>
+            <li><a href="#configuracao">6. Configuração e Deployment</a></li>
+            <li><a href="#troubleshooting">7. Troubleshooting</a></li>
+            <li><a href="#historico">8. Histórico de Atualizações</a></li>
+        </ul>
+    </div>
+    
+    <section id="visao-geral">
+        <h1>1. Visão Geral do Sistema</h1>
+        
+        <div class="feature-box">
+            <h3>🎯 Objetivo</h3>
+            <p>O <strong>Ateliê de Beleza</strong> é um sistema completo de gestão para salões de beleza que oferece uma experiência digital moderna tanto para clientes quanto para administradores. O sistema facilita o agendamento de serviços, gestão de clientes, controle de vendas e personalização completa da marca.</p>
+        </div>
+        
+        <h3>✨ Características Principais</h3>
+        <ul>
+            <li><strong>Interface Responsiva</strong>: Funciona perfeitamente em desktop, tablet e mobile</li>
+            <li><strong>Autenticação Segura</strong>: Login local e integração com Google OAuth</li>
+            <li><strong>Gestão Completa</strong>: Agendamentos, clientes, serviços, preços e vendas</li>
+            <li><strong>Personalização Total</strong>: Logo, cores, banner, rodapé e conteúdo personalizáveis</li>
+            <li><strong>Recuperação de Senha</strong>: Sistema de reset via email</li>
+            <li><strong>Avaliações e Feedback</strong>: Sistema de reviews com curtidas</li>
+        </ul>
+    </section>
+    
+    <section id="arquitetura">
+        <h1>2. Arquitetura Técnica</h1>
+        
+        <h2>🛠️ Stack Tecnológico</h2>
+        
+        <div class="tech-stack">
+            <div class="tech-item">
+                <h4>Frontend</h4>
+                <ul>
+                    <li>React 18 com TypeScript</li>
+                    <li>Tailwind CSS</li>
+                    <li>Radix UI</li>
+                    <li>Wouter (roteamento)</li>
+                    <li>TanStack React Query</li>
+                    <li>React Hook Form + Zod</li>
+                    <li>Vite (build tool)</li>
+                </ul>
+            </div>
+            
+            <div class="tech-item">
+                <h4>Backend</h4>
+                <ul>
+                    <li>Node.js com TypeScript</li>
+                    <li>Express.js</li>
+                    <li>Passport.js</li>
+                    <li>PostgreSQL</li>
+                    <li>Drizzle ORM</li>
+                    <li>Nodemailer</li>
+                </ul>
+            </div>
+            
+            <div class="tech-item">
+                <h4>Infraestrutura</h4>
+                <ul>
+                    <li>Replit (hospedagem)</li>
+                    <li>Neon Database</li>
+                    <li>Base64 (imagens)</li>
+                    <li>Google OAuth</li>
+                    <li>SendGrid (emails)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="code-block">
+<strong>Estrutura de Pastas:</strong>
+├── client/                 # Frontend React
+│   ├── src/
+│   │   ├── components/     # Componentes reutilizáveis
+│   │   ├── pages/         # Páginas da aplicação
+│   │   ├── hooks/         # Hooks customizados
+│   │   └── lib/           # Utilitários e configurações
+├── server/                # Backend Express
+│   ├── auth.ts           # Sistema de autenticação
+│   ├── routes.ts         # Rotas da API
+│   ├── db.ts             # Configuração do banco
+│   └── storage.ts        # Interface de armazenamento
+├── shared/               # Código compartilhado
+│   └── schema.ts         # Schemas e tipos TypeScript
+└── uploads/              # Diretório para arquivos (legacy)
+        </div>
+    </section>
+    
+    <section id="funcionalidades">
+        <h1>3. Funcionalidades Principais</h1>
+        
+        <h2>🔐 Sistema de Autenticação</h2>
+        <ul>
+            <li><strong>Login Local</strong>: Email/senha com hash seguro</li>
+            <li><strong>Google OAuth</strong>: Integração completa com Google</li>
+            <li><strong>Recuperação de Senha</strong>: Email com token temporário</li>
+            <li><strong>Sessões Seguras</strong>: Cookies com expiração automática</li>
+        </ul>
+        
+        <h2>📅 Gestão de Agendamentos</h2>
+        <ul>
+            <li><strong>Calendário Inteligente</strong>: Horários de 40 em 40 minutos</li>
+            <li><strong>Status Dinâmico</strong>: Pendente, Confirmado, Realizado, Cancelado</li>
+            <li><strong>Prevenção de Conflitos</strong>: Impossível agendar horários ocupados</li>
+            <li><strong>Notificações Visuais</strong>: Cores e ícones para cada status</li>
+        </ul>
+        
+        <h2>💼 Catálogo de Serviços</h2>
+        <ul>
+            <li><strong>Categorização</strong>: Serviços organizados por categorias</li>
+            <li><strong>Imagens Personalizadas</strong>: Upload e gerenciamento de fotos</li>
+            <li><strong>Preços Flexíveis</strong>: Faixas de preço min/max</li>
+            <li><strong>Serviços em Destaque</strong>: Sistema de promoção</li>
+        </ul>
+        
+        <h2>👥 Gestão de Clientes</h2>
+        <ul>
+            <li><strong>Perfis Completos</strong>: Dados pessoais e histórico</li>
+            <li><strong>Histórico de Agendamentos</strong>: Visualização completa</li>
+            <li><strong>Estatísticas Pessoais</strong>: Dashboards individuais</li>
+        </ul>
+        
+        <h2>⭐ Sistema de Avaliações</h2>
+        <ul>
+            <li><strong>Reviews Públicos</strong>: Clientes podem avaliar serviços</li>
+            <li><strong>Sistema de Curtidas</strong>: Interação social</li>
+            <li><strong>Moderação</strong>: Controle administrativo</li>
+        </ul>
+        
+        <h2>🎨 Personalização da Marca</h2>
+        <ul>
+            <li><strong>Logo Personalizada</strong>: Upload e exibição automática</li>
+            <li><strong>Cores da Marca</strong>: Seletor de cores dinâmico</li>
+            <li><strong>Banner Principal</strong>: Imagem e textos customizáveis</li>
+            <li><strong>Rodapé Completo</strong>: Contatos e redes sociais</li>
+            <li><strong>Tabela de Preços</strong>: Gestão completa de preços</li>
+        </ul>
+    </section>
+    
+    <section id="manual-usuario">
+        <h1>4. Manual do Usuário</h1>
+        
+        <h2>👤 Criando uma Conta</h2>
+        <ol>
+            <li>Acesse a página inicial</li>
+            <li>Clique em "Entrar" no menu</li>
+            <li>Selecione "Criar Conta"</li>
+            <li>Preencha: nome, email e senha</li>
+            <li>Confirme o email se necessário</li>
+        </ol>
+        
+        <h2>🔑 Fazendo Login</h2>
+        <div class="feature-box">
+            <h4>Opção 1 - Login Local:</h4>
+            <ol>
+                <li>Clique em "Entrar"</li>
+                <li>Digite email e senha</li>
+                <li>Clique em "Entrar"</li>
+            </ol>
+            
+            <h4>Opção 2 - Google:</h4>
+            <ol>
+                <li>Clique em "Continuar com Google"</li>
+                <li>Autorize a aplicação</li>
+                <li>Redirecionamento automático</li>
+            </ol>
+        </div>
+        
+        <h2>📝 Agendando um Serviço</h2>
+        <ol>
+            <li>Navegue pelos serviços na página inicial</li>
+            <li>Clique em "Agendar" no serviço desejado</li>
+            <li>Preencha o formulário:
+                <ul>
+                    <li>Nome completo</li>
+                    <li>Email de contato</li>
+                    <li>Selecione a data</li>
+                    <li>Escolha um horário disponível (verde)</li>
+                    <li>Adicione observações se necessário</li>
+                </ul>
+            </li>
+            <li>Confirme o agendamento</li>
+        </ol>
+        
+        <h2>📊 Visualizando Agendamentos</h2>
+        <ol>
+            <li>Faça login na sua conta</li>
+            <li>Clique no ícone de usuário no header</li>
+            <li>Acesse "Perfil"</li>
+            <li>Visualize seus agendamentos e estatísticas</li>
+        </ol>
+        
+        <h2>⭐ Avaliando Serviços</h2>
+        <ol>
+            <li>Acesse a seção "Avaliações" na página inicial</li>
+            <li>Clique em "Deixar Avaliação"</li>
+            <li>Preencha: nome, nota (1-5 estrelas) e comentário</li>
+            <li>Envie a avaliação</li>
+            <li>Curta avaliações de outros clientes</li>
+        </ol>
+    </section>
+    
+    <section id="manual-admin">
+        <h1>5. Manual do Administrador</h1>
+        
+        <div class="credentials">
+            <h4>🔐 Credenciais de Acesso</h4>
+            <p><strong>Email:</strong> lleandro.m32@gmail.com</p>
+            <p><strong>Senha:</strong> admin123</p>
+        </div>
+        
+        <h2>🎛️ Menu Administrativo</h2>
+        <p>O administrador tem acesso a um menu hambúrguer especial com:</p>
+        <ul>
+            <li>Dashboard</li>
+            <li>Gestão de Agendamentos</li>
+            <li>Clientes e Vendas</li>
+            <li>Gestão de Imagens</li>
+            <li>Configurações do Site</li>
+        </ul>
+        
+        <h2>📅 Gerenciando Agendamentos</h2>
+        <ol>
+            <li>Acesse "Dashboard" no menu admin</li>
+            <li>Visualize todos os agendamentos</li>
+            <li>Filtre por status se necessário</li>
+            <li>Altere status: Pendente → Confirmado → Realizado</li>
+            <li>Cancele agendamentos se necessário</li>
+        </ol>
+        
+        <h2>💼 Gestão de Serviços</h2>
+        <div class="success-box">
+            <h4>Criando Novo Serviço:</h4>
+            <ol>
+                <li>Menu Admin → "Gestão de Imagens"</li>
+                <li>Clique em "Adicionar Novo Serviço"</li>
+                <li>Preencha: nome, descrição, preços, categoria, ícone</li>
+                <li>Faça upload de imagem personalizada</li>
+                <li>Defina se é serviço em destaque</li>
+            </ol>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Editando Serviço:</h4>
+            <ol>
+                <li>Localize o serviço na lista</li>
+                <li>Clique em "Editar"</li>
+                <li>Modifique os campos necessários</li>
+                <li>Salve as alterações</li>
+            </ol>
+        </div>
+        
+        <div class="warning-box">
+            <h4>Upload de Imagens:</h4>
+            <ol>
+                <li>Clique em "Escolher Imagem"</li>
+                <li>Selecione arquivo (JPG, PNG, WebP até 5MB)</li>
+                <li>Visualize o preview</li>
+                <li>Confirme o upload</li>
+            </ol>
+        </div>
+        
+        <h2>🏷️ Gestão de Categorias</h2>
+        <ol>
+            <li>Menu Admin → "Categorias"</li>
+            <li><strong>Criar</strong>: Nome, ícone FontAwesome</li>
+            <li><strong>Editar</strong>: Modificar informações</li>
+            <li><strong>Remover</strong>: Remove categoria e todos serviços/preços relacionados</li>
+        </ol>
+        
+        <h2>💰 Tabela de Preços</h2>
+        <ol>
+            <li>Menu Admin → "Preços"</li>
+            <li><strong>Adicionar</strong>: Nome do item, preços min/max, categoria</li>
+            <li><strong>Editar</strong>: Clique no item para edição inline</li>
+            <li><strong>Remover</strong>: Exclui item da tabela</li>
+        </ol>
+        
+        <h2>🎨 Personalização do Site</h2>
+        <div class="feature-box">
+            <h4>Configurações Gerais:</h4>
+            <ol>
+                <li>Menu Admin → "Configurações do Site"</li>
+                <li>Modifique: nome do site, slogan, cor primária</li>
+                <li>Upload de logo personalizada</li>
+                <li>Visualize mudanças em tempo real</li>
+            </ol>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Banner Principal:</h4>
+            <ol>
+                <li>Menu Admin → "Banner"</li>
+                <li>Edite: título, subtítulo, texto do botão, link</li>
+                <li>Upload de imagem de fundo</li>
+                <li>Preview instantâneo</li>
+            </ol>
+        </div>
+        
+        <div class="feature-box">
+            <h4>Rodapé:</h4>
+            <ol>
+                <li>Menu Admin → "Rodapé"</li>
+                <li>Configure: dados do negócio, contatos, redes sociais</li>
+                <li>URLs opcionais para redes sociais</li>
+                <li>Informações de funcionamento</li>
+            </ol>
+        </div>
+        
+        <h2>💳 Gestão de Vendas</h2>
+        <ol>
+            <li>Menu Admin → "Clientes e Vendas"</li>
+            <li><strong>Registrar Venda</strong>: Cliente, serviço, valor, forma de pagamento</li>
+            <li><strong>Filtrar Vendas</strong>: Por período, cliente ou serviço</li>
+            <li><strong>Relatórios</strong>: Visualização de faturamento</li>
+        </ol>
+        
+        <h2>👥 Criando Usuários Admin</h2>
+        <ol>
+            <li>Menu Admin → "Usuários"</li>
+            <li>Preencha dados do novo administrador</li>
+            <li>Marque "É Administrador"</li>
+            <li>Defina senha temporária</li>
+        </ol>
+    </section>
+    
+    <section id="configuracao">
+        <h1>6. Configuração e Deployment</h1>
+        
+        <h2>🔧 Variáveis de Ambiente</h2>
+        <div class="code-block">
+# Banco de Dados (Obrigatório)
+DATABASE_URL=postgresql://user:password@host:port/database
+
+# Autenticação de Sessão (Obrigatório)
+SESSION_SECRET=sua_chave_secreta_aqui
+
+# Google OAuth (Opcional)
+GOOGLE_CLIENT_ID=seu_google_client_id
+GOOGLE_CLIENT_SECRET=seu_google_client_secret
+
+# Email para Recuperação de Senha (Opcional)
+EMAIL_USER=seu_email@gmail.com
+EMAIL_PASS=sua_senha_de_aplicativo
+
+# SendGrid (Produção - Opcional)
+SENDGRID_API_KEY=sua_chave_sendgrid
+        </div>
+        
+        <h2>🚀 Deploy no Replit</h2>
+        <ol>
+            <li><strong>Fork do Projeto</strong>: Clone o repositório</li>
+            <li><strong>Configurar Variáveis</strong>: Adicione as variáveis de ambiente</li>
+            <li><strong>Banco de Dados</strong>: Provisione PostgreSQL</li>
+            <li><strong>Executar Migração</strong>: <code>npm run db:push</code></li>
+            <li><strong>Iniciar Aplicação</strong>: <code>npm run dev</code></li>
+        </ol>
+        
+        <h2>🔗 Configuração Google OAuth</h2>
+        <ol>
+            <li>Acesse <a href="https://console.cloud.google.com">Google Cloud Console</a></li>
+            <li>Crie um novo projeto ou selecione existente</li>
+            <li>Ative a API "Google+ API"</li>
+            <li>Crie credenciais OAuth 2.0</li>
+            <li>Configure URLs autorizadas:
+                <ul>
+                    <li><strong>Origens JavaScript</strong>: <code>https://seu-dominio.replit.app</code></li>
+                    <li><strong>URIs de redirecionamento</strong>: <code>https://seu-dominio.replit.app/api/auth/google/callback</code></li>
+                </ul>
+            </li>
+        </ol>
+        
+        <h2>📧 Configuração de Email</h2>
+        <div class="tech-stack">
+            <div class="tech-item">
+                <h4>Opção 1 - Gmail</h4>
+                <ol>
+                    <li>Ative verificação em 2 etapas</li>
+                    <li>Gere senha de aplicativo</li>
+                    <li>Use como <code>EMAIL_PASS</code></li>
+                </ol>
+            </div>
+            
+            <div class="tech-item">
+                <h4>Opção 2 - SendGrid</h4>
+                <ol>
+                    <li>Crie conta no SendGrid</li>
+                    <li>Gere API Key</li>
+                    <li>Configure <code>SENDGRID_API_KEY</code></li>
+                </ol>
+            </div>
+        </div>
+    </section>
+    
+    <section id="troubleshooting">
+        <h1>7. Troubleshooting</h1>
+        
+        <h2>🚨 Problemas Comuns</h2>
+        
+        <div class="warning-box">
+            <h4>1. Erro de Autenticação Google</h4>
+            <p><strong>Sintoma:</strong> "Error 400: redirect_uri_mismatch"</p>
+            <p><strong>Solução:</strong></p>
+            <ul>
+                <li>Verifique URLs no Google Cloud Console</li>
+                <li>Certifique-se que coincidem com o domínio atual</li>
+                <li>Aguarde até 5 minutos para propagação</li>
+            </ul>
+        </div>
+        
+        <div class="warning-box">
+            <h4>2. Emails Não Enviados</h4>
+            <p><strong>Sintoma:</strong> "Erro ao enviar email de recuperação"</p>
+            <p><strong>Soluções:</strong></p>
+            <ul>
+                <li>Verifique credenciais de email</li>
+                <li>Confirme senha de aplicativo (Gmail)</li>
+                <li>Teste com SendGrid em produção</li>
+            </ul>
+        </div>
+        
+        <div class="warning-box">
+            <h4>3. Imagens Não Carregam</h4>
+            <p><strong>Sintoma:</strong> Imagens quebradas após deploy</p>
+            <p><strong>Solução:</strong></p>
+            <ul>
+                <li>Execute <code>/api/admin/regenerate-images</code></li>
+                <li>Sistema regenera automaticamente SVGs padrão</li>
+                <li>Faça novo upload se necessário</li>
+            </ul>
+        </div>
+        
+        <div class="success-box">
+            <h4>4. Agendamentos com Data Errada</h4>
+            <p><strong>Sintoma:</strong> Discrepância de datas entre usuário e admin</p>
+            <p><strong>Solução:</strong></p>
+            <ul>
+                <li>Problema de timezone já corrigido</li>
+                <li>Função <code>formatDate</code> implementada</li>
+                <li>Datas agora consistentes</li>
+            </ul>
+        </div>
+        
+        <div class="warning-box">
+            <h4>5. Banco de Dados Não Conecta</h4>
+            <p><strong>Sintoma:</strong> "Database connection failed"</p>
+            <p><strong>Soluções:</strong></p>
+            <ul>
+                <li>Verifique <code>DATABASE_URL</code></li>
+                <li>Confirme que banco está ativo</li>
+                <li>Execute <code>npm run db:push</code> para criar tabelas</li>
+            </ul>
+        </div>
+    </section>
+    
+    <section id="historico">
+        <h1>8. Histórico de Atualizações</h1>
+        
+        <div class="success-box">
+            <h2>Versão 2.0 (Julho 2025)</h2>
+            <h4>Principais Melhorias:</h4>
+            <ul>
+                <li>✅ Migração completa para PostgreSQL</li>
+                <li>✅ Sistema de armazenamento de imagens em Base64</li>
+                <li>✅ Correção de problemas de timezone</li>
+                <li>✅ Interface de usuário aprimorada</li>
+                <li>✅ Sistema de recuperação de senha por email</li>
+                <li>✅ Google OAuth totalmente funcional</li>
+            </ul>
+        </div>
+        
+        <h3>🔧 Funcionalidades Implementadas:</h3>
+        
+        <h4>Sistema de Upload de Imagens</h4>
+        <ul>
+            <li>Upload seguro de imagens para serviços</li>
+            <li>Validação de tipos e tamanho</li>
+            <li>Armazenamento no banco de dados</li>
+        </ul>
+        
+        <h4>Menu Administrativo</h4>
+        <ul>
+            <li>Interface organizada para administradores</li>
+            <li>Acesso rápido a todas as funcionalidades</li>
+            <li>Design responsivo</li>
+        </ul>
+        
+        <h4>Personalização Completa</h4>
+        <ul>
+            <li>Configuração do site (nome, logo, cores)</li>
+            <li>Banner personalizável</li>
+            <li>Rodapé configurável</li>
+            <li>Tabela de preços dinâmica</li>
+        </ul>
+        
+        <h4>Gestão Avançada</h4>
+        <ul>
+            <li>CRUD completo de serviços e categorias</li>
+            <li>Sistema de agendamentos com horários de 40min</li>
+            <li>Prevenção de conflitos de horário</li>
+            <li>Gestão de vendas e relatórios</li>
+        </ul>
+        
+        <h4>Melhorias de UX</h4>
+        <ul>
+            <li>Status de agendamento com ícones e cores</li>
+            <li>Formatação correta de datas</li>
+            <li>Sistema de avaliações com curtidas</li>
+            <li>Páginas de perfil personalizadas</li>
+        </ul>
+    </section>
+    
+    <div class="footer">
+        <h3>📞 Contato e Suporte</h3>
+        <p><strong>Desenvolvedor:</strong> Leandro Menezes</p>
+        <p><strong>Sistema:</strong> Salão de Beleza - Gestão Completa</p>
+        <p><strong>Tecnologia:</strong> React + TypeScript + PostgreSQL</p>
+        <br>
+        <p>Este sistema foi desenvolvido para oferecer uma solução completa e moderna para salões de beleza, priorizando facilidade de uso, personalização e confiabilidade.</p>
+        <br>
+        <p><em>Documentação atualizada em: Julho 2025 | Versão do Sistema: 2.0</em></p>
+    </div>
+</body>
+</html>
