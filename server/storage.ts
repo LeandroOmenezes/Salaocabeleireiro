@@ -1,6 +1,6 @@
 import { 
   users, categories, services, priceItems, appointments, reviews, sales,
-  banner, footer, siteConfig, reviewComments, commentLikes,
+  banner, footer, siteConfig, reviewComments, commentLikes, reviewLikes,
   type User, type InsertUser,
   type Category, type InsertCategory,
   type Service, type InsertService,
@@ -1176,17 +1176,67 @@ export class DatabaseStorage implements IStorage {
   }
 
   async toggleLikeReview(reviewId: number, userId: number): Promise<{ review: Review; userLiked: boolean } | undefined> {
-    // This would need a separate likes table for proper implementation
-    // For now, we'll just return the review without like functionality
-    const [review] = await db.select().from(reviews).where(eq(reviews.id, reviewId));
-    if (!review) return undefined;
+    console.log(`[DEBUG] toggleLikeReview: reviewId=${reviewId}, userId=${userId}`);
     
-    return { review, userLiked: false };
+    // Check if user already liked this review
+    const existingLike = await db.select().from(reviewLikes)
+      .where(and(
+        eq(reviewLikes.reviewId, reviewId),
+        eq(reviewLikes.userId, userId)
+      ));
+
+    console.log(`[DEBUG] Existing review likes found: ${existingLike.length}`);
+
+    let userLiked: boolean;
+
+    if (existingLike.length > 0) {
+      console.log(`[DEBUG] Removing existing review like`);
+      // User already liked, remove like
+      await db.delete(reviewLikes)
+        .where(and(
+          eq(reviewLikes.reviewId, reviewId),
+          eq(reviewLikes.userId, userId)
+        ));
+      
+      // Decrease likes count
+      await db.update(reviews)
+        .set({ likes: sql`${reviews.likes} - 1` })
+        .where(eq(reviews.id, reviewId));
+      
+      userLiked = false;
+    } else {
+      console.log(`[DEBUG] Adding new review like`);
+      // User hasn't liked, add like
+      await db.insert(reviewLikes).values({
+        reviewId,
+        userId,
+      });
+      
+      // Increase likes count
+      await db.update(reviews)
+        .set({ likes: sql`${reviews.likes} + 1` })
+        .where(eq(reviews.id, reviewId));
+      
+      userLiked = true;
+    }
+
+    // Get updated review
+    const [review] = await db.select().from(reviews)
+      .where(eq(reviews.id, reviewId));
+
+    console.log(`[DEBUG] Updated review:`, review);
+
+    if (!review) return undefined;
+
+    return { review, userLiked };
   }
 
   async getUserLikes(userId: number): Promise<number[]> {
-    // Would need a separate likes table
-    return [];
+    const likes = await db.select({ reviewId: reviewLikes.reviewId })
+      .from(reviewLikes)
+      .where(eq(reviewLikes.userId, userId));
+    
+    return likes.map(like => like.reviewId);
   }
 
   // Review Comments

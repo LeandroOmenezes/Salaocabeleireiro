@@ -146,6 +146,14 @@ export const commentLikes = pgTable("comment_likes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// === Review Likes ===
+export const reviewLikes = pgTable("review_likes", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").notNull(),
+  userId: integer("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // === Sales ===
 export const sales = pgTable("sales", {
   id: serial("id").primaryKey(),
