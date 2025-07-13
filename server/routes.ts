@@ -724,17 +724,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Rota para dar/remover like (coração) em uma avaliação
-  app.post("/api/reviews/:id/like", async (req: Request, res: Response) => {
+  // Rota para dar/remover like (coração ou joinha) em uma avaliação
+  app.post("/api/reviews/:id/like/:likeType", async (req: Request, res: Response) => {
     try {
       const reviewId = parseInt(req.params.id);
+      const likeType = req.params.likeType as 'heart' | 'thumbs';
+      
+      // Verificar se o tipo de like é válido
+      if (likeType !== 'heart' && likeType !== 'thumbs') {
+        return res.status(400).json({ message: "Tipo de like inválido" });
+      }
       
       // Verificar se o usuário está autenticado
       if (!req.isAuthenticated() || !req.user) {
         return res.status(401).json({ message: "É necessário estar logado para curtir avaliações" });
       }
       
-      const result = await storage.toggleLikeReview(reviewId, req.user.id);
+      const result = await storage.toggleLikeReview(reviewId, req.user.id, likeType);
       
       if (!result) {
         return res.status(404).json({ message: "Avaliação não encontrada" });

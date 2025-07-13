@@ -110,6 +110,7 @@ export const reviews = pgTable("reviews", {
   rating: real("rating").notNull(),
   comment: text("comment").notNull(),
   likes: integer("likes").notNull().default(0),
+  thumbsLikes: integer("thumbs_likes").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -151,6 +152,7 @@ export const reviewLikes = pgTable("review_likes", {
   id: serial("id").primaryKey(),
   reviewId: integer("review_id").notNull(),
   userId: integer("user_id").notNull(),
+  likeType: text("like_type").notNull(), // 'heart' ou 'thumbs'
   createdAt: timestamp("created_at").defaultNow(),
 });
 

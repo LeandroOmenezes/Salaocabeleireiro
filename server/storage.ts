@@ -107,8 +107,9 @@ export interface IStorage {
   toggleLikeReview(
     reviewId: number,
     userId: number,
+    likeType: 'heart' | 'thumbs',
   ): Promise<{ review: Review; userLiked: boolean } | undefined>;
-  getUserLikes(userId: number): Promise<number[]>;
+  getUserLikes(userId: number): Promise<{heartLikes: number[], thumbsLikes: number[]}>;
 
   // Review Comments
   getReviewComments(reviewId: number): Promise<ReviewComment[]>;
@@ -1175,14 +1176,15 @@ export class DatabaseStorage implements IStorage {
     return review;
   }
 
-  async toggleLikeReview(reviewId: number, userId: number): Promise<{ review: Review; userLiked: boolean } | undefined> {
-    console.log(`[DEBUG] toggleLikeReview: reviewId=${reviewId}, userId=${userId}`);
+  async toggleLikeReview(reviewId: number, userId: number, likeType: 'heart' | 'thumbs'): Promise<{ review: Review; userLiked: boolean } | undefined> {
+    console.log(`[DEBUG] toggleLikeReview: reviewId=${reviewId}, userId=${userId}, likeType=${likeType}`);
     
-    // Check if user already liked this review
+    // Check if user already liked this review with this type
     const existingLike = await db.select().from(reviewLikes)
       .where(and(
         eq(reviewLikes.reviewId, reviewId),
-        eq(reviewLikes.userId, userId)
+        eq(reviewLikes.userId, userId),
+        eq(reviewLikes.likeType, likeType)
       ));
 
     console.log(`[DEBUG] Existing review likes found: ${existingLike.length}`);
@@ -1191,31 +1193,45 @@ export class DatabaseStorage implements IStorage {
 
     if (existingLike.length > 0) {
       console.log(`[DEBUG] Removing existing review like`);
-      // User already liked, remove like
+      // User already liked with this type, remove like
       await db.delete(reviewLikes)
         .where(and(
           eq(reviewLikes.reviewId, reviewId),
-          eq(reviewLikes.userId, userId)
+          eq(reviewLikes.userId, userId),
+          eq(reviewLikes.likeType, likeType)
         ));
       
-      // Decrease likes count
-      await db.update(reviews)
-        .set({ likes: sql`${reviews.likes} - 1` })
-        .where(eq(reviews.id, reviewId));
+      // Decrease appropriate likes count
+      if (likeType === 'heart') {
+        await db.update(reviews)
+          .set({ likes: sql`${reviews.likes} - 1` })
+          .where(eq(reviews.id, reviewId));
+      } else {
+        await db.update(reviews)
+          .set({ thumbsLikes: sql`${reviews.thumbsLikes} - 1` })
+          .where(eq(reviews.id, reviewId));
+      }
       
       userLiked = false;
     } else {
       console.log(`[DEBUG] Adding new review like`);
-      // User hasn't liked, add like
+      // User hasn't liked with this type, add like
       await db.insert(reviewLikes).values({
         reviewId,
         userId,
+        likeType,
       });
       
-      // Increase likes count
-      await db.update(reviews)
-        .set({ likes: sql`${reviews.likes} + 1` })
-        .where(eq(reviews.id, reviewId));
+      // Increase appropriate likes count
+      if (likeType === 'heart') {
+        await db.update(reviews)
+          .set({ likes: sql`${reviews.likes} + 1` })
+          .where(eq(reviews.id, reviewId));
+      } else {
+        await db.update(reviews)
+          .set({ thumbsLikes: sql`${reviews.thumbsLikes} + 1` })
+          .where(eq(reviews.id, reviewId));
+      }
       
       userLiked = true;
     }
@@ -1231,12 +1247,15 @@ export class DatabaseStorage implements IStorage {
     return { review, userLiked };
   }
 
-  async getUserLikes(userId: number): Promise<number[]> {
-    const likes = await db.select({ reviewId: reviewLikes.reviewId })
+  async getUserLikes(userId: number): Promise<{heartLikes: number[], thumbsLikes: number[]}> {
+    const likes = await db.select({ reviewId: reviewLikes.reviewId, likeType: reviewLikes.likeType })
       .from(reviewLikes)
       .where(eq(reviewLikes.userId, userId));
     
-    return likes.map(like => like.reviewId);
+    const heartLikes = likes.filter(like => like.likeType === 'heart').map(like => like.reviewId);
+    const thumbsLikes = likes.filter(like => like.likeType === 'thumbs').map(like => like.reviewId);
+    
+    return { heartLikes, thumbsLikes };
   }
 
   // Review Comments
