@@ -762,6 +762,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao buscar likes do usuário" });
     }
   });
+
+  // === Review Comments ===
+  app.get("/api/reviews/:reviewId/comments", async (req: Request, res: Response) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ message: "ID da avaliação inválido" });
+      }
+
+      const comments = await storage.getReviewComments(reviewId);
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar comentários" });
+    }
+  });
+
+  app.post("/api/reviews/:reviewId/comments", async (req: Request, res: Response) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ message: "ID da avaliação inválido" });
+      }
+
+      // Verificar se o usuário está autenticado
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "É necessário estar logado para comentar" });
+      }
+
+      // Validar dados do comentário
+      const { comment } = req.body;
+      if (!comment || comment.trim().length === 0) {
+        return res.status(400).json({ message: "Comentário não pode estar vazio" });
+      }
+
+      // Criar comentário
+      const newComment = await storage.createReviewComment({
+        reviewId,
+        comment: comment.trim(),
+        userId: req.user.id,
+        userName: req.user.name || req.user.username
+      });
+
+      res.status(201).json(newComment);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar comentário" });
+    }
+  });
+
+  app.post("/api/comments/:commentId/like", async (req: Request, res: Response) => {
+    try {
+      const commentId = parseInt(req.params.commentId);
+      if (isNaN(commentId)) {
+        return res.status(400).json({ message: "ID do comentário inválido" });
+      }
+
+      // Verificar se o usuário está autenticado
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "É necessário estar logado para curtir comentários" });
+      }
+
+      const result = await storage.toggleLikeComment(commentId, req.user.id);
+
+      if (!result) {
+        return res.status(404).json({ message: "Comentário não encontrado" });
+      }
+
+      res.status(200).json({
+        comment: result.comment,
+        userLiked: result.userLiked
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao processar like no comentário" });
+    }
+  });
+
+  app.get("/api/user/comment-likes", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "É necessário estar logado" });
+      }
+
+      const userCommentLikes = await storage.getUserCommentLikes(req.user.id);
+      res.status(200).json(userCommentLikes);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar likes de comentários do usuário" });
+    }
+  });
   
   // === Admin Users Management ===
   app.get("/api/admin/users", async (req: Request, res: Response) => {

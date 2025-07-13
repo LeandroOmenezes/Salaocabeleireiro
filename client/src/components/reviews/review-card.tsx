@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { ReviewComments } from "./review-comments";
 
 interface ReviewCardProps {
   review: Review;
@@ -130,6 +131,9 @@ export default function ReviewCard({ review }: ReviewCardProps) {
           <span className="text-sm font-medium">{likes}</span>
         </button>
       </div>
+
+      {/* Sistema de comentários */}
+      <ReviewComments reviewId={review.id} />
     </div>
   );
 }

@@ -120,6 +120,30 @@ export const insertReviewSchema = createInsertSchema(reviews, {
   likes: z.number().default(0),
 }).omit({ id: true, createdAt: true });
 
+// === Review Comments (Threads) ===
+export const reviewComments = pgTable("review_comments", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").notNull(),
+  userId: integer("user_id").notNull(),
+  userName: text("user_name").notNull(),
+  comment: text("comment").notNull(),
+  likes: integer("likes").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReviewCommentSchema = createInsertSchema(reviewComments, {
+  reviewId: z.number().int(),
+  comment: z.string().min(1),
+}).omit({ id: true, userId: true, userName: true, likes: true, createdAt: true });
+
+// === Comment Likes ===
+export const commentLikes = pgTable("comment_likes", {
+  id: serial("id").primaryKey(),
+  commentId: integer("comment_id").notNull(),
+  userId: integer("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // === Sales ===
 export const sales = pgTable("sales", {
   id: serial("id").primaryKey(),
@@ -230,6 +254,11 @@ export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+export type ReviewComment = typeof reviewComments.$inferSelect;
+export type InsertReviewComment = z.infer<typeof insertReviewCommentSchema>;
+
+export type CommentLike = typeof commentLikes.$inferSelect;
 
 export type Sale = typeof sales.$inferSelect;
 export type InsertSale = z.infer<typeof insertSaleSchema>;

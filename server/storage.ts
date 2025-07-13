@@ -1,19 +1,21 @@
 import { 
   users, categories, services, priceItems, appointments, reviews, sales,
-  banner, footer, siteConfig,
+  banner, footer, siteConfig, reviewComments, commentLikes,
   type User, type InsertUser,
   type Category, type InsertCategory,
   type Service, type InsertService,
   type PriceItem, type InsertPriceItem,
   type Appointment, type InsertAppointment,
   type Review, type InsertReview,
+  type ReviewComment, type InsertReviewComment,
+  type CommentLike,
   type Sale, type InsertSale,
   type Banner, type InsertBanner,
   type Footer, type InsertFooter,
   type SiteConfig, type InsertSiteConfig
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import createMemoryStore from "memorystore";
@@ -107,6 +109,15 @@ export interface IStorage {
     userId: number,
   ): Promise<{ review: Review; userLiked: boolean } | undefined>;
   getUserLikes(userId: number): Promise<number[]>;
+
+  // Review Comments
+  getReviewComments(reviewId: number): Promise<ReviewComment[]>;
+  createReviewComment(comment: InsertReviewComment & { userId: number; userName: string }): Promise<ReviewComment>;
+  toggleLikeComment(
+    commentId: number,
+    userId: number,
+  ): Promise<{ comment: ReviewComment; userLiked: boolean } | undefined>;
+  getUserCommentLikes(userId: number): Promise<number[]>;
 
   // Sales
   getSales(): Promise<Sale[]>;
@@ -1175,6 +1186,74 @@ export class DatabaseStorage implements IStorage {
   async getUserLikes(userId: number): Promise<number[]> {
     // Would need a separate likes table
     return [];
+  }
+
+  // Review Comments
+  async getReviewComments(reviewId: number): Promise<ReviewComment[]> {
+    return await db.select().from(reviewComments)
+      .where(eq(reviewComments.reviewId, reviewId))
+      .orderBy(desc(reviewComments.createdAt));
+  }
+
+  async createReviewComment(comment: InsertReviewComment & { userId: number; userName: string }): Promise<ReviewComment> {
+    const [newComment] = await db.insert(reviewComments).values(comment).returning();
+    return newComment;
+  }
+
+  async toggleLikeComment(commentId: number, userId: number): Promise<{ comment: ReviewComment; userLiked: boolean } | undefined> {
+    // Check if user already liked this comment
+    const existingLike = await db.select().from(commentLikes)
+      .where(and(
+        eq(commentLikes.commentId, commentId),
+        eq(commentLikes.userId, userId)
+      ));
+
+    let userLiked: boolean;
+
+    if (existingLike.length > 0) {
+      // User already liked, remove like
+      await db.delete(commentLikes)
+        .where(and(
+          eq(commentLikes.commentId, commentId),
+          eq(commentLikes.userId, userId)
+        ));
+      
+      // Decrease likes count
+      await db.update(reviewComments)
+        .set({ likes: sql`${reviewComments.likes} - 1` })
+        .where(eq(reviewComments.id, commentId));
+      
+      userLiked = false;
+    } else {
+      // User hasn't liked, add like
+      await db.insert(commentLikes).values({
+        commentId,
+        userId,
+      });
+      
+      // Increase likes count
+      await db.update(reviewComments)
+        .set({ likes: sql`${reviewComments.likes} + 1` })
+        .where(eq(reviewComments.id, commentId));
+      
+      userLiked = true;
+    }
+
+    // Get updated comment
+    const [comment] = await db.select().from(reviewComments)
+      .where(eq(reviewComments.id, commentId));
+
+    if (!comment) return undefined;
+
+    return { comment, userLiked };
+  }
+
+  async getUserCommentLikes(userId: number): Promise<number[]> {
+    const likes = await db.select({ commentId: commentLikes.commentId })
+      .from(commentLikes)
+      .where(eq(commentLikes.userId, userId));
+    
+    return likes.map(like => like.commentId);
   }
 
   // Sales
