@@ -381,3 +381,15 @@ Preferred communication style: Simple, everyday language.
 - **Autenticação robusta**: Sistema completo de validação de usuário para comentários e curtidas
 - **UX moderna**: Interface responsiva com estados de hover, animações de escala e cores temáticas
 - **Performance otimizada**: Invalidação inteligente de cache e sincronização automática de dados
+
+### Sistema de Likes Duplo para Avaliações Principais (2025-07-13)
+- **Funcionalidade dupla implementada**: Avaliações principais agora suportam dois tipos de interação independentes
+- **Botão coração (vermelho)**: Sistema de curtidas tradicional com contador individual
+- **Botão joinha (azul)**: Sistema de aprovação com contador separado do coração
+- **Schema atualizado**: Campo `thumbsLikes` adicionado à tabela `reviews` no banco PostgreSQL
+- **Tabela review_likes**: Sistema completo de likes com campo `likeType` para distinguir 'heart' e 'thumbs'
+- **API expandida**: Rotas `/api/reviews/:id/like/heart` e `/api/reviews/:id/like/thumbs` funcionais
+- **Interface consistente**: Mesma UX dos comentários aplicada às avaliações principais
+- **Animações independentes**: Cada botão tem suas próprias animações e estados visuais
+- **Contadores em tempo real**: Sincronização automática entre frontend e backend
+- **Funcionamento confirmado**: Sistema testado e aprovado com likes independentes funcionando perfeitamente
