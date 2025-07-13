@@ -350,3 +350,10 @@ Preferred communication style: Simple, everyday language.
 - **Agendamentos de teste removidos**: Agenda organizada apenas com dados reais
 - **Dados preservados**: Mantidos usuários legítimos (admin principal e usuária real)
 - **Sistema limpo**: Banco preparado para uso em produção sem poluição de dados de teste
+
+### Correção dos Horários de Agendamento (2025-07-13)
+- **Problema identificado**: Terceiro horário aparecia como 10:00 em vez de 10:20
+- **Algoritmo corrigido**: Lógica de geração de horários reformulada para intervalos precisos de 40 minutos
+- **Sequência correta**: 09:00, 09:40, 10:20, 11:00, 11:40, 12:20, 13:00, 13:40, etc.
+- **Método implementado**: Cálculo baseado em minutos totais com incrementos de 40 minutos
+- **Funcionamento confirmado**: Horários agora seguem intervalos exatos de 40 minutos

@@ -544,15 +544,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Gerar todos os horários possíveis (intervalo de 40 minutos)
       const generateTimeSlots = () => {
         const slots = [];
-        const startHour = 9; // 09:00
-        const endHour = 17; // 17:00 (último horário 16:20)
+        const startTime = 9 * 60; // 09:00 em minutos (540 minutos)
+        const endTime = 17 * 60; // 17:00 em minutos (1020 minutos)
+        const interval = 40; // 40 minutos
         
-        for (let hour = startHour; hour < endHour; hour++) {
-          for (let minute = 0; minute < 60; minute += 40) {
-            const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-            slots.push(timeString);
-          }
+        for (let time = startTime; time < endTime; time += interval) {
+          const hour = Math.floor(time / 60);
+          const minute = time % 60;
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          slots.push(timeString);
         }
+        
         return slots;
       };
       
