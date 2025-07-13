@@ -712,8 +712,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validar os dados da avaliação
       const reviewData = insertReviewSchema.parse(req.body);
       
+      // Adicionar userId se o usuário está autenticado
+      const reviewWithUser = {
+        ...reviewData,
+        userId: req.user?.id || null
+      };
+      
       // Criar a avaliação
-      const review = await storage.createReview(reviewData);
+      const review = await storage.createReview(reviewWithUser);
       res.status(201).json(review);
     } catch (error) {
       if (error instanceof ZodError) {

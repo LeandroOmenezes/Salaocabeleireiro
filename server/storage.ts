@@ -1191,7 +1191,23 @@ export class DatabaseStorage implements IStorage {
 
   // Reviews
   async getReviews(): Promise<Review[]> {
-    return await db.select().from(reviews).orderBy(desc(reviews.createdAt));
+    const reviewsWithUsers = await db.select({
+      id: reviews.id,
+      userId: reviews.userId,
+      clientName: reviews.clientName,
+      rating: reviews.rating,
+      comment: reviews.comment,
+      likes: reviews.likes,
+      thumbsLikes: reviews.thumbsLikes,
+      createdAt: reviews.createdAt,
+      // Include user profile image data
+      userProfileImageBase64: users.profileImageBase64
+    })
+    .from(reviews)
+    .leftJoin(users, eq(reviews.userId, users.id))
+    .orderBy(desc(reviews.createdAt));
+
+    return reviewsWithUsers as Review[];
   }
 
   async createReview(insertReview: InsertReview): Promise<Review> {

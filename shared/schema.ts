@@ -110,6 +110,7 @@ export const insertAppointmentSchema = createInsertSchema(appointments, {
 // === Reviews ===
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id"), // Opcional para permitir reviews de usuários não cadastrados
   clientName: text("client_name").notNull(),
   rating: real("rating").notNull(),
   comment: text("comment").notNull(),
@@ -268,7 +269,9 @@ export type InsertPriceItem = z.infer<typeof insertPriceItemSchema>;
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 
-export type Review = typeof reviews.$inferSelect;
+export type Review = typeof reviews.$inferSelect & {
+  userProfileImageBase64?: string | null;
+};
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 
 export type ReviewComment = typeof reviewComments.$inferSelect & {

@@ -136,7 +136,9 @@ export default function ReviewCard({ review }: ReviewCardProps) {
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
       <div className="flex items-center mb-4">
         <Avatar
+          userId={review.userId}
           userName={review.clientName}
+          imageUrl={review.userId && review.userProfileImageBase64 ? `/api/images/user/${review.userId}` : undefined}
           size="lg"
           className="mr-4 flex-shrink-0"
         />
