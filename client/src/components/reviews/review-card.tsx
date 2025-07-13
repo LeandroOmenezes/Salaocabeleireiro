@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { ReviewComments } from "./review-comments";
+import { Avatar } from "@/components/ui/avatar";
 
 interface ReviewCardProps {
   review: Review;
@@ -134,9 +135,11 @@ export default function ReviewCard({ review }: ReviewCardProps) {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
       <div className="flex items-center mb-4">
-        <div className="w-14 h-14 bg-blue-100 rounded-full mr-4 flex items-center justify-center text-blue-500">
-          <i className="fas fa-user text-xl"></i>
-        </div>
+        <Avatar
+          userName={review.clientName}
+          size="lg"
+          className="mr-4 flex-shrink-0"
+        />
         <div>
           <h3 className="text-lg font-bold text-gray-800">{review.clientName}</h3>
           <div className="flex text-yellow-400">
