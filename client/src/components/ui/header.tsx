@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSiteConfig } from "@/hooks/use-site-config";
+import { Avatar } from "@/components/ui/avatar";
 import AdminMenu from "./admin-menu";
 
 export default function Header() {
@@ -53,9 +54,12 @@ export default function Header() {
           {user ? (
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3 bg-gray-100 px-3 py-2 rounded-full">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <i className="fas fa-user text-white text-sm"></i>
-                </div>
+                <Avatar 
+                  userId={user.id} 
+                  userName={user.name || user.username}
+                  imageUrl={user.profileImageBase64 ? `/api/images/user/${user.id}` : undefined}
+                  size="sm"
+                />
                 <div className="text-sm">
                   <div className="font-medium text-gray-800">{user.name || user.username}</div>
                   {user.isAdmin && (
@@ -100,9 +104,12 @@ export default function Header() {
           {user ? (
             <>
               <div className="flex items-center space-x-3 bg-gray-100 px-3 py-2 rounded-lg mb-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <i className="fas fa-user text-white text-sm"></i>
-                </div>
+                <Avatar 
+                  userId={user.id} 
+                  userName={user.name || user.username}
+                  imageUrl={user.profileImageBase64 ? `/api/images/user/${user.id}` : undefined}
+                  size="sm"
+                />
                 <div className="text-sm">
                   <div className="font-medium text-gray-800">{user.name || user.username}</div>
                   {user.isAdmin && (
