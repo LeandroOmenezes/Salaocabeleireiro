@@ -241,7 +241,7 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                           }`}
                         />
                         <span className="font-medium">
-                          {comment.heartLikes > 0 && comment.heartLikes}
+                          {comment.heartLikes > 0 ? comment.heartLikes : null}
                         </span>
                       </Button>
 
@@ -263,8 +263,8 @@ export function ReviewComments({ reviewId }: ReviewCommentsProps) {
                             userCommentLikes.thumbsLikes.includes(comment.id) ? "fill-current scale-110" : ""
                           }`}
                         />
-                        <span className="font-medium">
-                          {comment.thumbsLikes > 0 && comment.thumbsLikes}
+                        <span className="font-medium" style={{display: comment.thumbsLikes > 0 ? 'inline' : 'none'}}>
+                          {comment.thumbsLikes}
                         </span>
                       </Button>
 
