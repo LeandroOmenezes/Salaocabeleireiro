@@ -50,12 +50,12 @@ export default function ReviewForm() {
         clientName: user?.name || "Cliente",
       };
       
-      console.log("Enviando avaliação:", reviewData);
+
       const res = await apiRequest("POST", "/api/reviews", reviewData);
       return await res.json();
     },
     onSuccess: (response) => {
-      console.log("Avaliação enviada com sucesso:", response);
+
       queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
       form.reset({
         clientName: user?.name || "",
@@ -68,7 +68,7 @@ export default function ReviewForm() {
       });
     },
     onError: (error) => {
-      console.error("Erro ao enviar avaliação:", error);
+
       toast({
         title: "Erro",
         description: "Não foi possível enviar sua avaliação. Tente novamente.",

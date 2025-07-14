@@ -812,10 +812,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const comments = await storage.getReviewComments(reviewId);
-      console.log(`[comments-debug] Review ${reviewId} comments:`, JSON.stringify(comments, null, 2));
       res.json(comments);
     } catch (error) {
-      console.error("[comments-debug] Error:", error);
       res.status(500).json({ message: "Erro ao buscar comentários" });
     }
   });

@@ -1216,9 +1216,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async toggleLikeReview(reviewId: number, userId: number, likeType: 'heart' | 'thumbs'): Promise<{ review: Review; userLiked: boolean } | undefined> {
-    console.log(`[DEBUG] toggleLikeReview: reviewId=${reviewId}, userId=${userId}, likeType=${likeType}`);
-    
-    // Check if user already liked this review with this type
     const existingLike = await db.select().from(reviewLikes)
       .where(and(
         eq(reviewLikes.reviewId, reviewId),
@@ -1226,13 +1223,9 @@ export class DatabaseStorage implements IStorage {
         eq(reviewLikes.likeType, likeType)
       ));
 
-    console.log(`[DEBUG] Existing review likes found: ${existingLike.length}`);
-
     let userLiked: boolean;
 
     if (existingLike.length > 0) {
-      console.log(`[DEBUG] Removing existing review like`);
-      // User already liked with this type, remove like
       await db.delete(reviewLikes)
         .where(and(
           eq(reviewLikes.reviewId, reviewId),
@@ -1253,8 +1246,6 @@ export class DatabaseStorage implements IStorage {
       
       userLiked = false;
     } else {
-      console.log(`[DEBUG] Adding new review like`);
-      // User hasn't liked with this type, add like
       await db.insert(reviewLikes).values({
         reviewId,
         userId,
@@ -1275,11 +1266,8 @@ export class DatabaseStorage implements IStorage {
       userLiked = true;
     }
 
-    // Get updated review
     const [review] = await db.select().from(reviews)
       .where(eq(reviews.id, reviewId));
-
-    console.log(`[DEBUG] Updated review:`, review);
 
     if (!review) return undefined;
 
@@ -1316,7 +1304,7 @@ export class DatabaseStorage implements IStorage {
     .where(eq(reviewComments.reviewId, reviewId))
     .orderBy(desc(reviewComments.createdAt));
 
-    console.log(`[storage-debug] Found ${comments.length} comments for review ${reviewId}`);
+
     return comments as ReviewComment[];
   }
 
@@ -1326,9 +1314,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async toggleLikeComment(commentId: number, userId: number, likeType: 'heart'): Promise<{ comment: ReviewComment; userLiked: boolean } | undefined> {
-    console.log(`[DEBUG] toggleLikeComment: commentId=${commentId}, userId=${userId}, likeType=${likeType}`);
-    
-    // Check if user already liked this comment with this type
     const existingLike = await db.select().from(commentLikes)
       .where(and(
         eq(commentLikes.commentId, commentId),
@@ -1336,13 +1321,9 @@ export class DatabaseStorage implements IStorage {
         eq(commentLikes.likeType, likeType)
       ));
 
-    console.log(`[DEBUG] Existing likes found: ${existingLike.length}`);
-
     let userLiked: boolean;
 
     if (existingLike.length > 0) {
-      console.log(`[DEBUG] Removing existing like`);
-      // User already liked with this type, remove like
       await db.delete(commentLikes)
         .where(and(
           eq(commentLikes.commentId, commentId),
@@ -1350,9 +1331,7 @@ export class DatabaseStorage implements IStorage {
           eq(commentLikes.likeType, likeType)
         ));
       
-      // Decrease likes count for this type
       if (likeType === 'heart') {
-        console.log(`[DEBUG] Decreasing heart likes`);
         await db.update(reviewComments)
           .set({ heartLikes: sql`${reviewComments.heartLikes} - 1` })
           .where(eq(reviewComments.id, commentId));
@@ -1360,17 +1339,13 @@ export class DatabaseStorage implements IStorage {
       
       userLiked = false;
     } else {
-      console.log(`[DEBUG] Adding new like`);
-      // User hasn't liked with this type, add like
       await db.insert(commentLikes).values({
         commentId,
         userId,
         likeType,
       });
       
-      // Increase likes count for this type
       if (likeType === 'heart') {
-        console.log(`[DEBUG] Increasing heart likes`);
         await db.update(reviewComments)
           .set({ heartLikes: sql`${reviewComments.heartLikes} + 1` })
           .where(eq(reviewComments.id, commentId));
@@ -1379,11 +1354,8 @@ export class DatabaseStorage implements IStorage {
       userLiked = true;
     }
 
-    // Get updated comment
     const [comment] = await db.select().from(reviewComments)
       .where(eq(reviewComments.id, commentId));
-
-    console.log(`[DEBUG] Updated comment:`, comment);
 
     if (!comment) return undefined;
 
