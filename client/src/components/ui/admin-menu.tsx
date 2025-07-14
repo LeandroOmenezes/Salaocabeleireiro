@@ -12,7 +12,8 @@ import {
   FileText,
   DollarSign,
   Layers,
-  Palette
+  Palette,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -68,6 +69,12 @@ export default function AdminMenu() {
       icon: Palette,
       label: "Configuração do Site",
       description: "Personalizar nome, logo e cores"
+    },
+    {
+      href: "/admin/whatsapp",
+      icon: MessageCircle,
+      label: "WhatsApp",
+      description: "Notificações automáticas"
     }
   ];
 

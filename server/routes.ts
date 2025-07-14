@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
+import { sendAppointmentNotification, testWhatsAppConnection } from "./whatsapp";
 import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema, insertCategorySchema, insertSiteConfigSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
@@ -674,15 +675,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id) || !status) {
         return res.status(400).json({ message: "Invalid request data" });
       }
+
+      // Buscar dados completos do agendamento antes da atualização
+      const originalAppointment = await storage.getAppointmentById(id);
       
+      if (!originalAppointment) {
+        return res.status(404).json({ message: "Appointment not found" });
+      }
+
+      // Atualizar status do agendamento
       const appointment = await storage.updateAppointmentStatus(id, status);
       
       if (!appointment) {
         return res.status(404).json({ message: "Appointment not found" });
       }
+
+      // Enviar notificação WhatsApp se o status for confirmado ou cancelado
+      if (status === 'confirmed' || status === 'cancelled') {
+        // Buscar dados do serviço para incluir na notificação
+        const service = await storage.getServiceById(originalAppointment.serviceId);
+        const serviceName = service?.name || 'Serviço';
+
+        // Formatar data brasileira
+        const [year, month, day] = originalAppointment.date.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+
+        // Enviar notificação WhatsApp (não bloquear resposta se falhar)
+        sendAppointmentNotification({
+          to: originalAppointment.phone,
+          clientName: originalAppointment.name,
+          serviceName: serviceName,
+          appointmentDate: formattedDate,
+          appointmentTime: originalAppointment.time,
+          status: status === 'confirmed' ? 'confirmed' : 'cancelled'
+        }).catch(error => {
+          console.error('Erro ao enviar WhatsApp (não crítico):', error);
+        });
+
+        console.log(`📱 Notificação WhatsApp programada para ${originalAppointment.name} (${originalAppointment.phone})`);
+      }
       
       res.json(appointment);
     } catch (error) {
+      console.error('Error updating appointment status:', error);
       res.status(500).json({ message: "Error updating appointment status" });
     }
   });
@@ -1457,6 +1492,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in regenerate images endpoint:", error);
       res.status(500).json({ message: "Erro ao processar regeneração de imagens" });
+    }
+  });
+
+  // === WhatsApp ===
+  app.get("/api/admin/whatsapp/test", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      const result = await testWhatsAppConnection();
+      res.json(result);
+    } catch (error) {
+      console.error("Error testing WhatsApp connection:", error);
+      res.status(500).json({ message: "Error testing WhatsApp connection" });
+    }
+  });
+
+  app.post("/api/admin/whatsapp/test-message", async (req: Request, res: Response) => {
+    try {
+      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      const { phone, clientName } = req.body;
+
+      if (!phone || !clientName) {
+        return res.status(400).json({ message: "Phone and clientName are required" });
+      }
+
+      // Enviar mensagem de teste
+      const success = await sendAppointmentNotification({
+        to: phone,
+        clientName: clientName,
+        serviceName: "Teste de Conectividade",
+        appointmentDate: new Date().toLocaleDateString('pt-BR'),
+        appointmentTime: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        status: 'confirmed'
+      });
+
+      res.json({
+        success,
+        message: success 
+          ? "Mensagem de teste enviada com sucesso!" 
+          : "Falha ao enviar mensagem de teste. Verifique as configurações."
+      });
+
+    } catch (error) {
+      console.error("Error sending test WhatsApp message:", error);
+      res.status(500).json({ message: "Error sending test WhatsApp message" });
     }
   });
 
