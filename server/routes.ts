@@ -579,8 +579,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/appointments", async (req: Request, res: Response) => {
     try {
+      // Verificar se o usuário está autenticado
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "É necessário estar logado para agendar um horário" });
+      }
+
       const appointmentData = insertAppointmentSchema.parse(req.body);
-      
       
       // Verificar se já existe um agendamento no mesmo horário
       const existingAppointments = await storage.getAppointments();
@@ -598,18 +602,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const appointment = await storage.createAppointment(appointmentData);
       
-      
-      // Verificar quantos agendamentos existem após criar este
-      const appointments = await storage.getAppointments();
-      
-      
       res.status(201).json(appointment);
     } catch (error) {
-      
       if (error instanceof ZodError) {
-        res.status(400).json({ message: "Invalid appointment data", errors: error.errors });
+        res.status(400).json({ message: "Dados de agendamento inválidos", errors: error.errors });
       } else {
-        res.status(500).json({ message: "Error creating appointment" });
+        res.status(500).json({ message: "Erro ao criar agendamento" });
       }
     }
   });

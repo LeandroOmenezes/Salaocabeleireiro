@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "wouter";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import ServiceCard from "@/components/services/service-card";
@@ -7,6 +8,7 @@ import AppointmentForm from "@/components/appointments/appointment-form";
 import ReviewCard from "@/components/reviews/review-card";
 import ReviewForm from "@/components/reviews/review-form";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { Service, Review, Category, PriceItem, Banner } from "@shared/schema";
 
 function Hero() {
@@ -170,6 +172,8 @@ function PriceList() {
 }
 
 function Appointments() {
+  const { user } = useAuth();
+
   return (
     <section id="appointments" className="py-16 relative overflow-hidden">
       {/* Imagem de fundo para a área do cliente */}
@@ -188,7 +192,30 @@ function Appointments() {
           <p className="text-gray-700 max-w-2xl mx-auto">Escolha o serviço e horário de sua preferência e venha cuidar da sua beleza conosco.</p>
         </div>
         
-        <AppointmentForm />
+        {user ? (
+          <AppointmentForm />
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg mx-auto text-center">
+            <div className="mb-6">
+              <i className="fas fa-user-lock text-5xl text-blue-500 mb-4"></i>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Login Necessário</h3>
+              <p className="text-gray-600">Para agendar um horário, você precisa estar logado em nossa plataforma.</p>
+            </div>
+            
+            <div className="space-y-4">
+              <Link href="/auth">
+                <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 text-lg">
+                  <i className="fas fa-sign-in-alt mr-2"></i>
+                  Fazer Login para Agendar
+                </Button>
+              </Link>
+              
+              <p className="text-sm text-gray-500">
+                Não tem conta? No login você também pode se cadastrar rapidamente!
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

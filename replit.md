@@ -434,3 +434,13 @@ Preferred communication style: Simple, everyday language.
 - **Banco 100% limpo**: Sistema agora contém apenas dados estruturais e configurações
 - **Estado final**: 1 usuário admin (Leandro Menezes) + zero avaliações + zero comentários + zero likes
 - **Sistema virginalmente limpo**: Banco de dados completamente zerado e pronto para receber dados reais
+
+### Sistema de Autenticação Obrigatória para Agendamentos (2025-07-14)
+- **Proteção no frontend**: Homepage agora verifica se usuário está logado antes de mostrar formulário de agendamento
+- **Interface de login**: Card informativo com botão "Fazer Login para Agendar" para usuários não autenticados
+- **Proteção no backend**: Rota `/api/appointments` (POST) agora exige autenticação antes de criar agendamentos
+- **Preenchimento automático**: Formulário de agendamento preenche automaticamente nome e email do usuário logado
+- **Campos desabilitados**: Nome e email aparecem desabilitados e com fundo cinza no formulário
+- **Mensagens em português**: Erro de autenticação retorna "É necessário estar logado para agendar um horário"
+- **Segurança completa**: Sistema garante que apenas usuários identificados podem criar agendamentos
+- **UX aprimorada**: Usuários são direcionados ao login de forma clara e intuitiva

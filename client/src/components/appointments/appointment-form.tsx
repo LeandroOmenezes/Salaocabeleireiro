@@ -12,6 +12,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Category, ServiceOption } from "@shared/schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { MessageSquare } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 const appointmentFormSchema = z.object({
   name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
@@ -34,6 +35,7 @@ interface TimeSlot {
 
 export default function AppointmentForm() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>("");
@@ -42,8 +44,8 @@ export default function AppointmentForm() {
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: user?.name || user?.username || "",
+      email: user?.username || "",
       phone: "",
       categoryId: "",
       serviceId: "",
@@ -233,7 +235,8 @@ export default function AppointmentForm() {
                   <FormControl>
                     <Input 
                       placeholder="Seu nome completo" 
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                      disabled
                       {...field} 
                     />
                   </FormControl>
@@ -253,7 +256,8 @@ export default function AppointmentForm() {
                   <Input 
                     type="email" 
                     placeholder="seu.email@exemplo.com" 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                    disabled
                     {...field} 
                   />
                 </FormControl>
