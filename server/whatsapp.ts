@@ -1,13 +1,11 @@
 import twilio from 'twilio';
 
-// Configuração do Twilio
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886'; // Sandbox number
+const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886';
 
 let client: twilio.Twilio | null = null;
 
-// Inicializar cliente Twilio se as credenciais estiverem disponíveis
 if (accountSid && authToken) {
   client = twilio(accountSid, authToken);
   console.log('✅ Twilio WhatsApp configurado com sucesso');
@@ -16,7 +14,7 @@ if (accountSid && authToken) {
 }
 
 interface WhatsAppNotification {
-  to: string; // Número do cliente no formato +5511999999999
+  to: string;
   clientName: string;
   serviceName: string;
   appointmentDate: string;
@@ -31,10 +29,7 @@ export async function sendAppointmentNotification(notification: WhatsAppNotifica
   }
 
   try {
-    // Formatar número no padrão WhatsApp
     const toNumber = `whatsapp:${notification.to}`;
-    
-    // Criar mensagem baseada no status
     let message: string;
     
     if (notification.status === 'confirmed') {
@@ -67,7 +62,6 @@ Entre em contato para reagendar! 📞
 _Sentimos muito pelo inconveniente._`;
     }
 
-    // Enviar mensagem
     const result = await client.messages.create({
       from: whatsappNumber,
       to: toNumber,
@@ -79,15 +73,8 @@ _Sentimos muito pelo inconveniente._`;
 
   } catch (error: any) {
     console.error('❌ Erro ao enviar WhatsApp:', error.message);
-    
-    // Log detalhado para debug
-    if (error.code) {
-      console.error(`Código do erro: ${error.code}`);
-    }
-    if (error.moreInfo) {
-      console.error(`Mais informações: ${error.moreInfo}`);
-    }
-    
+    if (error.code) console.error(`Código do erro: ${error.code}`);
+    if (error.moreInfo) console.error(`Mais informações: ${error.moreInfo}`);
     return false;
   }
 }
@@ -101,9 +88,7 @@ export async function testWhatsAppConnection(): Promise<{ success: boolean; mess
   }
 
   try {
-    // Tentar buscar informações da conta para testar conectividade
     const account = await client.api.accounts(accountSid).fetch();
-    
     return {
       success: true,
       message: `Conexão Twilio OK. Conta: ${account.friendlyName}`

@@ -19,13 +19,10 @@ export function WhatsAppManagement() {
   const [testPhone, setTestPhone] = useState("");
   const [testName, setTestName] = useState("");
 
-  // Verificar status do WhatsApp
   const { data: whatsappStatus, isLoading: statusLoading, refetch: refetchStatus } = useQuery<WhatsAppStatus>({
     queryKey: ["/api/admin/whatsapp/test"],
     retry: false
   });
-
-  // Mutation para enviar mensagem de teste
   const testMessageMutation = useMutation({
     mutationFn: async (data: { phone: string; clientName: string }) => {
       const res = await apiRequest("POST", "/api/admin/whatsapp/test-message", data);
@@ -64,7 +61,7 @@ export function WhatsAppManagement() {
       return;
     }
 
-    // Validar formato do telefone
+
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     if (!phoneRegex.test(testPhone.replace(/\s/g, ''))) {
       toast({
@@ -96,7 +93,7 @@ export function WhatsAppManagement() {
         <h1 className="text-2xl font-bold">Notificações WhatsApp</h1>
       </div>
 
-      {/* Status da Conexão */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -130,7 +127,7 @@ export function WhatsAppManagement() {
         </CardContent>
       </Card>
 
-      {/* Configurações */}
+
       <Card>
         <CardHeader>
           <CardTitle>Como Configurar</CardTitle>
@@ -163,7 +160,7 @@ export function WhatsAppManagement() {
         </CardContent>
       </Card>
 
-      {/* Teste de Mensagem */}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -211,7 +208,7 @@ export function WhatsAppManagement() {
         </CardContent>
       </Card>
 
-      {/* Funcionamento Automático */}
+
       <Card>
         <CardHeader>
           <CardTitle>Funcionamento Automático</CardTitle>

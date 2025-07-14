@@ -11,10 +11,7 @@ import fs from "fs";
 import express from "express";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication
   setupAuth(app);
-  
-  // Configure multer for file uploads
   const uploadsDir = path.join(process.cwd(), 'uploads');
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -33,7 +30,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const upload = multer({
     storage: storage_config,
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB
+      fileSize: 5 * 1024 * 1024,
     },
     fileFilter: (req, file, cb) => {
       const allowedTypes = /jpeg|jpg|png|webp/;
@@ -48,13 +45,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Serve uploaded images
   app.use('/uploads', express.static(uploadsDir));
-  
-  // === Clients ===
   app.get("/api/clients", async (req: Request, res: Response) => {
     try {
-      // Only allow authenticated users
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -638,7 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Nova rota para usuários verem seus próprios agendamentos
+
   app.get("/api/my-appointments", async (req: Request, res: Response) => {
     try {
       if (!req.isAuthenticated()) {
@@ -649,7 +642,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const allAppointments = await storage.getAppointments();
       
-      // Filtrar apenas os agendamentos do usuário atual
+
       const userAppointments = allAppointments.filter(appointment => 
         appointment.email === user.username
       );
@@ -676,31 +669,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request data" });
       }
 
-      // Buscar dados completos do agendamento antes da atualização
+
       const originalAppointment = await storage.getAppointmentById(id);
       
       if (!originalAppointment) {
         return res.status(404).json({ message: "Appointment not found" });
       }
 
-      // Atualizar status do agendamento
+
       const appointment = await storage.updateAppointmentStatus(id, status);
       
       if (!appointment) {
         return res.status(404).json({ message: "Appointment not found" });
       }
 
-      // Enviar notificação WhatsApp se o status for confirmado ou cancelado
+
       if (status === 'confirmed' || status === 'cancelled') {
-        // Buscar dados do serviço para incluir na notificação
+
         const service = await storage.getServiceById(originalAppointment.serviceId);
         const serviceName = service?.name || 'Serviço';
 
-        // Formatar data brasileira
+
         const [year, month, day] = originalAppointment.date.split('-');
         const formattedDate = `${day}/${month}/${year}`;
 
-        // Enviar notificação WhatsApp (não bloquear resposta se falhar)
+
         sendAppointmentNotification({
           to: originalAppointment.phone,
           clientName: originalAppointment.name,
@@ -722,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // === Reviews ===
+
   app.get("/api/reviews", async (req: Request, res: Response) => {
     try {
       const reviews = await storage.getReviews();
