@@ -35,7 +35,7 @@ export function Avatar({ userId, userName, imageUrl, size = "md", className = ""
           alt={`Foto de ${userName}`}
           className="w-full h-full object-cover"
           onError={(e) => {
-            console.log("Error loading image:", finalImageUrl);
+            
             // Fallback para iniciais se a imagem falhar
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';

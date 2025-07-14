@@ -96,7 +96,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
   `;
   
   // Tentar SendGrid primeiro (produção)
-  console.log(`🔍 Verificando SendGrid API Key: ${process.env.SENDGRID_API_KEY ? 'ENCONTRADA' : 'NÃO ENCONTRADA'}`);
+  
   if (process.env.SENDGRID_API_KEY) {
     try {
       const mailService = new MailService();
@@ -109,10 +109,10 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
         html: emailHTML
       });
       
-      console.log(`✅ Email enviado via SendGrid para: ${email}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Erro ao enviar email via SendGrid:', error);
+      
       // Continuar para tentar nodemailer
     }
   }
@@ -135,18 +135,18 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
         html: emailHTML
       });
       
-      console.log(`✅ Email enviado via Gmail para: ${email}`);
+      
       return true;
     } catch (error) {
-      console.error('❌ Erro ao enviar email via Gmail:', error);
+      
     }
   }
   
   // Modo desenvolvimento - mostrar no console
-  console.log('\n=== EMAIL DE RECUPERAÇÃO DE SENHA (MODO DESENVOLVIMENTO) ===');
-  console.log(`📧 Para: ${email}`);
-  console.log(`🔗 Link de recuperação: ${resetLink}`);
-  console.log('==============================================================\n');
+  
+  
+  
+  
   
   return true;
 }
@@ -224,7 +224,7 @@ export function setupAuth(app: Express) {
   
   // Estratégia de autenticação do Google (configurada se as credenciais estiverem disponíveis)
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    console.log("Google auth configured with CLIENT_ID:", process.env.GOOGLE_CLIENT_ID.substring(0, 5) + "...");
+    
     
     // Detectar automaticamente a URL do ambiente
     const getBaseUrl = () => {
@@ -240,15 +240,14 @@ export function setupAuth(app: Express) {
     const baseUrl = getBaseUrl();
     const callbackUrl = `${baseUrl}/api/auth/google/callback`;
     
-    console.log("🌐 Base URL:", baseUrl);
-    console.log("🔗 Google callback URL:", callbackUrl);
-    console.log("⚠️  IMPORTANTE: Adicione esta URL no Google Cloud Console:");
-    console.log(`   Authorized redirect URIs: ${callbackUrl}`);
-    console.log(`   JavaScript origins: ${baseUrl}`);
+    
+    
+    
+    
+    
     
     // Verificar se as credenciais do Google são válidas
     if (!process.env.GOOGLE_CLIENT_ID.includes('.googleusercontent.com')) {
-      console.warn("ATENÇÃO: As credenciais do Google podem estar incorretas ou expiradas");
     }
     
     passport.use(
@@ -261,12 +260,12 @@ export function setupAuth(app: Express) {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            console.log("Google profile received:", profile.displayName, profile.emails?.[0]?.value);
+            
             
             // Verificar se o usuário já existe no sistema
             const email = profile.emails?.[0]?.value;
             if (!email) {
-              console.error("No email found in Google profile");
+              
               return done(new Error("No email found in Google profile"));
             }
             
@@ -274,7 +273,7 @@ export function setupAuth(app: Express) {
             
             // Se o usuário não existir, criar um novo automaticamente
             if (!user) {
-              console.log("Creating new user from Google profile:", email);
+              
               user = await storage.createUser({
                 username: email,
                 password: await hashPassword(randomBytes(16).toString('hex')), // Senha aleatória
@@ -282,14 +281,14 @@ export function setupAuth(app: Express) {
                 phone: "", // Campo obrigatório, mas pode ser vazio para usuários do Google
                 isAdmin: false
               });
-              console.log("New user created successfully:", user.username);
+              
             } else {
-              console.log("Existing user found:", user.username);
+              
             }
             
             return done(null, user);
           } catch (error) {
-            console.error("Error in Google OAuth callback:", error);
+            
             return done(error);
           }
         }
@@ -356,7 +355,7 @@ export function setupAuth(app: Express) {
         res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
-      console.error("Erro no registro:", error);
+      
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -393,8 +392,8 @@ export function setupAuth(app: Express) {
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     // Rota para iniciar o processo de autenticação do Google
     app.get("/api/auth/google", (req, res, next) => {
-      console.log("Iniciando autenticação Google...");
-      console.log("URL atual:", req.get('host'));
+      
+      
       passport.authenticate("google", {
         scope: ['profile', 'email']
       })(req, res, next);
@@ -404,32 +403,32 @@ export function setupAuth(app: Express) {
     app.get(
       "/api/auth/google/callback",
       (req, res, next) => {
-        console.log("Google callback recebido");
+        
         
         passport.authenticate("google", (err: Error | null, user: Express.User | false | null, info: any) => {
-          console.log("Google auth callback result:", { err: err?.message, user: user ? 'User found' : 'No user', info });
+          
           
           if (err) {
-            console.error("Google auth error:", err);
+            
             return res.redirect("/auth?error=" + encodeURIComponent("Erro na autenticação: " + err.message));
           }
           
           if (!user) {
-            console.error("Google auth failed - no user returned from strategy");
+            
             return res.redirect("/auth?error=Falha+na+autenticação+com+o+Google");
           }
           
-          console.log("Attempting to login user:", user);
+          
           
           req.login(user, (loginErr) => {
             if (loginErr) {
-              console.error("Login error:", loginErr);
+              
               return res.redirect("/auth?error=" + encodeURIComponent("Erro ao fazer login: " + loginErr.message));
             }
             
-            console.log("Login com Google bem-sucedido para:", user.username);
-            console.log("Session after login:", req.session);
-            console.log("User authenticated:", req.isAuthenticated());
+            
+            
+            
             
             // Sucesso - redirecionar para a página inicial
             return res.redirect("/");

@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
           setUser(userData);
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        
       } finally {
         setIsLoading(false);
       }

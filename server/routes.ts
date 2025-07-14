@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail } from "./auth";
-import { sendAppointmentNotification, testWhatsAppConnection } from "./whatsapp";
+
 import { insertAppointmentSchema, insertSaleSchema, insertReviewSchema, insertBannerSchema, insertFooterSchema, insertPriceItemSchema, insertServiceSchema, insertCategorySchema, insertSiteConfigSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import multer from "multer";
@@ -236,13 +236,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: `/api/images/service/${serviceId}`
       });
     } catch (error) {
-      console.error("Error uploading service image:", error);
+      
       // Remove the uploaded file if an error occurred
       if (req.file) {
         try {
           fs.unlinkSync(req.file.path);
         } catch (unlinkError) {
-          console.error("Error removing uploaded file:", unlinkError);
+          
         }
       }
       res.status(500).json({ message: "Erro ao fazer upload da imagem" });
@@ -264,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         service
       });
     } catch (error) {
-      console.error("Error creating service:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados do serviço inválidos", errors: error.errors });
       } else {
@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ message: "Serviço removido com sucesso" });
     } catch (error) {
-      console.error("Error deleting service:", error);
+      
       res.status(500).json({ message: "Erro ao remover serviço" });
     }
   });
@@ -317,7 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ message: "Status de destaque atualizado com sucesso" });
     } catch (error) {
-      console.error("Error updating service featured status:", error);
+      
       res.status(500).json({ message: "Erro ao atualizar status de destaque" });
     }
   });
@@ -342,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ message: "Serviço atualizado com sucesso", service: updated });
     } catch (error) {
-      console.error("Error updating service:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados do serviço inválidos", errors: error.errors });
       } else {
@@ -366,7 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category
       });
     } catch (error) {
-      console.error("Error creating category:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados da categoria inválidos", errors: error.errors });
       } else {
@@ -394,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category
       });
     } catch (error) {
-      console.error("Error updating category:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados da categoria inválidos", errors: error.errors });
       } else {
@@ -428,7 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deletedPriceItems: priceItems.length
       });
     } catch (error) {
-      console.error("Error deleting category:", error);
+      
       res.status(500).json({ message: "Erro ao remover categoria" });
     }
   });
@@ -472,7 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priceItem
       });
     } catch (error) {
-      console.error("Error creating price item:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados do preço inválidos", errors: error.errors });
       } else {
@@ -500,7 +500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         priceItem: updatedPriceItem
       });
     } catch (error) {
-      console.error("Error updating price item:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados do preço inválidos", errors: error.errors });
       } else {
@@ -524,7 +524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ message: "Item de preço removido com sucesso" });
     } catch (error) {
-      console.error("Error deleting price item:", error);
+      
       res.status(500).json({ message: "Erro ao remover item de preço" });
     }
   });
@@ -572,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(timeSlots);
     } catch (error) {
-      console.error("[appointments] Error fetching available times:", error);
+      
       res.status(500).json({ message: "Erro ao buscar horários disponíveis" });
     }
   });
@@ -580,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/appointments", async (req: Request, res: Response) => {
     try {
       const appointmentData = insertAppointmentSchema.parse(req.body);
-      console.log("[appointments] Creating appointment with data:", appointmentData);
+      
       
       // Verificar se já existe um agendamento no mesmo horário
       const existingAppointments = await storage.getAppointments();
@@ -597,15 +597,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const appointment = await storage.createAppointment(appointmentData);
-      console.log("[appointments] Created appointment:", appointment);
+      
       
       // Verificar quantos agendamentos existem após criar este
       const appointments = await storage.getAppointments();
-      console.log(`[appointments] Total appointments after creation: ${appointments.length}`);
+      
       
       res.status(201).json(appointment);
     } catch (error) {
-      console.error("[appointments] Error creating appointment:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Invalid appointment data", errors: error.errors });
       } else {
@@ -618,15 +618,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Verificar se o usuário está autenticado e é admin
       if (!req.isAuthenticated() || !req.user?.isAdmin) {
-        console.log("[appointments] Unauthorized access attempt");
+        
         return res.status(401).json({ message: "Unauthorized" });
       }
       
       const appointments = await storage.getAppointments();
-      console.log(`[appointments] Returning ${appointments.length} appointments for admin`);
+      
       res.json(appointments);
     } catch (error) {
-      console.error("[appointments] Error fetching appointments:", error);
+      
       res.status(500).json({ message: "Error fetching appointments" });
     }
   });
@@ -635,7 +635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/my-appointments", async (req: Request, res: Response) => {
     try {
       if (!req.isAuthenticated()) {
-        console.log("[my-appointments] Unauthorized access attempt");
+        
         return res.status(401).json({ message: "Unauthorized" });
       }
 
@@ -647,10 +647,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         appointment.email === user.username
       );
       
-      console.log(`[my-appointments] Returning ${userAppointments.length} appointments for user ${user.username}`);
+      
       res.json(userAppointments);
     } catch (error) {
-      console.error("[my-appointments] Error fetching user appointments:", error);
+      
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -684,33 +684,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
 
-      if (status === 'confirmed' || status === 'cancelled') {
 
-        const service = await storage.getServiceById(originalAppointment.serviceId);
-        const serviceName = service?.name || 'Serviço';
-
-
-        const [year, month, day] = originalAppointment.date.split('-');
-        const formattedDate = `${day}/${month}/${year}`;
-
-
-        sendAppointmentNotification({
-          to: originalAppointment.phone,
-          clientName: originalAppointment.name,
-          serviceName: serviceName,
-          appointmentDate: formattedDate,
-          appointmentTime: originalAppointment.time,
-          status: status === 'confirmed' ? 'confirmed' : 'cancelled'
-        }).catch(error => {
-          console.error('Erro ao enviar WhatsApp (não crítico):', error);
-        });
-
-        console.log(`📱 Notificação WhatsApp programada para ${originalAppointment.name} (${originalAppointment.phone})`);
-      }
       
       res.json(appointment);
     } catch (error) {
-      console.error('Error updating appointment status:', error);
+      
       res.status(500).json({ message: "Error updating appointment status" });
     }
   });
@@ -1061,7 +1039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Email de recuperação enviado com sucesso. Verifique sua caixa de entrada." 
         });
       } catch (emailError: any) {
-        console.error("Email error:", emailError.message);
+        
         
         // Se o erro contém um link de reset, enviar para o cliente
         if (emailError.message.includes('EMAIL_NOT_CONFIGURED:') || emailError.message.includes('EMAIL_CONFIG_ERROR:')) {
@@ -1075,7 +1053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
     } catch (error) {
-      console.error("Erro ao processar recuperação de senha:", error);
+      
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -1128,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(200).json({ message: "Senha redefinida com sucesso" });
     } catch (error) {
-      console.error("Erro ao redefinir senha:", error);
+      
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -1158,7 +1136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         banner
       });
     } catch (error) {
-      console.error("Error updating banner:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados do banner inválidos", errors: error.errors });
       } else {
@@ -1200,13 +1178,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: "/api/images/banner"
       });
     } catch (error) {
-      console.error("Error uploading banner image:", error);
+      
       // Remove the uploaded file if an error occurred
       if (req.file) {
         try {
           fs.unlinkSync(req.file.path);
         } catch (unlinkError) {
-          console.error("Error removing uploaded file:", unlinkError);
+          
         }
       }
       res.status(500).json({ message: "Erro ao fazer upload da imagem do banner" });
@@ -1238,7 +1216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         footer
       });
     } catch (error) {
-      console.error("Error updating footer:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados do rodapé inválidos", errors: error.errors });
       } else {
@@ -1272,7 +1250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         config
       });
     } catch (error) {
-      console.error("Error updating site config:", error);
+      
       if (error instanceof ZodError) {
         res.status(400).json({ message: "Dados da configuração inválidos", errors: error.errors });
       } else {
@@ -1310,13 +1288,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         logoUrl
       });
     } catch (error) {
-      console.error("Error uploading logo:", error);
+      
       // Remove the uploaded file if an error occurred
       if (req.file) {
         try {
           fs.unlinkSync(req.file.path);
         } catch (unlinkError) {
-          console.error("Error removing uploaded file:", unlinkError);
+          
         }
       }
       res.status(500).json({ message: "Erro ao fazer upload da logo" });
@@ -1334,29 +1312,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Upload de imagem de perfil do usuário
   app.post("/api/user/upload-profile-image", upload.single('profileImage'), async (req: Request, res: Response) => {
-    console.log("=== UPLOAD PROFILE IMAGE DEBUG ===");
-    console.log("User authenticated:", req.isAuthenticated());
-    console.log("User data:", req.user ? { id: req.user.id, username: req.user.username } : null);
-    console.log("File received:", !!req.file);
-    console.log("Headers:", req.headers);
-    console.log("Body keys:", Object.keys(req.body));
+    
+    
+    
+    
+    
+    
     
     if (req.file) {
-      console.log("File details:", {
-        originalname: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        fieldname: req.file.fieldname
-      });
+      
     }
 
     if (!req.isAuthenticated()) {
-      console.log("❌ User not authenticated");
+      
       return res.status(401).json({ error: "Login necessário" });
     }
 
     if (!req.file) {
-      console.log("❌ No file in request");
+      
       return res.status(400).json({ error: "Arquivo de imagem necessário" });
     }
 
@@ -1378,7 +1351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ message: "Imagem de perfil atualizada com sucesso", user: updatedUser });
     } catch (error) {
-      console.error("Erro ao fazer upload da imagem de perfil:", error);
+      
       // Limpar arquivo temporário em caso de erro
       if (req.file && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
@@ -1411,7 +1384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.send(imageBuffer);
     } catch (error) {
-      console.error("Erro ao servir imagem de perfil:", error);
+      
       res.status(500).json({ error: "Erro interno do servidor" });
     }
   });
@@ -1438,7 +1411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.send(imageBuffer);
     } catch (error) {
-      console.error("Error serving service image:", error);
+      
       res.status(500).json({ message: "Erro ao servir imagem" });
     }
   });
@@ -1460,7 +1433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.send(imageBuffer);
     } catch (error) {
-      console.error("Error serving banner image:", error);
+      
       res.status(500).json({ message: "Erro ao servir imagem do banner" });
     }
   });
@@ -1473,7 +1446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // LIMPEZA DESABILITADA PARA PROTEGER IMAGENS PERSONALIZADAS
-      console.log("🔒 Regeneração de imagens desabilitada para preservar uploads do usuário");
+      
       
       res.json({ 
         message: "Regeneração de imagens desabilitada para proteger suas imagens personalizadas",
@@ -1481,60 +1454,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         note: "Suas imagens estão protegidas e não serão removidas"
       });
     } catch (error) {
-      console.error("Error in regenerate images endpoint:", error);
+      
       res.status(500).json({ message: "Erro ao processar regeneração de imagens" });
     }
   });
 
-  // === WhatsApp ===
-  app.get("/api/admin/whatsapp/test", async (req: Request, res: Response) => {
-    try {
-      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied. Admin privileges required." });
-      }
 
-      const result = await testWhatsAppConnection();
-      res.json(result);
-    } catch (error) {
-      console.error("Error testing WhatsApp connection:", error);
-      res.status(500).json({ message: "Error testing WhatsApp connection" });
-    }
-  });
-
-  app.post("/api/admin/whatsapp/test-message", async (req: Request, res: Response) => {
-    try {
-      if (!req.isAuthenticated() || !req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied. Admin privileges required." });
-      }
-
-      const { phone, clientName } = req.body;
-
-      if (!phone || !clientName) {
-        return res.status(400).json({ message: "Phone and clientName are required" });
-      }
-
-      // Enviar mensagem de teste
-      const success = await sendAppointmentNotification({
-        to: phone,
-        clientName: clientName,
-        serviceName: "Teste de Conectividade",
-        appointmentDate: new Date().toLocaleDateString('pt-BR'),
-        appointmentTime: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        status: 'confirmed'
-      });
-
-      res.json({
-        success,
-        message: success 
-          ? "Mensagem de teste enviada com sucesso!" 
-          : "Falha ao enviar mensagem de teste. Verifique as configurações."
-      });
-
-    } catch (error) {
-      console.error("Error sending test WhatsApp message:", error);
-      res.status(500).json({ message: "Error sending test WhatsApp message" });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;

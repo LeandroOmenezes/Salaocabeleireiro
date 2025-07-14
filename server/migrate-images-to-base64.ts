@@ -3,7 +3,7 @@ import path from 'path';
 import { storage } from './storage';
 
 export async function migrateImagesToBase64() {
-  console.log('🔄 Iniciando migração de imagens para base64...');
+  
   
   const services = await storage.getServices();
   let migratedCount = 0;
@@ -26,10 +26,10 @@ export async function migrateImagesToBase64() {
           if (ext === '.webp') mimeType = 'image/webp';
           
           await storage.updateServiceImageData(service.id, imageBase64, mimeType);
-          console.log(`✅ Migrado: ${service.name} (${service.imageUrl})`);
+          
           migratedCount++;
         } catch (error) {
-          console.error(`❌ Erro ao migrar ${service.name}:`, error);
+          
         }
       } else {
         // Arquivo não existe - gerar imagem padrão em SVG
@@ -37,7 +37,7 @@ export async function migrateImagesToBase64() {
         const svgBase64 = Buffer.from(defaultSvg).toString('base64');
         
         await storage.updateServiceImageData(service.id, svgBase64, 'image/svg+xml');
-        console.log(`🎨 Gerada imagem padrão para: ${service.name}`);
+        
         generatedCount++;
       }
     }
@@ -59,10 +59,10 @@ export async function migrateImagesToBase64() {
         if (ext === '.webp') mimeType = 'image/webp';
         
         await storage.updateBannerImageData(imageBase64, mimeType);
-        console.log(`✅ Banner migrado: ${banner.backgroundImage}`);
+        
         migratedCount++;
       } catch (error) {
-        console.error('❌ Erro ao migrar banner:', error);
+        
       }
     } else {
       // Gerar banner padrão
@@ -70,15 +70,15 @@ export async function migrateImagesToBase64() {
       const svgBase64 = Buffer.from(defaultBannerSvg).toString('base64');
       
       await storage.updateBannerImageData(svgBase64, 'image/svg+xml');
-      console.log('🎨 Gerada imagem padrão para banner');
+      
       generatedCount++;
     }
   }
   
-  console.log(`\n🎉 Migração concluída:`);
-  console.log(`   📁 ${migratedCount} imagens migradas do filesystem`);
-  console.log(`   🎨 ${generatedCount} imagens padrão geradas`);
-  console.log(`   ✨ Todas as imagens agora estão permanentemente no banco PostgreSQL!`);
+  
+  
+  
+  
 }
 
 function generateServiceSvg(serviceName: string): string {

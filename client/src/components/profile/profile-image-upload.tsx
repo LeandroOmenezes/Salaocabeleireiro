@@ -36,9 +36,9 @@ export function ProfileImageUpload({
       formData.append('profileImage', file);
 
       // Use fetch directly for file upload
-      console.log("Sending request to /api/user/upload-profile-image");
-      console.log("File object:", file);
-      console.log("FormData entries:", Array.from(formData.entries()));
+      
+      
+      
       
       const res = await fetch("/api/user/upload-profile-image", {
         method: "POST",
@@ -54,7 +54,7 @@ export function ProfileImageUpload({
       return await res.json();
     },
     onSuccess: (data) => {
-      console.log("Upload successful:", data);
+      
       toast({
         title: "Sucesso!",
         description: "Imagem de perfil atualizada com sucesso",
@@ -76,7 +76,7 @@ export function ProfileImageUpload({
       }, 500);
     },
     onError: (error: any) => {
-      console.error("Erro ao fazer upload:", error);
+      
       toast({
         title: "Erro no upload",
         description: error.message || "Não foi possível fazer upload da imagem. Tente novamente.",
@@ -90,7 +90,7 @@ export function ProfileImageUpload({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    console.log("File selected:", file.name, file.type, file.size);
+    
 
     // Validação do tipo de arquivo
     if (!file.type.startsWith('image/')) {
@@ -120,7 +120,7 @@ export function ProfileImageUpload({
     reader.readAsDataURL(file);
 
     // Upload da imagem
-    console.log("Starting upload...");
+    
     uploadMutation.mutate(file);
   };
 

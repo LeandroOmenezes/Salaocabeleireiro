@@ -214,10 +214,10 @@ export class MemStorage implements IStorage {
           email: "lleandro.m32@gmail.com",
           isAdmin: true,
         });
-        console.log("Admin user created successfully");
+        
       }
     } catch (error) {
-      console.error("Error creating admin user:", error);
+      
     }
 
     // Seed categories
@@ -425,7 +425,7 @@ export class MemStorage implements IStorage {
     ];
 
     appointments.forEach((appointment) => this.createAppointment(appointment));
-    console.log("Agendamentos iniciais criados com sucesso");
+    
   }
 
   // === Users ===
@@ -1108,7 +1108,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return service || undefined;
     } catch (error) {
-      console.error("Error updating service image data:", error);
+      
       return undefined;
     }
   }
@@ -1436,7 +1436,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updated || undefined;
     } catch (error) {
-      console.error("Error updating banner image data:", error);
+      
       return undefined;
     }
   }

@@ -70,12 +70,7 @@ export default function AdminMenu() {
       label: "Configuração do Site",
       description: "Personalizar nome, logo e cores"
     },
-    {
-      href: "/admin/whatsapp",
-      icon: MessageCircle,
-      label: "WhatsApp",
-      description: "Notificações automáticas"
-    }
+
   ];
 
   const toggleMenu = () => setIsOpen(!isOpen);

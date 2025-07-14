@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 
 export async function seedDefaultImages() {
-  console.log("🔒 SEED DE IMAGENS DESABILITADO para preservar imagens personalizadas");
-  console.log("📸 Suas imagens estão protegidas contra substituição automática");
+  
+  
   
   // SEED COMPLETAMENTE DESABILITADO PARA PROTEGER UPLOADS DO USUÁRIO
   return;
@@ -14,7 +14,7 @@ export async function seedDefaultImages() {
     const uploadsDir = path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
-      console.log("📁 Diretório uploads criado");
+      
     }
     
     // Verificar serviços sem imagem e que ainda referenciam arquivos inexistentes
@@ -37,7 +37,7 @@ export async function seedDefaultImages() {
     }
     
     if (needsDefault) {
-      console.log("🎨 Configurando imagens padrão SVG...");
+      
       
       // Gerar SVG padrão para serviços (ícone de beleza)
       const defaultServiceSvg = `<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
@@ -83,26 +83,26 @@ export async function seedDefaultImages() {
       fs.writeFileSync(defaultServicePath, defaultServiceSvg);
       fs.writeFileSync(defaultBannerPath, defaultBannerSvg);
       
-      console.log("✅ Imagens SVG padrão criadas");
+      
       
       // Atualizar serviços sem imagem
       for (const service of services) {
         if (!service.imageUrl || (service.imageUrl.startsWith('/uploads/') && !fs.existsSync(path.join(process.cwd(), service.imageUrl)))) {
           await storage.updateServiceImage(service.id, '/uploads/default-service.svg');
-          console.log(`🔄 Serviço "${service.name}" atualizado com imagem padrão`);
+          
         }
       }
       
       // Atualizar banner se necessário
       if (!banner?.backgroundImage || (banner.backgroundImage && banner.backgroundImage.startsWith('/uploads/') && !fs.existsSync(path.join(process.cwd(), banner.backgroundImage)))) {
         await storage.updateBannerImage('/uploads/default-banner.svg');
-        console.log("🔄 Banner atualizado com imagem padrão");
+        
       }
     } else {
-      console.log("✅ Todas as imagens estão funcionando corretamente");
+      
     }
     
   } catch (error) {
-    console.error("❌ Erro durante configuração de imagens padrão:", error);
+    
   }
 }
