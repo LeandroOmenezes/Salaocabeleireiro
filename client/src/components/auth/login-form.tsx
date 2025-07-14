@@ -290,10 +290,10 @@ export default function LoginForm({ onToggleForm }: LoginFormProps) {
               </div>
               
               {forgotPasswordMutation.isSuccess && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    <strong>✓ Solicitação processada com sucesso!</strong><br />
-                    <span className="text-xs">O link de recuperação foi gerado. Em modo de desenvolvimento, verifique o console do servidor para o link temporário.</span>
+                <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm text-green-700">
+                    <strong>✓ Link de recuperação enviado!</strong><br />
+                    <span className="text-xs">Verifique sua caixa de entrada e pasta de spam para o email de recuperação.</span>
                   </p>
                 </div>
               )}

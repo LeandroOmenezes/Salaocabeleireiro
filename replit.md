@@ -444,3 +444,14 @@ Preferred communication style: Simple, everyday language.
 - **Mensagens em português**: Erro de autenticação retorna "É necessário estar logado para agendar um horário"
 - **Segurança completa**: Sistema garante que apenas usuários identificados podem criar agendamentos
 - **UX aprimorada**: Usuários são direcionados ao login de forma clara e intuitiva
+
+### Sistema de Recuperação de Senha em Produção (2025-07-14)
+- **Modo produção ativado**: Sistema de recuperação de senha migrado completamente para produção
+- **SendGrid configurado**: Email profissional via SendGrid como método principal de envio
+- **Fallback Gmail**: Sistema alternativo usando nodemailer para contas Gmail configuradas
+- **Mensagens em português**: Todas as respostas da API traduzidas para português brasileiro
+- **Templates profissionais**: Emails HTML responsivos com design do Salão de Beleza Premium
+- **Segurança robusta**: Tokens com expiração de 1 hora e validação completa
+- **UX melhorada**: Frontend mostra mensagens de sucesso em verde, instruindo verificar email e spam
+- **Sistema completo**: Cliente pode redefinir senha independentemente através do email cadastrado
+- **Rotas funcionais**: `/api/forgot-password`, `/api/reset-password/:token` totalmente operacionais

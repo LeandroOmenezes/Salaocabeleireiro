@@ -1023,32 +1023,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verificar se o usuário existe
       const user = await storage.getUserByUsername(email);
+      
       if (!user) {
-        return res.status(404).json({ message: "Usuário não encontrado com este email" });
+        // Por segurança, não informamos se o email existe ou não
+        return res.status(200).json({ message: "Se o email estiver cadastrado, você receberá um link de recuperação" });
       }
       
-      // Gerar token de reset
+      // Gerar token de recuperação
       const resetToken = generatePasswordResetToken(user.id);
       
+      // Enviar email
       try {
-        // Tentar enviar email
         await sendPasswordResetEmail(email, resetToken);
-        res.status(200).json({ 
-          message: "Email de recuperação enviado com sucesso. Verifique sua caixa de entrada." 
-        });
-      } catch (emailError: any) {
-        
-        
-        // Se o erro contém um link de reset, enviar para o cliente
-        if (emailError.message.includes('EMAIL_NOT_CONFIGURED:') || emailError.message.includes('EMAIL_CONFIG_ERROR:')) {
-          const resetLink = emailError.message.split(':')[1];
-          res.status(200).json({ 
-            message: "Sistema de email temporariamente indisponível. Use este link para redefinir sua senha:",
-            resetLink: resetLink
-          });
-        } else {
-          res.status(500).json({ message: "Erro ao enviar email de recuperação" });
-        }
+        res.status(200).json({ message: "Link de recuperação enviado para seu email" });
+      } catch (error) {
+        res.status(500).json({ message: "Erro ao enviar email de recuperação. Tente novamente mais tarde." });
       }
     } catch (error) {
       

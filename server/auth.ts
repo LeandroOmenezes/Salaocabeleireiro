@@ -96,7 +96,6 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
   `;
   
   // Tentar SendGrid primeiro (produção)
-  
   if (process.env.SENDGRID_API_KEY) {
     try {
       const mailService = new MailService();
@@ -142,13 +141,8 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
     }
   }
   
-  // Modo desenvolvimento - mostrar no console
-  
-  
-  
-  
-  
-  return true;
+  // Se chegou até aqui, nenhum método de envio funcionou
+  throw new Error('Não foi possível enviar o email de recuperação. Verifique a configuração do servidor.');
 }
 
 // Função para gerar um token de recuperação de senha
@@ -444,14 +438,14 @@ export function setupAuth(app: Express) {
       const { email } = req.body;
       
       if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+        return res.status(400).json({ message: "Email é obrigatório" });
       }
       
       // Verificar se o usuário existe
       const user = await storage.getUserByUsername(email);
       if (!user) {
         // Por razões de segurança, não informamos ao cliente se o usuário existe ou não
-        return res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
+        return res.status(200).json({ message: "Se o email estiver cadastrado, você receberá um link de recuperação" });
       }
       
       // Gerar token de recuperação de senha
@@ -460,7 +454,7 @@ export function setupAuth(app: Express) {
       // Enviar e-mail de recuperação
       await sendPasswordResetEmail(email, resetToken);
       
-      res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
+      res.status(200).json({ message: "Link de recuperação enviado para seu email" });
     } catch (error) {
       next(error);
     }
@@ -472,7 +466,7 @@ export function setupAuth(app: Express) {
     const tokenData = passwordResetTokens.get(token);
     
     if (!tokenData || tokenData.expires < new Date()) {
-      return res.status(400).json({ valid: false, message: "Invalid or expired token" });
+      return res.status(400).json({ valid: false, message: "Token inválido ou expirado" });
     }
     
     res.json({ valid: true });
@@ -485,19 +479,19 @@ export function setupAuth(app: Express) {
       const { password } = req.body;
       
       if (!password) {
-        return res.status(400).json({ message: "Password is required" });
+        return res.status(400).json({ message: "Senha é obrigatória" });
       }
       
       const tokenData = passwordResetTokens.get(token);
       
       if (!tokenData || tokenData.expires < new Date()) {
-        return res.status(400).json({ message: "Invalid or expired token" });
+        return res.status(400).json({ message: "Token inválido ou expirado" });
       }
       
       // Obter usuário pelo ID
       const user = await storage.getUser(tokenData.userId);
       if (!user) {
-        return res.status(400).json({ message: "User not found" });
+        return res.status(400).json({ message: "Usuário não encontrado" });
       }
       
       // Atualizar a senha do usuário com a senha criptografada
@@ -507,7 +501,7 @@ export function setupAuth(app: Express) {
       // Remover o token usado
       passwordResetTokens.delete(token);
       
-      res.status(200).json({ message: "Password has been reset successfully" });
+      res.status(200).json({ message: "Senha redefinida com sucesso" });
     } catch (error) {
       next(error);
     }
