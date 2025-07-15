@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useCallback } from "react";
 import { useLocation, useRoute, Link } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -38,26 +38,30 @@ export default function ResetPasswordPage() {
     }
   });
 
-  useEffect(() => {
-    if (token) {
-      verifyResetTokenMutation.mutate({ token }, {
-        onSuccess: (data) => {
-          setIsTokenValid(data.valid);
-          if (!data.valid) {
-            setTimeout(() => {
-              navigate("/auth");
-            }, 3000);
-          }
-        },
-        onError: () => {
-          setIsTokenValid(false);
-          setTimeout(() => {
-            navigate("/auth");
-          }, 3000);
-        }
-      });
+  const verifyToken = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`/api/reset-password/${token}`);
+      const data = await response.json();
+      setIsTokenValid(data.valid);
+      
+      if (!data.valid) {
+        setTimeout(() => {
+          navigate("/auth");
+        }, 3000);
+      }
+    } catch (error) {
+      setIsTokenValid(false);
+      setTimeout(() => {
+        navigate("/auth");
+      }, 3000);
     }
-  }, [token, verifyResetTokenMutation, navigate]);
+  }, [token, navigate]);
+
+  useEffect(() => {
+    verifyToken();
+  }, [verifyToken]);
 
   function onSubmit(data: ResetPasswordValues) {
     resetPasswordMutation.mutate({ 
