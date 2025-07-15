@@ -107,11 +107,8 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
         subject: '🔒 Recuperação de Senha - Salão de Beleza Premium',
         html: emailHTML
       });
-      
-      
       return true;
     } catch (error) {
-      
       // Continuar para tentar nodemailer
     }
   }
@@ -432,33 +429,7 @@ export function setupAuth(app: Express) {
     );
   }
   
-  // Rota para solicitar recuperação de senha
-  app.post("/api/forgot-password", async (req, res, next) => {
-    try {
-      const { email } = req.body;
-      
-      if (!email) {
-        return res.status(400).json({ message: "Email é obrigatório" });
-      }
-      
-      // Verificar se o usuário existe
-      const user = await storage.getUserByUsername(email);
-      if (!user) {
-        // Por razões de segurança, não informamos ao cliente se o usuário existe ou não
-        return res.status(200).json({ message: "Se o email estiver cadastrado, você receberá um link de recuperação" });
-      }
-      
-      // Gerar token de recuperação de senha
-      const resetToken = generatePasswordResetToken(user.id);
-      
-      // Enviar e-mail de recuperação
-      await sendPasswordResetEmail(email, resetToken);
-      
-      res.status(200).json({ message: "Link de recuperação enviado para seu email" });
-    } catch (error) {
-      next(error);
-    }
-  });
+  // Rota de forgot-password removida - implementada em routes.ts
   
   // Rota para verificar a validade do token de redefinição
   app.get("/api/reset-password/:token", (req, res) => {

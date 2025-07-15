@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (data) => {
       toast({
         title: "Solicitação processada",
-        description: "Link de recuperação gerado com sucesso. Verifique o console do desenvolvedor para o link temporário.",
+        description: "Link de recuperação enviado para seu email. Verifique sua caixa de entrada e pasta de spam.",
       });
     },
     onError: (error: Error) => {
