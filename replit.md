@@ -457,4 +457,6 @@ Preferred communication style: Simple, everyday language.
 - **Rotas funcionais**: `/api/forgot-password`, `/api/reset-password/:token` totalmente operacionais
 - **Correção de URL**: Link do email corrigido de `?token=` para `/token` para corresponder às rotas do frontend
 - **Duplicação removida**: Rotas duplicadas entre auth.ts e routes.ts foram consolidadas
+- **Loop infinito corrigido**: useCallback implementado para resolver erro de renderização máxima excedida
+- **URL de produção atualizada**: baseUrl corrigido para usar domínio de produção correto
 - **Funcionamento confirmado**: Sistema testado e funcional - emails chegam e links redirecionam corretamente

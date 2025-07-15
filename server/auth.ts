@@ -41,7 +41,7 @@ async function comparePasswords(supplied: string, stored: string) {
 
 // Função para enviar e-mail de recuperação de senha
 async function sendPasswordResetEmail(email: string, resetToken: string) {
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN || 'https://074180d3-6593-4975-b6e8-b8a879923e7e-00-22oylhbt1l0da.janeway.replit.dev';
+  const baseUrl = 'https://salaocabeleireiro-lomenezes.replit.app';
   const resetLink = `${baseUrl}/reset-password/${resetToken}`;
   
   const emailHTML = `
