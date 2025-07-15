@@ -445,7 +445,7 @@ Preferred communication style: Simple, everyday language.
 - **Segurança completa**: Sistema garante que apenas usuários identificados podem criar agendamentos
 - **UX aprimorada**: Usuários são direcionados ao login de forma clara e intuitiva
 
-### Sistema de Recuperação de Senha em Produção (2025-07-14)
+### Sistema de Recuperação de Senha em Produção (2025-07-15)
 - **Modo produção ativado**: Sistema de recuperação de senha migrado completamente para produção
 - **SendGrid configurado**: Email profissional via SendGrid como método principal de envio
 - **Fallback Gmail**: Sistema alternativo usando nodemailer para contas Gmail configuradas
@@ -455,3 +455,6 @@ Preferred communication style: Simple, everyday language.
 - **UX melhorada**: Frontend mostra mensagens de sucesso em verde, instruindo verificar email e spam
 - **Sistema completo**: Cliente pode redefinir senha independentemente através do email cadastrado
 - **Rotas funcionais**: `/api/forgot-password`, `/api/reset-password/:token` totalmente operacionais
+- **Correção de URL**: Link do email corrigido de `?token=` para `/token` para corresponder às rotas do frontend
+- **Duplicação removida**: Rotas duplicadas entre auth.ts e routes.ts foram consolidadas
+- **Funcionamento confirmado**: Sistema testado e funcional - emails chegam e links redirecionam corretamente
