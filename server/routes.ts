@@ -1030,7 +1030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Gerar token de recuperação
-      const resetToken = generatePasswordResetToken(user.id);
+      const resetToken = await generatePasswordResetToken(user.id);
       
       // Enviar email
       try {
@@ -1053,7 +1053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Token é obrigatório" });
       }
       
-      const userId = verifyPasswordResetToken(token);
+      const userId = await verifyPasswordResetToken(token);
       const valid = userId !== null;
       res.status(200).json({ valid });
     } catch (error) {
@@ -1074,7 +1074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Senha deve ter no mínimo 6 caracteres" });
       }
       
-      const userId = verifyPasswordResetToken(token);
+      const userId = await verifyPasswordResetToken(token);
       if (!userId) {
         return res.status(400).json({ message: "Token inválido ou expirado" });
       }
@@ -1089,7 +1089,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Remover token usado
-      removePasswordResetToken(token);
+      await removePasswordResetToken(token);
       
       res.status(200).json({ message: "Senha redefinida com sucesso" });
     } catch (error) {

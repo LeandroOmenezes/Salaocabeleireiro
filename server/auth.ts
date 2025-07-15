@@ -13,9 +13,7 @@ import { MailService } from '@sendgrid/mail';
 
 const MemoryStore = createMemoryStore(session);
 
-// Armazenamento temporário para tokens de recuperação de senha
-// Na produção, isso deve ser armazenado em um banco de dados
-const passwordResetTokens = new Map<string, { userId: number; expires: Date }>();
+
 
 declare global {
   namespace Express {
@@ -143,25 +141,20 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
 }
 
 // Função para gerar um token de recuperação de senha
-function generatePasswordResetToken(userId: number): string {
+async function generatePasswordResetToken(userId: number): Promise<string> {
   const token = randomBytes(32).toString('hex');
-  const expires = new Date();
-  expires.setHours(expires.getHours() + 1); // Token expira em 1 hora
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 1); // Token expira em 1 hora
   
-  passwordResetTokens.set(token, { userId, expires });
+  await storage.createPasswordResetToken({ token, userId, expiresAt });
   return token;
 }
 
 // Função para verificar um token de recuperação de senha
-function verifyPasswordResetToken(token: string): number | null {
-  const tokenData = passwordResetTokens.get(token);
+async function verifyPasswordResetToken(token: string): Promise<number | null> {
+  const tokenData = await storage.getPasswordResetToken(token);
   
   if (!tokenData) {
-    return null;
-  }
-  
-  if (new Date() > tokenData.expires) {
-    passwordResetTokens.delete(token);
     return null;
   }
   
@@ -169,8 +162,8 @@ function verifyPasswordResetToken(token: string): number | null {
 }
 
 // Função para remover um token usado
-function removePasswordResetToken(token: string): void {
-  passwordResetTokens.delete(token);
+async function removePasswordResetToken(token: string): Promise<void> {
+  await storage.deletePasswordResetToken(token);
 }
 
 export { hashPassword, generatePasswordResetToken, verifyPasswordResetToken, removePasswordResetToken, sendPasswordResetEmail };
@@ -429,52 +422,5 @@ export function setupAuth(app: Express) {
     );
   }
   
-  // Rota de forgot-password removida - implementada em routes.ts
-  
-  // Rota para verificar a validade do token de redefinição
-  app.get("/api/reset-password/:token", (req, res) => {
-    const { token } = req.params;
-    const tokenData = passwordResetTokens.get(token);
-    
-    if (!tokenData || tokenData.expires < new Date()) {
-      return res.status(400).json({ valid: false, message: "Token inválido ou expirado" });
-    }
-    
-    res.json({ valid: true });
-  });
-  
-  // Rota para redefinir a senha com um token válido
-  app.post("/api/reset-password/:token", async (req, res, next) => {
-    try {
-      const { token } = req.params;
-      const { password } = req.body;
-      
-      if (!password) {
-        return res.status(400).json({ message: "Senha é obrigatória" });
-      }
-      
-      const tokenData = passwordResetTokens.get(token);
-      
-      if (!tokenData || tokenData.expires < new Date()) {
-        return res.status(400).json({ message: "Token inválido ou expirado" });
-      }
-      
-      // Obter usuário pelo ID
-      const user = await storage.getUser(tokenData.userId);
-      if (!user) {
-        return res.status(400).json({ message: "Usuário não encontrado" });
-      }
-      
-      // Atualizar a senha do usuário com a senha criptografada
-      const hashedPassword = await hashPassword(password);
-      await storage.updateUserPassword(user.id, hashedPassword);
-      
-      // Remover o token usado
-      passwordResetTokens.delete(token);
-      
-      res.status(200).json({ message: "Senha redefinida com sucesso" });
-    } catch (error) {
-      next(error);
-    }
-  });
+  // Rotas de reset password implementadas em routes.ts
 }

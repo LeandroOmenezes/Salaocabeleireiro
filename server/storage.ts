@@ -1,6 +1,7 @@
 import { 
   users, categories, services, priceItems, appointments, reviews, sales,
   banner, footer, siteConfig, reviewComments, commentLikes, reviewLikes,
+  passwordResetTokens,
   type User, type InsertUser,
   type Category, type InsertCategory,
   type Service, type InsertService,
@@ -12,7 +13,8 @@ import {
   type Sale, type InsertSale,
   type Banner, type InsertBanner,
   type Footer, type InsertFooter,
-  type SiteConfig, type InsertSiteConfig
+  type SiteConfig, type InsertSiteConfig,
+  type PasswordResetToken, type InsertPasswordResetToken
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
@@ -141,6 +143,12 @@ export interface IStorage {
   getSiteConfig(): Promise<SiteConfig | undefined>;
   updateSiteConfig(config: InsertSiteConfig): Promise<SiteConfig>;
   updateSiteLogo(logoUrl: string): Promise<SiteConfig | undefined>;
+
+  // Password Reset Tokens
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  deletePasswordResetToken(token: string): Promise<boolean>;
+  cleanupExpiredTokens(): Promise<void>;
 
   // Session store
   sessionStore: session.Store;
@@ -941,6 +949,23 @@ export class MemStorage implements IStorage {
     }
     return undefined;
   }
+
+  // Password Reset Tokens (stub implementation for MemStorage)
+  async createPasswordResetToken(insertToken: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    throw new Error("Password reset tokens not supported in MemStorage");
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    return undefined;
+  }
+
+  async deletePasswordResetToken(token: string): Promise<boolean> {
+    return false;
+  }
+
+  async cleanupExpiredTokens(): Promise<void> {
+    // No-op for MemStorage
+  }
 }
 
 const PostgresSessionStore = connectPg(session);
@@ -1486,6 +1511,32 @@ export class DatabaseStorage implements IStorage {
       .set({ logoUrl })
       .returning();
     return updated || undefined;
+  }
+
+  // Password Reset Tokens
+  async createPasswordResetToken(insertToken: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [token] = await db.insert(passwordResetTokens).values(insertToken).returning();
+    return token;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [tokenData] = await db.select().from(passwordResetTokens)
+      .where(and(
+        eq(passwordResetTokens.token, token),
+        gte(passwordResetTokens.expiresAt, new Date())
+      ));
+    return tokenData || undefined;
+  }
+
+  async deletePasswordResetToken(token: string): Promise<boolean> {
+    const result = await db.delete(passwordResetTokens)
+      .where(eq(passwordResetTokens.token, token));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async cleanupExpiredTokens(): Promise<void> {
+    await db.delete(passwordResetTokens)
+      .where(sql`expires_at < NOW()`);
   }
 }
 

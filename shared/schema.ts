@@ -293,6 +293,24 @@ export type InsertFooter = z.infer<typeof insertFooterSchema>;
 export type SiteConfig = typeof siteConfig.$inferSelect;
 export type InsertSiteConfig = z.infer<typeof insertSiteConfigSchema>;
 
+// === Password Reset Tokens ===
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  userId: integer("user_id").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens, {
+  token: z.string().min(1),
+  userId: z.number().int(),
+  expiresAt: z.date(),
+}).omit({ id: true, createdAt: true });
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+
 // Additional types for frontend select options
 export interface ServiceOption {
   id: string;
