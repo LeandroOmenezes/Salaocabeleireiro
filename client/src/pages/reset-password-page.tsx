@@ -42,8 +42,11 @@ export default function ResetPasswordPage() {
     if (!token) return;
     
     try {
+      console.log('Verificando token:', token);
       const response = await fetch(`/api/reset-password/${token}`);
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
       setIsTokenValid(data.valid);
       
       if (!data.valid) {
@@ -52,6 +55,7 @@ export default function ResetPasswordPage() {
         }, 3000);
       }
     } catch (error) {
+      console.error('Erro ao verificar token:', error);
       setIsTokenValid(false);
       setTimeout(() => {
         navigate("/auth");
@@ -101,8 +105,8 @@ export default function ResetPasswordPage() {
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Link inválido ou expirado</h1>
             <p className="text-gray-600 mb-6">O link de recuperação de senha que você usou é inválido ou expirou.</p>
             <p className="text-gray-600 mb-6">Você será redirecionado para a página de login em alguns segundos.</p>
-            <Link href="/auth">
-              <a className="text-blue-500 hover:text-blue-600 underline">Voltar para o login</a>
+            <Link href="/auth" className="text-blue-500 hover:text-blue-600 underline">
+              Voltar para o login
             </Link>
           </div>
         </main>
@@ -124,8 +128,8 @@ export default function ResetPasswordPage() {
                 <div className="text-green-500 text-5xl mb-4">✓</div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">Senha redefinida com sucesso!</h2>
                 <p className="text-gray-600 mb-6">Sua senha foi alterada. Você será redirecionado para a página de login em alguns segundos.</p>
-                <Link href="/auth">
-                  <a className="text-blue-500 hover:text-blue-600 underline">Voltar para o login</a>
+                <Link href="/auth" className="text-blue-500 hover:text-blue-600 underline">
+                  Voltar para o login
                 </Link>
               </div>
             ) : (
