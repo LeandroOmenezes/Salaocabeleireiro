@@ -221,6 +221,7 @@ export default function ServiceManagement() {
   };
 
   const handleEditService = (service: Service) => {
+    console.log('handleEditService called with service:', service);
     setEditingService(service);
     editForm.reset({
       name: service.name,
@@ -231,6 +232,7 @@ export default function ServiceManagement() {
       icon: service.icon,
       featured: service.featured || false,
     });
+    console.log('editingService state set to:', service);
   };
 
   const onEditSubmit = (data: InsertService) => {

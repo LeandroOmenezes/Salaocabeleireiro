@@ -28,7 +28,7 @@ export default function ResetPasswordPage() {
   const token = params?.token || "";
   const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
   
-  console.log('ResetPasswordPage rendered, token from params:', token);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -44,12 +44,8 @@ export default function ResetPasswordPage() {
     if (!token) return;
     
     try {
-      console.log('Verificando token:', token);
       const response = await fetch(`/api/reset-password/${token}`);
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
-      console.log('Setting isTokenValid to:', data.valid);
       setIsTokenValid(data.valid);
       
       if (!data.valid) {
@@ -58,7 +54,6 @@ export default function ResetPasswordPage() {
         }, 3000);
       }
     } catch (error) {
-      console.error('Erro ao verificar token:', error);
       setIsTokenValid(false);
       setTimeout(() => {
         navigate("/auth");
@@ -83,8 +78,6 @@ export default function ResetPasswordPage() {
     });
   }
 
-  console.log('Current isTokenValid state:', isTokenValid);
-  
   if (isTokenValid === null) {
     return (
       <div className="font-sans bg-gray-100 text-gray-800 min-h-screen flex flex-col">
@@ -101,7 +94,6 @@ export default function ResetPasswordPage() {
   }
 
   if (isTokenValid === false) {
-    console.log('Showing expired token page because isTokenValid is false');
     return (
       <div className="font-sans bg-gray-100 text-gray-800 min-h-screen flex flex-col">
         <Header />
