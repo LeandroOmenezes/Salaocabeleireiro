@@ -39,7 +39,7 @@ async function comparePasswords(supplied: string, stored: string) {
 
 // Função para enviar e-mail de recuperação de senha
 async function sendPasswordResetEmail(email: string, resetToken: string) {
-  const baseUrl = 'https://salaocabeleireiro-lomenezes.replit.app';
+  const baseUrl = 'https://salaocabeleireiro.onrender.com/';
   const resetLink = `${baseUrl}/reset-password/${resetToken}`;
   
   const emailHTML = `
@@ -102,7 +102,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
       await mailService.send({
         to: email,
         from: 'lleandro.m32@gmail.com', // Email verificado no SendGrid
-        subject: '🔒 Recuperação de Senha - Salão de Beleza Premium',
+        subject: '🔒 Recuperação de Senha - Salão de Beleza',
         html: emailHTML
       });
       return true;
@@ -125,7 +125,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
       await transporter.sendMail({
         from: `"Salão de Beleza Premium" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: '🔒 Recuperação de Senha - Salão de Beleza Premium',
+        subject: '🔒 Recuperação de Senha - Salão de Beleza',
         html: emailHTML
       });
       
@@ -250,7 +250,7 @@ export function setupAuth(app: Express) {
             const email = profile.emails?.[0]?.value;
             if (!email) {
               
-              return done(new Error("No email found in Google profile"));
+              return done(new Error("Nenhum e-mail encontrado no perfil do Google"));
             }
             
             let user = await storage.getUserByUsername(email);
