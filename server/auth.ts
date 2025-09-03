@@ -212,6 +212,12 @@ export function setupAuth(app: Express) {
     
     // Detectar automaticamente a URL do ambiente
     const getBaseUrl = () => {
+
+      // Render
+      if (process.env.RENDER_EXTERNAL_URL) {
+        return process.env.RENDER_EXTERNAL_URL;
+      }
+      
       // Em produção no Replit, usar a URL do ambiente
       if (process.env.REPLIT_DOMAINS) {
         return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
