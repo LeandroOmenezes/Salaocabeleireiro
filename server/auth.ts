@@ -84,7 +84,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
       
       <div style="text-align: center; padding: 20px; border-top: 1px solid #eee;">
         <p style="color: #999; font-size: 12px; margin-bottom: 5px;">
-          <strong>Salão de Beleza Premium</strong>
+          <strong>Salão de Beleza</strong>
         </p>
         <p style="color: #999; font-size: 12px;">
           Este é um email automático, não responda a esta mensagem.
@@ -123,7 +123,7 @@ async function sendPasswordResetEmail(email: string, resetToken: string) {
       });
 
       await transporter.sendMail({
-        from: `"Salão de Beleza Premium" <${process.env.EMAIL_USER}>`,
+        from: `"Salão de Beleza" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: '🔒 Recuperação de Senha - Salão de Beleza',
         html: emailHTML
